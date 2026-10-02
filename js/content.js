@@ -6,9 +6,10 @@ export const audiences=[
 
 export const games=[
 {id:'quiz',icon:'⚡',title:'Quiz Relâmpago',description:'Perguntas rápidas, pontuação, sequência de acertos e explicações pedagógicas.',tags:['funcional','offline'],ready:true},
-{id:'milhao',icon:'💡',title:'Show do Milhão do Trânsito',description:'Perguntas, cronômetro, pulos, cartas, plateia, progressão e resultado final.',tags:['web','v0.2 alpha'],ready:true},
-{id:'trilha',icon:'🎲',title:'Trilha do Trânsito',description:'Tabuleiro, dado animado, avanço por casas e desafios educativos.',tags:['Windows → Web','multijogador'],ready:false},
-{id:'memoria',icon:'🧠',title:'Jogo da Memória',description:'Associação visual de placas, comportamentos e situações seguras.',tags:['atenção','visual'],ready:false},
+{id:'milhao',icon:'💡',cover:'assets/games/quiz_do_milhao_do_transito.png',title:'Show do Milhão do Trânsito',description:'Perguntas, cronômetro, pulos, cartas, plateia, progressão e resultado final.',tags:['jogar agora','telão'],ready:true},
+{id:'trilha',icon:'🎲',cover:'assets/games/trilha_do_transito_agentes_mirins.png',title:'Trilha do Trânsito',description:'Tabuleiro, dado animado, peões, casas especiais e desafios educativos.',tags:['jogar agora','multijogador'],ready:true},
+{id:'memoria',icon:'🧠',cover:'assets/games/jogo_da_memoria_mobiliza_educa.png',title:'Jogo da Memória',description:'Cartas animadas, pares de sinais e situações seguras, tempo e pontuação.',tags:['jogar agora','atenção'],ready:true},
+{id:'cruzadas',icon:'✏️',cover:'assets/games/palavras_cruzadas_do_transito.png',title:'Palavras Cruzadas do Trânsito',description:'Pistas educativas, validação das respostas, tentativas e pontuação.',tags:['jogar agora','vocabulário'],ready:true},
 {id:'cidade',icon:'🏙️',title:'Cidade Mirim',description:'Missões em ambiente urbano com papéis de pedestre, ciclista e condutor.',tags:['simulação','missões'],ready:false},
 {id:'plateia',icon:'📱',title:'Plateia Interativa',description:'QR Code, respostas pelo celular, percentuais ao vivo e telão sincronizado.',tags:['coletivo','telão'],ready:false}
 ];
