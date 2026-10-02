@@ -39,6 +39,8 @@ function saveResult(score){
 }
 
 export function openTrilha(dialog,host,onFinish){
+  dialog.classList.add('trail-v29-dialog');
+  dialog.addEventListener('close',()=>dialog.classList.remove('trail-v29-dialog'),{once:true});
   let players=[
     {name:'Azul',pos:0,color:'blue'},
     {name:'Amarelo',pos:0,color:'yellow'}
@@ -133,9 +135,9 @@ export function openTrilha(dialog,host,onFinish){
   }).join('');
 
   const render=()=>{
-    host.innerHTML=`<section class="game trail-game trail-v18">
+    host.innerHTML=`<section class="game trail-game trail-v18 trail-v29">
       <div class="trail-hero">
-        <img src="assets/games/trilha_do_transito_agentes_mirins.svg?v=18" alt="Trilha do Trânsito">
+        <img src="assets/games/trilha_do_transito_agentes_mirins.svg?v=29" alt="Trilha do Trânsito">
         <div>
           <p class="eyebrow">TRILHA DO TRÂNSITO</p>
           <h2>Corrida pela segurança</h2>
@@ -197,7 +199,11 @@ export function openTrilha(dialog,host,onFinish){
       if(box)box.insertAdjacentHTML('beforeend',pawnHtml(p));
     });
     host.querySelectorAll('.trail-cell').forEach(el=>el.classList.remove('occupied-current'));
-    host.querySelector(`[data-cell="${current().pos}"]`)?.classList.add('occupied-current');
+    const currentCell=host.querySelector(`[data-cell="${current().pos}"]`);
+    currentCell?.classList.add('occupied-current');
+    if(window.matchMedia('(max-width:760px)').matches){
+      currentCell?.scrollIntoView({block:'nearest',behavior:'smooth'});
+    }
   };
 
   const overlay=(html,extra='')=>{
@@ -486,7 +492,7 @@ export function openTrilha(dialog,host,onFinish){
     onFinish?.();
 
     host.innerHTML=`<section class="game trail-result trail-v18">
-      <img class="trail-result-cover" src="assets/games/trilha_do_transito_agentes_mirins.svg?v=18" alt="">
+      <img class="trail-result-cover" src="assets/games/trilha_do_transito_agentes_mirins.svg?v=29" alt="">
       <div class="result-trophy">🏁</div>
       <p class="eyebrow">CHEGADA!</p>
       <h2><span class="trail-pawn ${p.color}"></span> ${p.name} venceu a Trilha do Trânsito!</h2>
