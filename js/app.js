@@ -2,7 +2,7 @@ import { games, audiences, learning, educatorModules, adminModules, tips } from 
 import { openQuiz } from './modules/quiz.js';
 import { openMilhao } from './modules/milhao.js?v=14';
 import { openTrilha } from './modules/trilha.js?v=19';
-import { openMemoria } from './modules/memoria.js?v=20';
+import { openMemoria } from './modules/memoria.js?v=21';
 import { openCruzadas } from './modules/cruzadas.js';
 import { openCidade } from './modules/cidade.js';
 import { openPlateia } from './modules/plateia.js';
@@ -88,5 +88,5 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.10.2',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.10.3',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
