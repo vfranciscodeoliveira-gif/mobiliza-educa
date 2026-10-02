@@ -9,7 +9,7 @@
   "theme_color":"#0f3c66",
   "lang":"pt-BR",
   "icons":[
-    {"src":"assets/icon-192.webp?v=8","sizes":"192x192","type":"image/webp","purpose":"any maskable"},
-    {"src":"assets/icon.svg?v=8","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+    {"src":"assets/icon-192.webp?v=9","sizes":"192x192","type":"image/webp","purpose":"any maskable"},
+    {"src":"assets/icon.svg?v=9","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
   ]
 }
