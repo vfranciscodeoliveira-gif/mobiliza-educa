@@ -31,30 +31,30 @@ function saveResult(count,attempts,score){
   localStorage.setItem('mobiliza.results',JSON.stringify(s));
 }
 
-function ensureCrosswordV28Styles(){
-  if(document.getElementById('crossword-v28-styles'))return;
+function ensureCrosswordV30Styles(){
+  if(document.getElementById('crossword-v30-styles'))return;
   const style=document.createElement('style');
-  style.id='crossword-v28-styles';
+  style.id='crossword-v30-styles';
   style.textContent=`
-  #gameDialog.crossword-v28-dialog{
+  #gameDialog.crossword-v30-dialog{
     width:min(1360px,96vw)!important;
     max-width:96vw!important;
     max-height:94vh!important;
     overflow:hidden!important;
   }
-  #gameDialog.crossword-v28-dialog>.dialog-shell{
+  #gameDialog.crossword-v30-dialog>.dialog-shell{
     height:94vh!important;
     max-height:94vh!important;
     overflow:hidden!important;
     border-radius:24px!important;
     background:#fff!important;
   }
-  #gameDialog.crossword-v28-dialog #gameHost{
+  #gameDialog.crossword-v30-dialog #gameHost{
     height:100%!important;
     min-height:0!important;
     overflow:hidden!important;
   }
-  #gameDialog.crossword-v28-dialog .dialog-close{
+  #gameDialog.crossword-v30-dialog .dialog-close{
     position:absolute!important;
     top:12px!important;
     right:12px!important;
@@ -62,7 +62,7 @@ function ensureCrosswordV28Styles(){
     margin:0!important;
   }
 
-  .crossword-v28{
+  .crossword-v30{
     box-sizing:border-box!important;
     width:100%!important;
     height:100%!important;
@@ -78,7 +78,7 @@ function ensureCrosswordV28Styles(){
       linear-gradient(180deg,#f9fcff,#eef7fb)!important;
   }
 
-  .crossword-v28 .cross-hero{
+  .crossword-v30 .cross-hero{
     min-height:0!important;
     display:grid!important;
     grid-template-columns:150px minmax(0,1fr)!important;
@@ -90,46 +90,46 @@ function ensureCrosswordV28Styles(){
     background:linear-gradient(135deg,#0a3f70,#0f6ca4 58%,#1591b6)!important;
     color:#fff!important;
   }
-  .crossword-v28 .cross-hero img{
+  .crossword-v30 .cross-hero img{
     width:150px!important;
     height:58px!important;
     object-fit:cover!important;
     border-radius:11px!important;
     box-shadow:0 5px 14px rgba(0,0,0,.20)!important;
   }
-  .crossword-v28 .cross-hero .eyebrow{
+  .crossword-v30 .cross-hero .eyebrow{
     margin:0 0 1px!important;
     color:#fff!important;
     font-size:.50rem!important;
     letter-spacing:.12em!important;
   }
-  .crossword-v28 .cross-hero h2{
+  .crossword-v30 .cross-hero h2{
     margin:0 0 2px!important;
     color:#fff!important;
     font-size:1.28rem!important;
     line-height:1.05!important;
   }
-  .crossword-v28 .cross-hero p{
+  .crossword-v30 .cross-hero p{
     margin:0!important;
     color:#e7f5fd!important;
     font-size:.64rem!important;
     line-height:1.2!important;
   }
 
-  .crossword-v28 .cross-toolbar{
+  .crossword-v30 .cross-toolbar{
     min-height:0!important;
     display:grid!important;
     grid-template-columns:minmax(0,1fr) auto!important;
     gap:6px!important;
   }
-  .crossword-v28 .cross-stats{
+  .crossword-v30 .cross-stats{
     min-height:0!important;
     display:grid!important;
     grid-template-columns:repeat(4,minmax(80px,1fr))!important;
     gap:5px!important;
   }
-  .crossword-v28 .cross-stat,
-  .crossword-v28 .cross-tools{
+  .crossword-v30 .cross-stat,
+  .crossword-v30 .cross-tools{
     height:48px!important;
     min-height:0!important;
     border:1px solid #d4e5ef!important;
@@ -137,30 +137,30 @@ function ensureCrosswordV28Styles(){
     background:#fff!important;
     box-shadow:0 3px 9px rgba(15,60,102,.05)!important;
   }
-  .crossword-v28 .cross-stat{
+  .crossword-v30 .cross-stat{
     display:flex!important;
     align-items:center!important;
     justify-content:space-between!important;
     gap:6px!important;
     padding:5px 9px!important;
   }
-  .crossword-v28 .cross-stat span{
+  .crossword-v30 .cross-stat span{
     color:#688093!important;
     font-size:.56rem!important;
     font-weight:800!important;
   }
-  .crossword-v28 .cross-stat strong{
+  .crossword-v30 .cross-stat strong{
     color:#173f60!important;
     font-size:.90rem!important;
   }
-  .crossword-v28 .cross-tools{
+  .crossword-v30 .cross-tools{
     display:flex!important;
     align-items:center!important;
     gap:4px!important;
     padding:4px!important;
   }
-  .crossword-v28 .cross-level,
-  .crossword-v28 .cross-tool{
+  .crossword-v30 .cross-level,
+  .crossword-v30 .cross-tool{
     min-height:28px!important;
     padding:4px 7px!important;
     border:1px solid #cfdee8!important;
@@ -172,28 +172,28 @@ function ensureCrosswordV28Styles(){
     cursor:pointer!important;
     white-space:nowrap!important;
   }
-  .crossword-v28 .cross-level.active{
+  .crossword-v30 .cross-level.active{
     background:#0e659d!important;
     color:#fff!important;
     border-color:#0e659d!important;
   }
 
-  .crossword-v28 .cross-main{
+  .crossword-v30 .cross-main{
     min-height:0!important;
     overflow:hidden!important;
     display:grid!important;
     grid-template-columns:minmax(390px,.94fr) minmax(420px,1.06fr)!important;
     gap:8px!important;
   }
-  .crossword-v28 .cross-board-panel,
-  .crossword-v28 .cross-side{
+  .crossword-v30 .cross-board-panel,
+  .crossword-v30 .cross-side{
     min-height:0!important;
     overflow:hidden!important;
     border:1px solid #cfdfE9!important;
     border-radius:17px!important;
     background:#fff!important;
   }
-  .crossword-v28 .cross-board-panel{
+  .crossword-v30 .cross-board-panel{
     display:grid!important;
     place-items:center!important;
     padding:8px!important;
@@ -202,14 +202,14 @@ function ensureCrosswordV28Styles(){
       linear-gradient(145deg,#0a3a62,#0b527f)!important;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.10)!important;
   }
-  .crossword-v28 .cross-board{
+  .crossword-v30 .cross-board{
     width:100%!important;
     height:100%!important;
     min-height:0!important;
     display:grid!important;
     gap:3px!important;
   }
-  .crossword-v28 .cw-cell{
+  .crossword-v30 .cw-cell{
     position:relative!important;
     min-width:0!important;
     min-height:0!important;
@@ -219,12 +219,12 @@ function ensureCrosswordV28Styles(){
     border:1px solid rgba(15,60,102,.16)!important;
     box-shadow:0 1px 3px rgba(0,0,0,.08)!important;
   }
-  .crossword-v28 .cw-cell.block{
+  .crossword-v30 .cw-cell.block{
     background:rgba(255,255,255,.035)!important;
     border-color:rgba(255,255,255,.03)!important;
     box-shadow:none!important;
   }
-  .crossword-v28 .cw-cell input{
+  .crossword-v30 .cw-cell input{
     width:100%!important;
     height:100%!important;
     min-width:0!important;
@@ -242,7 +242,7 @@ function ensureCrosswordV28Styles(){
     font-weight:1000!important;
     caret-color:#0e659d!important;
   }
-  .crossword-v28 .cw-cell .cw-number{
+  .crossword-v30 .cw-cell .cw-number{
     position:absolute!important;
     left:2px!important;
     top:1px!important;
@@ -253,24 +253,24 @@ function ensureCrosswordV28Styles(){
     font-weight:1000!important;
     pointer-events:none!important;
   }
-  .crossword-v28 .cw-cell.active{
+  .crossword-v30 .cw-cell.active{
     z-index:2!important;
     background:#fff7ca!important;
     border-color:#f0c446!important;
   }
-  .crossword-v28 .cw-cell.current{
+  .crossword-v30 .cw-cell.current{
     box-shadow:inset 0 0 0 3px #efb62c,0 0 0 2px rgba(239,182,44,.18)!important;
   }
-  .crossword-v28 .cw-cell.correct{
+  .crossword-v30 .cw-cell.correct{
     background:#dcf5e5!important;
     border-color:#7dca9b!important;
   }
-  .crossword-v28 .cw-cell.wrong{
+  .crossword-v30 .cw-cell.wrong{
     background:#ffe2df!important;
     border-color:#e98077!important;
     animation:crossShake .28s ease!important;
   }
-  .crossword-v28 .cw-cell.hint{
+  .crossword-v30 .cw-cell.hint{
     background:#e5f1ff!important;
     border-color:#77aee0!important;
   }
@@ -280,14 +280,14 @@ function ensureCrosswordV28Styles(){
     70%{transform:translateX(3px)}
   }
 
-  .crossword-v28 .cross-side{
+  .crossword-v30 .cross-side{
     display:grid!important;
     grid-template-rows:104px minmax(0,1fr)!important;
     gap:6px!important;
     padding:7px!important;
     background:linear-gradient(180deg,#f7fbfd,#eef6fa)!important;
   }
-  .crossword-v28 .cross-focus{
+  .crossword-v30 .cross-focus{
     min-height:0!important;
     display:grid!important;
     grid-template-columns:94px minmax(0,1fr) auto!important;
@@ -299,14 +299,14 @@ function ensureCrosswordV28Styles(){
     background:#fff!important;
     box-shadow:0 4px 12px rgba(15,60,102,.05)!important;
   }
-  .crossword-v28 .cross-focus img{
+  .crossword-v30 .cross-focus img{
     width:94px!important;
     height:78px!important;
     object-fit:contain!important;
     border-radius:9px!important;
     background:#eaf4f8!important;
   }
-  .crossword-v28 .cross-focus .dir{
+  .crossword-v30 .cross-focus .dir{
     display:block!important;
     color:#6b8799!important;
     font-size:.46rem!important;
@@ -314,23 +314,23 @@ function ensureCrosswordV28Styles(){
     letter-spacing:.10em!important;
     font-weight:1000!important;
   }
-  .crossword-v28 .cross-focus h3{
+  .crossword-v30 .cross-focus h3{
     margin:2px 0!important;
     color:#173e5d!important;
     font-size:.80rem!important;
     line-height:1.15!important;
   }
-  .crossword-v28 .cross-focus p{
+  .crossword-v30 .cross-focus p{
     margin:0!important;
     color:#647d90!important;
     font-size:.58rem!important;
     line-height:1.2!important;
   }
-  .crossword-v28 .cross-focus-actions{
+  .crossword-v30 .cross-focus-actions{
     display:grid!important;
     gap:4px!important;
   }
-  .crossword-v28 .cross-focus-actions button{
+  .crossword-v30 .cross-focus-actions button{
     min-width:82px!important;
     min-height:30px!important;
     padding:4px 7px!important;
@@ -340,16 +340,16 @@ function ensureCrosswordV28Styles(){
     font-weight:1000!important;
     cursor:pointer!important;
   }
-  .crossword-v28 .cross-check{
+  .crossword-v30 .cross-check{
     background:#0f6398!important;
     color:#fff!important;
   }
-  .crossword-v28 .cross-clear{
+  .crossword-v30 .cross-clear{
     background:#eef4f7!important;
     color:#426074!important;
   }
 
-  .crossword-v28 .cross-clues{
+  .crossword-v30 .cross-clues{
     min-height:0!important;
     overflow:auto!important;
     display:grid!important;
@@ -358,7 +358,7 @@ function ensureCrosswordV28Styles(){
     padding-right:2px!important;
     scrollbar-width:thin!important;
   }
-  .crossword-v28 .cross-clue{
+  .crossword-v30 .cross-clue{
     display:grid!important;
     grid-template-columns:30px 50px minmax(0,1fr) auto!important;
     align-items:center!important;
@@ -372,16 +372,16 @@ function ensureCrosswordV28Styles(){
     text-align:left!important;
     cursor:pointer!important;
   }
-  .crossword-v28 .cross-clue:hover,
-  .crossword-v28 .cross-clue.active{
+  .crossword-v30 .cross-clue:hover,
+  .crossword-v30 .cross-clue.active{
     border-color:#63a8d2!important;
     background:#f0f8fd!important;
   }
-  .crossword-v28 .cross-clue.solved{
+  .crossword-v30 .cross-clue.solved{
     border-color:#8bcaa2!important;
     background:#e9f8ee!important;
   }
-  .crossword-v28 .cross-clue-no{
+  .crossword-v30 .cross-clue-no{
     display:grid!important;
     place-items:center!important;
     width:26px!important;
@@ -392,45 +392,45 @@ function ensureCrosswordV28Styles(){
     font-size:.66rem!important;
     font-weight:1000!important;
   }
-  .crossword-v28 .cross-clue img{
+  .crossword-v30 .cross-clue img{
     width:50px!important;
     height:40px!important;
     object-fit:contain!important;
     border-radius:7px!important;
     background:#edf5f9!important;
   }
-  .crossword-v28 .cross-clue strong{
+  .crossword-v30 .cross-clue strong{
     display:block!important;
     color:#678397!important;
     font-size:.44rem!important;
     text-transform:uppercase!important;
     letter-spacing:.08em!important;
   }
-  .crossword-v28 .cross-clue p{
+  .crossword-v30 .cross-clue p{
     margin:2px 0 0!important;
     color:#28485e!important;
     font-size:.55rem!important;
     line-height:1.15!important;
   }
-  .crossword-v28 .cross-clue-status{
+  .crossword-v30 .cross-clue-status{
     color:#0f5f91!important;
     font-size:.48rem!important;
     font-weight:1000!important;
     white-space:nowrap!important;
   }
-  .crossword-v28 .cross-clue.solved .cross-clue-status{
+  .crossword-v30 .cross-clue.solved .cross-clue-status{
     color:#278951!important;
   }
 
-  .crossword-v28 .cross-footer{
+  .crossword-v30 .cross-footer{
     min-height:0!important;
     display:grid!important;
     grid-template-columns:minmax(0,1fr) auto!important;
     gap:6px!important;
     height:36px!important;
   }
-  .crossword-v28 .cross-hint,
-  .crossword-v28 .cross-best{
+  .crossword-v30 .cross-hint,
+  .crossword-v30 .cross-best{
     display:flex!important;
     align-items:center!important;
     gap:6px!important;
@@ -442,12 +442,12 @@ function ensureCrosswordV28Styles(){
     color:#557185!important;
     font-size:.52rem!important;
   }
-  .crossword-v28 .cross-best{
+  .crossword-v30 .cross-best{
     min-width:205px!important;
     justify-content:space-between!important;
   }
 
-  .crossword-v28 .cross-toast{
+  .crossword-v30 .cross-toast{
     position:absolute!important;
     left:50%!important;
     bottom:42px!important;
@@ -466,23 +466,23 @@ function ensureCrosswordV28Styles(){
     box-shadow:0 14px 34px rgba(0,0,0,.24)!important;
     transition:.2s ease!important;
   }
-  .crossword-v28 .cross-toast.show{
+  .crossword-v30 .cross-toast.show{
     opacity:1!important;
     transform:translate(-50%,0)!important;
   }
-  .crossword-v28 .cross-toast.ok{background:rgba(15,108,66,.97)!important}
-  .crossword-v28 .cross-toast.no{background:rgba(133,61,43,.97)!important}
-  .crossword-v28 .cross-toast img{
+  .crossword-v30 .cross-toast.ok{background:rgba(15,108,66,.97)!important}
+  .crossword-v30 .cross-toast.no{background:rgba(133,61,43,.97)!important}
+  .crossword-v30 .cross-toast img{
     width:58px!important;
     height:42px!important;
     object-fit:contain!important;
     border-radius:8px!important;
     background:#fff!important;
   }
-  .crossword-v28 .cross-toast strong{display:block!important;font-size:.68rem!important}
-  .crossword-v28 .cross-toast small{display:block!important;margin-top:2px!important;font-size:.54rem!important;color:#e5f2f8!important}
+  .crossword-v30 .cross-toast strong{display:block!important;font-size:.68rem!important}
+  .crossword-v30 .cross-toast small{display:block!important;margin-top:2px!important;font-size:.54rem!important;color:#e5f2f8!important}
 
-  .crossword-v28 .cross-overlay{
+  .crossword-v30 .cross-overlay{
     position:absolute!important;
     inset:0!important;
     z-index:150!important;
@@ -493,13 +493,13 @@ function ensureCrosswordV28Styles(){
     background:rgba(3,18,37,.10)!important;
     transition:.2s!important;
   }
-  .crossword-v28 .cross-overlay.show{
+  .crossword-v30 .cross-overlay.show{
     opacity:1!important;
     pointer-events:auto!important;
     background:rgba(3,18,37,.70)!important;
     backdrop-filter:blur(2px)!important;
   }
-  .crossword-v28 .cross-modal{
+  .crossword-v30 .cross-modal{
     width:min(560px,88%)!important;
     display:grid!important;
     justify-items:center!important;
@@ -512,9 +512,9 @@ function ensureCrosswordV28Styles(){
     border:2px solid rgba(255,255,255,.24)!important;
     box-shadow:0 26px 74px rgba(0,0,0,.42)!important;
   }
-  .crossword-v28 .cross-modal h3{margin:0!important;color:#fff!important;font-size:1.35rem!important}
-  .crossword-v28 .cross-modal p{margin:0!important;color:#dceefa!important;line-height:1.4!important}
-  .crossword-v28 .cross-modal-actions{display:flex!important;gap:8px!important;justify-content:center!important;flex-wrap:wrap!important}
+  .crossword-v30 .cross-modal h3{margin:0!important;color:#fff!important;font-size:1.35rem!important}
+  .crossword-v30 .cross-modal p{margin:0!important;color:#dceefa!important;line-height:1.4!important}
+  .crossword-v30 .cross-modal-actions{display:flex!important;gap:8px!important;justify-content:center!important;flex-wrap:wrap!important}
 
   .crossword-result-v28{
     box-sizing:border-box!important;
@@ -567,51 +567,51 @@ function ensureCrosswordV28Styles(){
   .crossword-result-v28 .cross-result-actions .btn{min-width:150px!important}
 
   @media(max-height:650px) and (min-width:761px){
-    .crossword-v28{grid-template-rows:58px 40px minmax(0,1fr) 28px!important;gap:4px!important;padding:6px 9px 7px!important}
-    .crossword-v28 .cross-hero{grid-template-columns:112px minmax(0,1fr)!important;padding:4px 8px!important}
-    .crossword-v28 .cross-hero img{width:112px!important;height:46px!important}
-    .crossword-v28 .cross-hero h2{font-size:1.06rem!important}
-    .crossword-v28 .cross-hero p{font-size:.52rem!important}
-    .crossword-v28 .cross-stat,.crossword-v28 .cross-tools{height:40px!important}
-    .crossword-v28 .cross-stat span{font-size:.48rem!important}
-    .crossword-v28 .cross-stat strong{font-size:.76rem!important}
-    .crossword-v28 .cross-level,.crossword-v28 .cross-tool{min-height:24px!important;padding:3px 5px!important;font-size:.47rem!important}
-    .crossword-v28 .cross-main{grid-template-columns:minmax(350px,.96fr) minmax(380px,1.04fr)!important;gap:5px!important}
-    .crossword-v28 .cross-side{grid-template-rows:84px minmax(0,1fr)!important;padding:5px!important;gap:4px!important}
-    .crossword-v28 .cross-focus{grid-template-columns:72px minmax(0,1fr) auto!important;padding:5px 7px!important;gap:7px!important}
-    .crossword-v28 .cross-focus img{width:72px!important;height:60px!important}
-    .crossword-v28 .cross-focus h3{font-size:.66rem!important}
-    .crossword-v28 .cross-focus p{font-size:.48rem!important}
-    .crossword-v28 .cross-focus-actions button{min-height:25px!important;font-size:.45rem!important}
-    .crossword-v28 .cross-clue{grid-template-columns:26px 42px minmax(0,1fr) auto!important;min-height:46px!important;padding:4px 6px!important;gap:5px!important}
-    .crossword-v28 .cross-clue img{width:42px!important;height:34px!important}
-    .crossword-v28 .cross-clue p{font-size:.46rem!important}
-    .crossword-v28 .cross-clue strong,.crossword-v28 .cross-clue-status{font-size:.39rem!important}
-    .crossword-v28 .cross-footer{height:28px!important}
-    .crossword-v28 .cross-hint,.crossword-v28 .cross-best{font-size:.44rem!important;padding:3px 6px!important}
+    .crossword-v30{grid-template-rows:58px 40px minmax(0,1fr) 28px!important;gap:4px!important;padding:6px 9px 7px!important}
+    .crossword-v30 .cross-hero{grid-template-columns:112px minmax(0,1fr)!important;padding:4px 8px!important}
+    .crossword-v30 .cross-hero img{width:112px!important;height:46px!important}
+    .crossword-v30 .cross-hero h2{font-size:1.06rem!important}
+    .crossword-v30 .cross-hero p{font-size:.52rem!important}
+    .crossword-v30 .cross-stat,.crossword-v30 .cross-tools{height:40px!important}
+    .crossword-v30 .cross-stat span{font-size:.48rem!important}
+    .crossword-v30 .cross-stat strong{font-size:.76rem!important}
+    .crossword-v30 .cross-level,.crossword-v30 .cross-tool{min-height:24px!important;padding:3px 5px!important;font-size:.47rem!important}
+    .crossword-v30 .cross-main{grid-template-columns:minmax(350px,.96fr) minmax(380px,1.04fr)!important;gap:5px!important}
+    .crossword-v30 .cross-side{grid-template-rows:84px minmax(0,1fr)!important;padding:5px!important;gap:4px!important}
+    .crossword-v30 .cross-focus{grid-template-columns:72px minmax(0,1fr) auto!important;padding:5px 7px!important;gap:7px!important}
+    .crossword-v30 .cross-focus img{width:72px!important;height:60px!important}
+    .crossword-v30 .cross-focus h3{font-size:.66rem!important}
+    .crossword-v30 .cross-focus p{font-size:.48rem!important}
+    .crossword-v30 .cross-focus-actions button{min-height:25px!important;font-size:.45rem!important}
+    .crossword-v30 .cross-clue{grid-template-columns:26px 42px minmax(0,1fr) auto!important;min-height:46px!important;padding:4px 6px!important;gap:5px!important}
+    .crossword-v30 .cross-clue img{width:42px!important;height:34px!important}
+    .crossword-v30 .cross-clue p{font-size:.46rem!important}
+    .crossword-v30 .cross-clue strong,.crossword-v30 .cross-clue-status{font-size:.39rem!important}
+    .crossword-v30 .cross-footer{height:28px!important}
+    .crossword-v30 .cross-hint,.crossword-v30 .cross-best{font-size:.44rem!important;padding:3px 6px!important}
   }
 
   @media(max-width:760px){
-    #gameDialog.crossword-v28-dialog>.dialog-shell{height:auto!important;max-height:94vh!important;overflow:auto!important}
-    #gameDialog.crossword-v28-dialog #gameHost{height:auto!important;overflow:visible!important}
-    .crossword-v28{height:auto!important;max-height:none!important;overflow:visible!important;display:block!important}
-    .crossword-v28 .cross-hero{grid-template-columns:1fr!important}
-    .crossword-v28 .cross-hero img{width:100%!important;height:auto!important;max-height:150px!important}
-    .crossword-v28 .cross-toolbar{grid-template-columns:1fr!important;margin:7px 0!important}
-    .crossword-v28 .cross-stats{grid-template-columns:repeat(2,1fr)!important}
-    .crossword-v28 .cross-tools{height:auto!important;flex-wrap:wrap!important;justify-content:center!important}
-    .crossword-v28 .cross-main{grid-template-columns:1fr!important}
-    .crossword-v28 .cross-board-panel{min-height:430px!important}
-    .crossword-v28 .cross-side{min-height:520px!important}
-    .crossword-v28 .cross-footer{height:auto!important;grid-template-columns:1fr!important;margin-top:7px!important}
+    #gameDialog.crossword-v30-dialog>.dialog-shell{height:auto!important;max-height:94vh!important;overflow:auto!important}
+    #gameDialog.crossword-v30-dialog #gameHost{height:auto!important;overflow:visible!important}
+    .crossword-v30{height:auto!important;max-height:none!important;overflow:visible!important;display:block!important}
+    .crossword-v30 .cross-hero{grid-template-columns:1fr!important}
+    .crossword-v30 .cross-hero img{width:100%!important;height:auto!important;max-height:150px!important}
+    .crossword-v30 .cross-toolbar{grid-template-columns:1fr!important;margin:7px 0!important}
+    .crossword-v30 .cross-stats{grid-template-columns:repeat(2,1fr)!important}
+    .crossword-v30 .cross-tools{height:auto!important;flex-wrap:wrap!important;justify-content:center!important}
+    .crossword-v30 .cross-main{grid-template-columns:1fr!important}
+    .crossword-v30 .cross-board-panel{min-height:430px!important}
+    .crossword-v30 .cross-side{min-height:520px!important}
+    .crossword-v30 .cross-footer{height:auto!important;grid-template-columns:1fr!important;margin-top:7px!important}
   }`;
   document.head.appendChild(style);
 }
 
 export function openCruzadas(dialog,host,onFinish){
-  ensureCrosswordV28Styles();
-  dialog.classList.add('crossword-v28-dialog');
-  dialog.addEventListener('close',()=>dialog.classList.remove('crossword-v28-dialog'),{once:true});
+  ensureCrosswordV30Styles();
+  dialog.classList.add('crossword-v30-dialog');
+  dialog.addEventListener('close',()=>dialog.classList.remove('crossword-v30-dialog'),{once:true});
 
   let level=localStorage.getItem('mobiliza.cruzadas.level')||'medium';
   if(!LEVELS[level])level='medium';
@@ -741,11 +741,11 @@ export function openCruzadas(dialog,host,onFinish){
 
   const render=()=>{
     const w=words()[activeIndex]||words()[0];
-    host.innerHTML=`<section class="game crossword-v28">
+    host.innerHTML=`<section class="game crossword-v30">
       <div class="cross-hero">
-        <img src="assets/games/palavras_cruzadas_do_transito.svg?v=28" alt="Palavras Cruzadas do Trânsito">
+        <img src="assets/games/palavras_cruzadas_do_transito.svg?v=30" alt="Palavras Cruzadas do Trânsito">
         <div>
-          <p class="eyebrow">PALAVRAS CRUZADAS DO TRÂNSITO • v28</p>
+          <p class="eyebrow">PALAVRAS CRUZADAS DO TRÂNSITO • v30</p>
           <h2>Complete a grade pelas pistas</h2>
           <p>Escolha uma pista, digite a palavra e use os cruzamentos para descobrir as demais.</p>
         </div>
@@ -837,21 +837,69 @@ export function openCruzadas(dialog,host,onFinish){
 
     if(focus&&!solved.has(i)){
       const inputs=getWordInputs(i);
-      const target=inputs.find(x=>!x.value)||inputs[0];
-      target?.focus();
-      target?.closest('.cw-cell')?.classList.add('current');
+      const target=inputs.find(x=>!x.readOnly&&!clean(x.value));
+
+      if(target){
+        focusInput(target);
+      }else{
+        // Pode acontecer de os cruzamentos já terem completado toda a palavra.
+        autoCheckIfCorrect(i);
+      }
     }
   };
 
-  const moveInWord=(from,delta)=>{
+  const focusInput=inp=>{
+    if(!inp)return false;
+    inp.focus();
+    host.querySelectorAll('.cw-cell').forEach(el=>el.classList.remove('current'));
+    inp.closest('.cw-cell')?.classList.add('current');
+    return true;
+  };
+
+  const moveInWord=(from,delta,{skipFilled=false}={})=>{
     const inputs=getWordInputs(activeIndex);
     const idx=inputs.indexOf(from);
-    const next=inputs[idx+delta];
-    if(next){
-      next.focus();
-      host.querySelectorAll('.cw-cell').forEach(el=>el.classList.remove('current'));
-      next.closest('.cw-cell')?.classList.add('current');
+    if(idx<0)return false;
+
+    for(let j=idx+delta;j>=0&&j<inputs.length;j+=delta){
+      const candidate=inputs[j];
+
+      // Ao digitar, letras já existentes nos cruzamentos são reconhecidas
+      // automaticamente e o cursor procura a próxima casa vazia.
+      if(skipFilled&&(candidate.readOnly||clean(candidate.value))){
+        continue;
+      }
+
+      // Na navegação para trás, nunca para em letra bloqueada por palavra resolvida.
+      if(delta<0&&candidate.readOnly){
+        continue;
+      }
+
+      return focusInput(candidate);
     }
+    return false;
+  };
+
+  const wordValue=i=>getWordInputs(i).map(inp=>clean(inp.value)).join('');
+  const wordIsComplete=i=>getWordInputs(i).every(inp=>clean(inp.value).length===1);
+
+  const autoCheckIfCorrect=i=>{
+    if(solved.has(i)||!wordIsComplete(i))return false;
+    const w=words()[i];
+
+    // A conferência automática só dispara quando a palavra completa está correta.
+    // Assim um erro de digitação não penaliza o jogador antes de ele pedir "Conferir".
+    if(wordValue(i)!==w.word)return false;
+
+    const h=host.querySelector('#crossHint');
+    if(h)h.innerHTML='<span>⚡</span><strong>Palavra completa! Conferindo automaticamente...</strong>';
+
+    setTimeout(()=>{
+      if(!solved.has(i)&&wordValue(i)===words()[i].word){
+        checkWord(i,{automatic:true});
+      }
+    },120);
+    return true;
   };
 
   const bind=()=>{
@@ -869,9 +917,18 @@ export function openCruzadas(dialog,host,onFinish){
 
       inp.addEventListener('input',()=>{
         inp.value=clean(inp.value).slice(-1);
-        if(inp.value){
-          sounds.key();
-          moveInWord(inp,1);
+        if(!inp.value)return;
+
+        sounds.key();
+
+        // Se as casas seguintes já têm letras vindas de cruzamentos,
+        // pula todas elas e leva o cursor à próxima casa realmente vazia.
+        const moved=moveInWord(inp,1,{skipFilled:true});
+
+        // Ao preencher a última casa necessária, a palavra correta é
+        // reconhecida e validada sem exigir o botão "Conferir".
+        if(!moved||wordIsComplete(activeIndex)){
+          autoCheckIfCorrect(activeIndex);
         }
       });
 
@@ -881,7 +938,7 @@ export function openCruzadas(dialog,host,onFinish){
             inp.value='';
             e.preventDefault();
           }else{
-            moveInWord(inp,-1);
+            moveInWord(inp,-1,{skipFilled:false});
           }
         }else if(e.key==='ArrowRight'||e.key==='ArrowDown'){
           e.preventDefault();moveInWord(inp,1);
@@ -933,7 +990,7 @@ export function openCruzadas(dialog,host,onFinish){
     setTimeout(()=>{if(t)t.className='cross-toast';},ok?1700:1200);
   };
 
-  const checkWord=i=>{
+  const checkWord=(i,{automatic=false}={})=>{
     if(solved.has(i))return;
     const w=words()[i];
     const inputs=getWordInputs(i);
@@ -978,7 +1035,7 @@ export function openCruzadas(dialog,host,onFinish){
     const h=host.querySelector('#crossHint');
     if(h)h.innerHTML=`<span>✅</span><strong>${w.word} concluída! As letras cruzadas ajudam nas outras palavras.</strong>`;
 
-    toast(true,w,`${w.word}: ${w.clue}`);
+    toast(true,w,`${automatic?'Conferida automaticamente. ':''}${w.word}: ${w.clue}`);
     updateHud();
 
     if(solved.size===words().length){
@@ -1052,7 +1109,7 @@ export function openCruzadas(dialog,host,onFinish){
   };
 
   const showRules=()=>{
-    const o=overlay(`<div class="cross-modal"><h3>Como jogar</h3><p>1. Clique em uma pista para destacar a palavra na grade.<br>2. Digite as letras; o cursor avança seguindo a direção da palavra.<br>3. Pressione <strong>Enter</strong> ou clique em <strong>Conferir</strong>.<br>4. Palavras corretas ficam verdes e ajudam nos cruzamentos.<br>5. O botão <strong>Letra</strong> revela uma letra, mas reduz a pontuação.</p><p><strong>Fácil:</strong> 5 palavras • <strong>Médio:</strong> 7 palavras • <strong>Difícil:</strong> 10 palavras.</p><button class="btn primary" id="crossRulesOk">Entendi</button></div>`);
+    const o=overlay(`<div class="cross-modal"><h3>Como jogar</h3><p>1. Clique em uma pista para destacar a palavra na grade.<br>2. Digite as letras; o cursor avança na direção da palavra e pula automaticamente casas já preenchidas pelos cruzamentos.<br>3. Ao completar corretamente a palavra, ela é conferida automaticamente. Você ainda pode usar <strong>Enter</strong> ou <strong>Conferir</strong>.<br>4. Palavras corretas ficam verdes e ajudam nos cruzamentos.<br>5. O botão <strong>Letra</strong> revela uma letra, mas reduz a pontuação.</p><p><strong>Fácil:</strong> 5 palavras • <strong>Médio:</strong> 7 palavras • <strong>Difícil:</strong> 10 palavras.</p><button class="btn primary" id="crossRulesOk">Entendi</button></div>`);
     o.querySelector('#crossRulesOk').onclick=closeOverlay;
   };
 
@@ -1074,7 +1131,7 @@ export function openCruzadas(dialog,host,onFinish){
 
     host.innerHTML=`<section class="crossword-result-v28">
       <div class="cross-result-hero">
-        <img src="assets/games/palavras_cruzadas_do_transito.svg?v=28" alt="Palavras Cruzadas do Trânsito">
+        <img src="assets/games/palavras_cruzadas_do_transito.svg?v=30" alt="Palavras Cruzadas do Trânsito">
         <div><p>PALAVRAS CRUZADAS • RESULTADO</p><h2>Grade concluída!</h2></div>
         <div class="cross-result-trophy">✏️</div>
       </div>
