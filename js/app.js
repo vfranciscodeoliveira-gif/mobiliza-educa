@@ -1,13 +1,16 @@
 import { games, audiences, learning, educatorModules, adminModules, tips } from './content.js';
 import { openQuiz } from './modules/quiz.js';
 import { openMilhao } from './modules/milhao.js';
+import { openTrilha } from './modules/trilha.js';
+import { openMemoria } from './modules/memoria.js';
+import { openCruzadas } from './modules/cruzadas.js';
 import { openAdminModule } from './modules/admin.js';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
 import { renderHomeNotifications } from './modules/notifications.js';
 
 const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
 let deferredPrompt=null,tipIndex=0;
-const moduleCard=(item,actionLabel='Abrir')=>`<article class="module-card card"><div class="module-icon" aria-hidden="true">${item.icon}</div><h3>${item.title}</h3><p>${item.description}</p><div class="module-meta">${(item.tags||[]).map(t=>`<span class="chip">${t}</span>`).join('')}</div><button class="btn ${item.ready?'primary':'ghost'}" data-module="${item.id}" ${item.disabled?'disabled':''}>${item.ready?actionLabel:'Em evolução'}</button></article>`;
+const moduleCard=(item,actionLabel='Abrir')=>`<article class="module-card card ${item.cover?'illustrated':''}">${item.cover?`<div class="module-cover"><img src="${item.cover}" alt="" loading="lazy" onerror="this.closest('.module-cover').classList.add('missing')"></div>`:`<div class="module-icon" aria-hidden="true">${item.icon}</div>`}<div class="module-card-body"><h3>${item.title}</h3><p>${item.description}</p><div class="module-meta">${(item.tags||[]).map(t=>`<span class="chip">${t}</span>`).join('')}</div><button class="btn ${item.ready?'primary':'ghost'}" data-module="${item.id}" ${item.disabled?'disabled':''}>${item.ready?actionLabel:'Em evolução'}</button></div></article>`;
 
 function updateAuthUI(){
  const unlocked=isAdminUnlocked(),lock=qs('#btnAdminLock'),nav=qs('[data-view="gestao"]');
@@ -30,10 +33,14 @@ function navigate(view){
 }
 function bindModuleButtons(){
  qsa('[data-module]').forEach(btn=>btn.addEventListener('click',async()=>{
-  if(btn.dataset.module==='quiz')openQuiz(qs('#gameDialog'),qs('#gameHost'),updateResults);
-  else if(btn.dataset.module==='milhao')openMilhao(qs('#gameDialog'),qs('#gameHost'),updateResults);
-  else if(adminModules.some(x=>x.id===btn.dataset.module)){
-   if(await ensureAdminAccess(qs('#authDialog'))){updateAuthUI();openAdminModule(btn.dataset.module,qs('#adminDialog'),qs('#adminHost'),qs('#authDialog'));}
+  const id=btn.dataset.module;
+  if(id==='quiz')openQuiz(qs('#gameDialog'),qs('#gameHost'),updateResults);
+  else if(id==='milhao')openMilhao(qs('#gameDialog'),qs('#gameHost'),updateResults);
+  else if(id==='trilha')openTrilha(qs('#gameDialog'),qs('#gameHost'),updateResults);
+  else if(id==='memoria')openMemoria(qs('#gameDialog'),qs('#gameHost'),updateResults);
+  else if(id==='cruzadas')openCruzadas(qs('#gameDialog'),qs('#gameHost'),updateResults);
+  else if(adminModules.some(x=>x.id===id)){
+   if(await ensureAdminAccess(qs('#authDialog'))){updateAuthUI();openAdminModule(id,qs('#adminDialog'),qs('#adminHost'),qs('#authDialog'));}
   }else if(!btn.disabled)alert('Este módulo já está reservado na arquitetura e será ativado nas próximas entregas.');
  }));
 }
