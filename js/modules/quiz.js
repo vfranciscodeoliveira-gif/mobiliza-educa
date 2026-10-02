@@ -10,7 +10,7 @@ export function openQuiz(dialog,host,onFinish){
   let i=0,score=0,correct=0,streak=0,bestStreak=0,locked=false;
   function render(){
     const q=questions[i];
-    host.innerHTML=`<section class="game"><p class="eyebrow">QUIZ RELÂMPAGO</p><div class="game-score"><span>Pergunta ${i+1}/${questions.length}</span><span>${score} pontos</span></div><div class="progress"><span style="width:${((i)/questions.length)*100}%"></span></div><h2>${q.q}</h2><div class="quiz-options">${q.a.map((x,n)=>`<button type="button" class="quiz-option" data-answer="${n}">${String.fromCharCode(65+n)}. ${x}</button>`).join('')}</div><div id="feedback"></div></section>`;
+    host.innerHTML=`<section class="game lightning-quiz"><div class="quiz-hero-mini"><div class="quiz-bolt">⚡</div><div><p class="eyebrow">QUIZ RELÂMPAGO</p><h2>Desafio rápido</h2></div></div><div class="game-score"><span>Pergunta ${i+1}/${questions.length}</span><span>${score} pontos</span></div><div class="progress"><span style="width:${((i)/questions.length)*100}%"></span></div><div class="quiz-question-card"><span>PERGUNTA ${i+1} DE ${questions.length}</span><h2>${q.q}</h2></div><div class="quiz-options lightning-options">${q.a.map((x,n)=>`<button type="button" class="quiz-option" data-answer="${n}">${String.fromCharCode(65+n)}. ${x}</button>`).join('')}</div><div id="feedback"></div></section>`;
     host.querySelectorAll('[data-answer]').forEach(b=>b.addEventListener('click',()=>answer(Number(b.dataset.answer))));
   }
   function answer(n){
