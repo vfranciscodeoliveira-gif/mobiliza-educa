@@ -1,4 +1,4 @@
-const CACHE='mobiliza-educa-v0.2.1';
+const CACHE='mobiliza-educa-v0.2.2';
 const ASSETS=['./','./index.html','./assets/app.css','./assets/icon.svg','./assets/brand-icon.webp','./assets/brand-cover.webp','./js/app.js','./js/content.js','./js/modules/quiz.js','./js/modules/milhao.js','./js/modules/admin.js','./manifest.webmanifest'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
