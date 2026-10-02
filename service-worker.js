@@ -1,7 +1,7 @@
-const CACHE='mobiliza-educa-v0.5.0';
+const CACHE='mobiliza-educa-v0.6.0';
 const ASSETS=[
  './','./index.html','./assets/app.css','./assets/showcase.css',
- './assets/icon.svg','./assets/icon-32.webp','./assets/icon-192.webp','./assets/brand-cover.webp',
+ './assets/icon.svg','./assets/mobiliza_educa_caminhos_para_a_vida.webp','./assets/icon-32.webp','./assets/icon-192.webp','./assets/brand-cover.webp',
  './assets/games/quiz_do_milhao_do_transito.webp',
  './assets/games/trilha_do_transito_agentes_mirins.webp',
  './assets/games/jogo_da_memoria_mobiliza_educa.webp',
