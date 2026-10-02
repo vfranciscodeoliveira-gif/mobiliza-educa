@@ -2,13 +2,13 @@ const BOARD_SIZE=24;
 const COLS=6;
 
 const SPECIALS={
-  4:{icon:'🚦',label:'Semáforo',title:'Atenção no amarelo',message:'Boa conduta no semáforo. Avance 1 casa.',delta:1,tone:'good'},
-  7:{icon:'🚶',label:'Pedestre',title:'Faixa respeitada',message:'Você deu preferência ao pedestre. Avance 2 casas.',delta:2,tone:'good'},
-  10:{icon:'📵',label:'Celular',title:'Distração ao volante',message:'Usar o celular tira a atenção da via. Volte 2 casas.',delta:-2,tone:'bad'},
-  13:{icon:'🚲',label:'Ciclista',title:'Convivência segura',message:'Você manteve distância segura do ciclista. Avance 2 casas.',delta:2,tone:'good'},
-  16:{icon:'🛡️',label:'Cinto',title:'Proteção para todos',message:'Todos estão usando cinto de segurança. Avance 1 casa.',delta:1,tone:'good'},
-  19:{icon:'⚠️',label:'Velocidade',title:'Excesso de velocidade',message:'Velocidade incompatível aumenta o risco. Volte 3 casas.',delta:-3,tone:'bad'},
-  21:{icon:'🚸',label:'Escola',title:'Área escolar',message:'Você reduziu a velocidade e redobrou a atenção. Avance 1 casa.',delta:1,tone:'good'}
+  4:{icon:'🚦',image:'assets/memory/semaforo.svg?v=24',label:'Semáforo',title:'Atenção no amarelo',message:'Boa conduta no semáforo. Avance 1 casa.',delta:1,tone:'good'},
+  7:{icon:'🚶',image:'assets/memory/pedestre.svg?v=24',label:'Pedestre',title:'Faixa respeitada',message:'Você deu preferência ao pedestre. Avance 2 casas.',delta:2,tone:'good'},
+  10:{icon:'📵',image:'assets/memory/celular.svg?v=24',label:'Celular',title:'Distração ao volante',message:'Usar o celular tira a atenção da via. Volte 2 casas.',delta:-2,tone:'bad'},
+  13:{icon:'🚲',image:'assets/memory/bicicleta.svg?v=24',label:'Ciclista',title:'Convivência segura',message:'Você manteve distância segura do ciclista. Avance 2 casas.',delta:2,tone:'good'},
+  16:{icon:'🛡️',image:'assets/memory/cinto.svg?v=24',label:'Cinto',title:'Proteção para todos',message:'Todos estão usando cinto de segurança. Avance 1 casa.',delta:1,tone:'good'},
+  19:{icon:'⚠️',image:'assets/memory/velocidade.svg?v=24',label:'Velocidade',title:'Excesso de velocidade',message:'Velocidade incompatível aumenta o risco. Volte 3 casas.',delta:-3,tone:'bad'},
+  21:{icon:'🚸',image:'assets/memory/escola.svg?v=24',label:'Escola',title:'Área escolar',message:'Você reduziu a velocidade e redobrou a atenção. Avance 1 casa.',delta:1,tone:'good'}
 };
 
 const BONUS_HOUSES=new Set([3,8,12,18,22]);
@@ -369,7 +369,7 @@ export function openTrilha(dialog,host,onFinish){
     if(sp.tone==='bad')sounds.badSpecial();else sounds.bonus();
     const toneClass=sp.tone==='bad'?'bad':'good';
     const o=overlay(`<div class="trail-modal trail-event-modal ${toneClass}">
-      <div class="trail-event-icon">${sp.icon}</div>
+      <div class="trail-event-visual"><img class="trail-event-image" src="${sp.image}" alt="${sp.label}"><div class="trail-event-icon">${sp.icon}</div></div>
       <p class="eyebrow">CASA ESPECIAL</p>
       <h3>${sp.title}</h3>
       <p>${sp.message}</p>
