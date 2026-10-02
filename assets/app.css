@@ -230,3 +230,222 @@ filter:drop-shadow(0 0 24px rgba(44,146,255,.55));pointer-events:none}
 @media(max-width:900px){
   .game-showcase .module-cover{min-height:210px}
 }
+
+/* v0.9.5 • Milhão compacto + SVG + ajuda visual */
+
+/* Remove o efeito de quadro preto e usa a arte vetorial como capa principal. */
+.milhao-cover-frame{
+  background:
+    linear-gradient(180deg,rgba(3,20,55,.04),rgba(3,20,55,.10)),
+    url('../assets/games/quiz_do_milhao_do_transito.svg?v=13') center/cover no-repeat !important;
+  border-color:rgba(255,255,255,.35)!important;
+}
+.milhao-cover-frame .milhao-start-art,
+.milhao-intro-art{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  aspect-ratio:16/9!important;
+  background:#0b4ba2;
+}
+.milhao-cover-badge{display:none!important}
+
+/* Intro: imagem real + contagem sobre a capa, sem painel vazio e sem rolagem. */
+.milhao-intro{
+  min-height:0!important;
+  height:min(650px,86vh)!important;
+  padding:18px 28px!important;
+}
+.intro-stage-v13{
+  width:min(860px,88vw);
+  gap:8px;
+}
+.intro-cover{
+  position:relative;
+  width:min(760px,78vw);
+  aspect-ratio:16/9;
+  border-radius:28px;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,.3);
+  box-shadow:0 28px 90px rgba(0,0,0,.48),0 0 48px rgba(52,145,255,.38);
+}
+.intro-cover .milhao-intro-art{
+  position:absolute;inset:0;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+}
+.intro-count-over{
+  position:absolute;inset:0;
+  display:grid;place-items:center;
+  background:rgba(2,16,48,.20);
+}
+.intro-count-over span{
+  min-width:120px;height:120px;
+  backdrop-filter:blur(5px);
+}
+.intro-player{margin:10px 0 0!important}
+.intro-title{margin-top:0!important;font-size:.82rem;letter-spacing:.11em}
+
+/* Jogo principal: cabe inteiro em notebook/monitor 1366x768 sem esconder a parte inferior. */
+.milhao-play{
+  min-height:0!important;
+  padding:14px 18px 16px!important;
+}
+.milhao-play .milhao-top{margin-bottom:6px!important}
+.milhao-play .milhao-top h2{margin:2px 0 4px!important;font-size:1.45rem!important}
+.milhao-play .milhao-score{margin:0!important;font-size:.86rem!important}
+.milhao-play .milhao-brand-stage{min-height:92px!important;margin:0!important}
+.milhao-play .milhao-logo-disc{
+  width:92px!important;height:92px!important;
+  border-width:5px!important;
+  box-shadow:0 0 0 6px rgba(11,91,214,.28),0 0 28px rgba(64,153,255,.55)!important;
+  font-size:.84rem!important;
+}
+.milhao-play .milhao-logo-disc strong{font-size:1rem!important}
+.milhao-play .milhao-logo-disc small{font-size:.45rem!important;margin-top:5px!important}
+.milhao-play .milhao-question-wrap{padding:9px 13px!important;border-width:3px!important}
+.milhao-play .milhao-question-wrap span{font-size:.68rem!important}
+.milhao-play .milhao-question{font-size:clamp(1.05rem,2vw,1.5rem)!important;margin-top:3px!important}
+.milhao-play .milhao-options{gap:7px!important;margin-top:8px!important}
+.milhao-play .quiz-option{
+  min-height:44px!important;
+  padding:7px 12px 7px 48px!important;
+  font-size:.83rem!important;
+  border-width:2px!important;
+}
+.milhao-play .quiz-option b{
+  width:30px!important;height:30px!important;left:8px!important;border-width:2px!important;
+}
+.milhao-play .milhao-aids{
+  margin-top:8px!important;padding:7px!important;gap:6px!important;border-radius:14px!important;
+}
+.milhao-play .milhao-aids .btn{
+  min-width:96px!important;
+  min-height:36px!important;
+  padding:7px 10px!important;
+  font-size:.82rem!important;
+}
+.milhao-play .milhao-ladder{gap:3px!important}
+.milhao-play .milhao-ladder span{
+  padding:3px 10px!important;
+  border-width:2px!important;
+  font-size:.74rem!important;
+}
+.milhao-play .milhao-timer{
+  width:66px!important;height:66px!important;
+  font-size:1.5rem!important;
+}
+.milhao-play .milhao-feedback,
+.milhao-play .audience-summary{
+  margin-top:6px!important;
+}
+
+/* Cartas realmente clicáveis e maiores. */
+.cards-pick-overlay.show{
+  pointer-events:auto!important;
+  z-index:60!important;
+}
+.cards-picker{
+  width:min(900px,92%)!important;
+  min-height:0!important;
+  padding:24px 26px!important;
+}
+.milhao-card-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:14px!important;
+}
+.milhao-card-pick{
+  display:block!important;
+  min-width:0!important;
+  height:240px!important;
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  user-select:none;
+  touch-action:manipulation;
+}
+.milhao-card-pick .milhao-card-face{pointer-events:none!important}
+.milhao-card-back{
+  background:
+    radial-gradient(circle at 50% 38%,rgba(65,151,255,.4),transparent 24%),
+    linear-gradient(145deg,#0e5fd4,#06245c)!important;
+}
+.milhao-card-back::before{
+  content:"";position:absolute;inset:12px;border:2px solid rgba(255,255,255,.22);border-radius:15px;
+}
+.milhao-card-back i{font-size:3rem!important;color:#f4b740}
+.milhao-card-back small{margin-top:8px;font-size:.7rem;letter-spacing:.08em;opacity:.8}
+.milhao-card-pick.not-chosen{opacity:.34;transform:scale(.96)}
+.milhao-card-pick.chosen{z-index:10;transform:scale(1.04)}
+
+/* Plateia: resultado em gráfico no centro, não espremido no rodapé. */
+.audience-help-v13{width:min(600px,88%)!important}
+.audience-people{
+  display:flex;justify-content:center;gap:12px;align-items:end;
+  min-height:95px;
+}
+.audience-people span{
+  position:relative;width:42px;height:42px;border-radius:50%;
+  background:#f4c25d;color:transparent;
+  animation:audienceBob .45s ease-in-out infinite alternate;
+}
+.audience-people span::after{
+  content:"";position:absolute;left:50%;top:35px;transform:translateX(-50%);
+  width:58px;height:58px;border-radius:24px 24px 12px 12px;background:#6e62d9;
+}
+.audience-people span:nth-child(2n){background:#c97b5b;animation-delay:.1s}
+.audience-people span:nth-child(3n)::after{background:#27a36a}
+.audience-people span:nth-child(4n)::after{background:#e15f76}
+@keyframes audienceBob{to{transform:translateY(-10px)}}
+.audience-result-stage{padding:26px 30px!important}
+.audience-chart{display:grid;gap:10px;width:100%;margin-top:8px}
+.audience-chart-row{
+  display:grid;grid-template-columns:34px 1fr 54px;gap:10px;align-items:center;
+}
+.audience-chart-row>span{
+  display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#0e66d3;color:#fff;font-weight:900;
+}
+.audience-chart-row i{
+  display:block;height:22px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.14);
+}
+.audience-chart-row i b{
+  display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#45a4ff,#f4b740);
+}
+.audience-chart-row strong{font-size:1.05rem}
+.audience-summary{
+  display:flex;gap:7px;align-items:center;flex-wrap:wrap;
+  color:#fff;font-size:.78rem;
+}
+.audience-summary>span{
+  padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.12);
+}
+
+/* Vitrine: capas SVG nítidas. */
+.game-showcase .module-cover{
+  min-height:270px!important;
+}
+.game-showcase .module-cover img{
+  object-fit:cover!important;
+  background:#0f4d7c;
+}
+.game-showcase .module-cover-title{
+  background:rgba(3,23,58,.68);
+  width:max-content;max-width:calc(100% - 32px);
+  padding:8px 11px;border-radius:10px;
+}
+
+@media(max-height:780px) and (min-width:901px){
+  #gameDialog{max-height:94vh!important}
+  #gameDialog .dialog-shell{max-height:94vh!important;overflow:hidden!important}
+  .milhao-play{padding:10px 16px 12px!important}
+  .milhao-play .milhao-brand-stage{min-height:76px!important}
+  .milhao-play .milhao-logo-disc{width:76px!important;height:76px!important;font-size:.72rem!important}
+  .milhao-play .milhao-logo-disc strong{font-size:.86rem!important}
+  .milhao-play .quiz-option{min-height:39px!important;padding-top:5px!important;padding-bottom:5px!important}
+  .milhao-play .milhao-question-wrap{padding:7px 12px!important}
+  .milhao-play .milhao-aids .btn{min-height:32px!important;padding:5px 9px!important}
+}
+@media(max-width:760px){
+  .milhao-card-grid{grid-template-columns:repeat(2,1fr)!important}
+  .milhao-card-pick{height:200px!important}
+}
