@@ -29,6 +29,18 @@ export const educatorModules=[
 {id:'acessibilidade',icon:'♿',title:'Acessibilidade',description:'Contraste, tamanho de texto, navegação por teclado e futura leitura assistida.',tags:['inclusão'],ready:true}
 ];
 
+export const adminModules=[
+{id:'admin-dashboard',icon:'📊',title:'Dashboard administrativo',description:'Visão geral de escolas, participantes, eventos, partidas, presença, avaliações e pendências.',tags:['Windows → Web','prioridade'],ready:true},
+{id:'admin-cadastros',icon:'🏫',title:'Cadastros educacionais',description:'Escolas, turmas, professores, alunos, jogadores e vínculos institucionais.',tags:['cadastros'],ready:true},
+{id:'admin-eventos',icon:'📅',title:'Eventos, agenda e operação',description:'Agenda, eventos, fila, recursos, materiais, equipes, parceiros e execução das ações.',tags:['operação'],ready:true},
+{id:'admin-conteudo',icon:'📝',title:'Conteúdo pedagógico',description:'Banco de perguntas, categorias, dificuldades, revisão, auditoria e Centro Editorial.',tags:['editorial'],ready:true},
+{id:'admin-avaliacao',icon:'📈',title:'Presença e avaliações',description:'Presença, pré-teste, pós-teste, evolução, indicadores e desempenho pedagógico.',tags:['impacto'],ready:true},
+{id:'admin-passaporte',icon:'🎓',title:'Passaporte e certificados',description:'Medalhas, passaporte, certificados, validação e histórico de participação.',tags:['reconhecimento'],ready:true},
+{id:'admin-relatorios',icon:'📑',title:'Relatórios e indicadores',description:'Relatórios operacionais, pedagógicos, estatísticas, ranking e comprovação de impacto.',tags:['gestão'],ready:true},
+{id:'admin-acessos',icon:'🔐',title:'Usuários, perfis e auditoria',description:'Perfis, permissões, trilha de auditoria, segurança, acessibilidade e políticas.',tags:['segurança'],ready:true},
+{id:'admin-sistema',icon:'⚙️',title:'Configurações, backup e sincronização',description:'Preferências, identidade, telão, dados locais, exportação, backup e futura sincronização em nuvem.',tags:['sistema'],ready:true}
+];
+
 export const tips=[
 {title:'Segurança também se aprende pelo exemplo.',text:'Quando adultos respeitam a faixa, o semáforo e os limites, crianças aprendem que segurança é parte natural da convivência.'},
 {title:'Velocidade muda tudo.',text:'Quanto maior a velocidade, menor o tempo para perceber, decidir e reagir. Reduzir a velocidade perto de escolas protege quem ainda está aprendendo a circular.'},
