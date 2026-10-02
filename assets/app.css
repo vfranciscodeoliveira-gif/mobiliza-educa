@@ -449,3 +449,101 @@ filter:drop-shadow(0 0 24px rgba(44,146,255,.55));pointer-events:none}
   .milhao-card-grid{grid-template-columns:repeat(2,1fr)!important}
   .milhao-card-pick{height:200px!important}
 }
+
+/* v0.9.6 • acabamento final do Show do Milhão */
+
+/* Tipografia ligeiramente maior sem voltar a exigir rolagem. */
+.milhao-play .milhao-question{
+  font-size:clamp(1.18rem,2.15vw,1.62rem)!important;
+  line-height:1.2!important;
+}
+.milhao-play .quiz-option{
+  font-size:.91rem!important;
+  line-height:1.18!important;
+}
+.milhao-play .milhao-aids .btn{
+  font-size:.86rem!important;
+}
+.milhao-play .milhao-score{
+  font-size:.9rem!important;
+}
+
+/* Cartas: ao revelar, a tela do jogo continua visível para o usuário entender
+   quais alternativas foram eliminadas. */
+.card-result-overlay.show{
+  background:rgba(0,10,35,.38)!important;
+}
+.card-result-stage{
+  width:min(430px,86%)!important;
+  min-height:0!important;
+  padding:22px 24px!important;
+  gap:12px!important;
+}
+.card-result-mini{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  width:100%;
+  text-align:left;
+  padding:14px 16px;
+  border-radius:18px;
+  background:linear-gradient(180deg,#fff4be,#efa821);
+  color:#132b44;
+  box-shadow:0 16px 34px rgba(0,0,0,.28);
+}
+.card-result-icon{
+  flex:0 0 72px;
+  width:72px;height:72px;
+  display:grid;place-items:center;
+  border-radius:18px;
+  background:#fff9df;
+  font-size:2.6rem;
+  font-weight:1000;
+  border:2px solid rgba(20,50,80,.12);
+}
+.card-result-mini small{
+  display:block;
+  font-size:.72rem;
+  letter-spacing:.1em;
+  font-weight:900;
+  opacity:.7;
+}
+.card-result-mini strong{
+  display:block;
+  font-size:2.2rem;
+  line-height:1;
+  margin-top:5px;
+}
+.card-continue,.audience-continue{
+  min-width:160px;
+}
+
+/* Plateia: o gráfico fica parado até o usuário confirmar que terminou de ler. */
+.audience-result-stage{
+  min-height:0!important;
+  width:min(640px,88%)!important;
+}
+.audience-result-stage .audience-continue{
+  margin-top:14px;
+}
+.audience-chart-row i{
+  height:24px!important;
+}
+.audience-chart-row strong{
+  font-size:1.1rem!important;
+}
+
+/* Refinamento da abertura. */
+.milhao-start-copy .milhao-title-3d{
+  max-width:15ch;
+}
+.milhao-start-copy>p:not(.eyebrow){
+  max-width:50ch;
+  line-height:1.45;
+}
+
+/* Em telas mais baixas mantém legibilidade sem estourar o modal. */
+@media(max-height:780px) and (min-width:901px){
+  .milhao-play .milhao-question{font-size:1.12rem!important}
+  .milhao-play .quiz-option{font-size:.86rem!important}
+}
