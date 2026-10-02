@@ -102,3 +102,22 @@ filter:drop-shadow(0 0 24px rgba(44,146,255,.55));pointer-events:none}
 @media(max-height:800px) and (min-width:901px){
   #gameDialog{max-height:92vh}.milhao.windows-look{padding:14px 22px!important;min-height:0!important}.milhao-brand-stage{min-height:110px!important}.milhao-logo-disc{width:110px!important;height:110px!important;font-size:1.1rem!important}.milhao-logo-disc strong{font-size:1.25rem!important}.milhao-question-wrap{padding:10px 14px!important}.milhao .quiz-option{min-height:46px!important;padding-top:8px!important;padding-bottom:8px!important}.milhao-aids{margin-top:7px!important}.milhao-ladder span{padding:3px 10px!important}
 }
+
+/* v0.9 • acabamento dos jogos */
+.memory-game{background:linear-gradient(180deg,#f8fcff,#eef7ff)}
+.memory-hero{display:grid;grid-template-columns:240px 1fr;gap:22px;align-items:center;margin:-38px -38px 24px;padding:18px 38px;background:linear-gradient(135deg,#0b3e70,#0f659d);color:#fff}
+.memory-hero img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:18px;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.memory-hero h2,.memory-hero p,.memory-hero .eyebrow{color:#fff;margin-top:5px}
+.memory-game .memory-card{min-height:132px;border:1px solid rgba(15,60,102,.08);box-shadow:0 8px 18px rgba(15,60,102,.09)}
+.memory-game .memory-card.matched{box-shadow:0 0 0 3px rgba(34,197,94,.22),0 8px 18px rgba(15,60,102,.09)}
+.memory-game .memory-back{background:linear-gradient(145deg,#0f3c66,#176aa0);font-size:2.2rem;text-shadow:0 3px 0 rgba(0,0,0,.15)}
+.memory-game .memory-front{background:linear-gradient(180deg,#fff,#f4f9fc)}
+#gameDialog{border:0;padding:0;background:transparent}
+#gameDialog::backdrop{background:rgba(6,18,31,.66);backdrop-filter:blur(3px)}
+#gameDialog>.dialog-shell{position:relative;border-radius:24px;background:#fff;box-shadow:0 34px 90px rgba(0,0,0,.38)}
+#gameDialog .dialog-close{position:sticky;top:12px;float:right;z-index:100;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;border:0;background:#fff;color:#153b5a;box-shadow:0 5px 18px rgba(0,0,0,.14);font-size:1.35rem;cursor:pointer}
+.milhao-feedback{margin-top:10px!important;padding:10px 14px!important;border-radius:14px!important}
+.milhao-feedback p{margin:5px 0 9px!important;line-height:1.35}
+.milhao-feedback .btn{min-height:38px!important;padding:8px 14px!important}
+@media(max-width:900px){.memory-hero{grid-template-columns:1fr}.memory-hero img{max-height:220px}}
+@media(max-width:620px){.memory-hero{margin:-24px -24px 18px;padding:16px 24px}.memory-grid{grid-template-columns:repeat(2,1fr)!important}.memory-game .memory-card{min-height:112px}}
