@@ -1,9 +1,9 @@
-import { games, audiences, learning, educatorModules, adminModules, tips } from './content.js?v=14';
-import { openQuiz } from './modules/quiz.js';
+import { games, audiences, learning, educatorModules, adminModules, tips } from './content.js?v=23';
+import { openQuiz } from './modules/quiz.js?v=23';
 import { openMilhao } from './modules/milhao.js?v=14';
 import { openTrilha } from './modules/trilha.js?v=19';
-import { openMemoria } from './modules/memoria.js?v=22';
-import { openCruzadas } from './modules/cruzadas.js';
+import { openMemoria } from './modules/memoria.js?v=23';
+import { openCruzadas } from './modules/cruzadas.js?v=23';
 import { openCidade } from './modules/cidade.js';
 import { openPlateia } from './modules/plateia.js';
 import { openAdminModule } from './modules/admin.js';
@@ -13,7 +13,7 @@ import { renderHomeNotifications } from './modules/notifications.js';
 const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
 let deferredPrompt=null,tipIndex=0;
 
-const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image||'';const cover=image?`${image}?v=14`:'';return `
+const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image||'';const cover=image?`${image}?v=23`:'';return `
 <article class="module-card card ${image?'illustrated':''} ${item.accent?'accent-'+item.accent:''}">
   ${image?`<div class="module-cover" style="--cover-image:url('${cover}')"><img src="${cover}" alt="${item.title}" loading="eager" decoding="async" onload="this.closest('.module-cover')?.classList.add('loaded')" onerror="this.closest('.module-cover')?.classList.add('cover-error')"><span class="cover-shine"></span><span class="module-cover-title">${item.icon||'🎮'} ${item.title}</span></div>`:`<div class="module-icon" aria-hidden="true">${item.icon}</div>`}
   <div class="module-card-body">
@@ -88,5 +88,5 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.10.4',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.10.5',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
