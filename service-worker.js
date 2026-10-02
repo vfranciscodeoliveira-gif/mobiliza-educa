@@ -1,4 +1,4 @@
-const CACHE='mobiliza-educa-v0.7.0';
+const CACHE='mobiliza-educa-v0.8.0';
 const ASSETS=[
  './','./index.html','./assets/app.css','./assets/showcase.css',
  './assets/icon.svg','./assets/mobiliza_educa_caminhos_para_a_vida.webp','./assets/icon-32.webp','./assets/icon-192.webp','./assets/brand-cover.webp',
