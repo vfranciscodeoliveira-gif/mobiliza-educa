@@ -1,6 +1,6 @@
 import { games, audiences, learning, educatorModules, adminModules, tips } from './content.js';
 import { openQuiz } from './modules/quiz.js';
-import { openMilhao } from './modules/milhao.js?v=10';
+import { openMilhao } from './modules/milhao.js?v=11';
 import { openTrilha } from './modules/trilha.js';
 import { openMemoria } from './modules/memoria.js';
 import { openCruzadas } from './modules/cruzadas.js';
@@ -15,7 +15,7 @@ let deferredPrompt=null,tipIndex=0;
 
 const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image||'';return `
 <article class="module-card card ${image?'illustrated':''} ${item.accent?'accent-'+item.accent:''}">
-  ${image?`<div class="module-cover"><img src="${image}?v=10" alt="${item.title}" loading="lazy" decoding="async"><span class="cover-shine"></span></div>`:`<div class="module-icon" aria-hidden="true">${item.icon}</div>`}
+  ${image?`<div class="module-cover"><img src="${image}?v=11" alt="${item.title}" loading="lazy" decoding="async"><span class="cover-shine"></span></div>`:`<div class="module-icon" aria-hidden="true">${item.icon}</div>`}
   <div class="module-card-body">
     <h3>${item.title}</h3>
     <p>${item.description}</p>
