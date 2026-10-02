@@ -1875,3 +1875,67 @@ filter:drop-shadow(0 0 24px rgba(44,146,255,.55));pointer-events:none}
     min-height:78px!important;
   }
 }
+
+/* v0.10.1 • dado 3D com pontos CSS */
+
+.trail-die-cube{
+  transform-style:preserve-3d;
+  perspective:800px;
+}
+.trail-die-dots{
+  position:absolute;
+  inset:18px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  gap:8px;
+  opacity:.28;
+  z-index:1;
+}
+.trail-die-dots i{
+  display:block;
+  width:16px;
+  height:16px;
+  place-self:center;
+  border-radius:50%;
+  background:transparent;
+  box-shadow:none;
+}
+.trail-die-dots i.on{
+  background:currentColor;
+  box-shadow:
+    inset 0 2px 2px rgba(255,255,255,.28),
+    0 2px 3px rgba(0,0,0,.18);
+}
+.trail-die-number{
+  z-index:2!important;
+  font-variant-numeric:tabular-nums;
+}
+.trail-die-cube.blue .trail-die-dots{
+  color:#d9efff;
+}
+.trail-die-cube.yellow .trail-die-dots{
+  color:#8f6b00;
+  opacity:.34;
+}
+.trail-die-cube.rolling-a{
+  transform:rotateX(18deg) rotateY(-20deg) rotateZ(12deg) scale(1.07)!important;
+}
+.trail-die-cube.rolling-b{
+  transform:rotateX(-16deg) rotateY(22deg) rotateZ(-10deg) scale(.97)!important;
+}
+.trail-die-cube.stopped{
+  animation:trailDieStop3d .38s cubic-bezier(.2,.9,.2,1.12) both!important;
+}
+@keyframes trailDieStop3d{
+  0%{transform:rotateX(18deg) rotateY(-18deg) rotateZ(9deg) scale(1.24)}
+  55%{transform:rotateX(-5deg) rotateY(6deg) rotateZ(-3deg) scale(1.06)}
+  100%{transform:rotateX(0) rotateY(0) rotateZ(0) scale(1.10)}
+}
+.trail-dice-move-hint{
+  display:block;
+  margin-top:5px;
+  font-size:.78rem;
+  color:#cce9fb;
+  font-weight:700;
+}
