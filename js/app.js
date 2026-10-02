@@ -81,5 +81,10 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
 qs('#btnInstall').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;qs('#btnInstall').hidden=true;});
 function network(){qs('#networkStatus').textContent=navigator.onLine?'● online':'● offline';}
 window.addEventListener('online',network);window.addEventListener('offline',network);network();
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=0.4.0'));
+const gameDialog=qs('#gameDialog');
+const closeGame=()=>{if(gameDialog?.open)gameDialog.close();};
+qs('#closeGameDialog')?.addEventListener('click',closeGame);
+gameDialog?.addEventListener('cancel',e=>{e.preventDefault();closeGame();});
+gameDialog?.addEventListener('click',e=>{if(e.target===gameDialog)closeGame();});
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=0.8.0'));
 render();
