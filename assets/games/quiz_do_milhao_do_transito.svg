@@ -1,43 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="t d">
-<title id="t">Quiz do Milhão do Trânsito</title><desc id="d">Arte vetorial azul com anéis luminosos, sinalização e painel do quiz.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">Show do Milhão do Trânsito</title>
+<desc id="desc">Capa profissional em estilo game show, com anéis azuis, palco, semáforo, placa de velocidade e elementos de educação para o trânsito.</desc>
 <defs>
- <radialGradient id="bg" cx="50%" cy="47%" r="67%"><stop offset="0" stop-color="#1693ff"/><stop offset=".22" stop-color="#0e66d3"/><stop offset=".54" stop-color="#083e93"/><stop offset="1" stop-color="#03183f"/></radialGradient>
- <linearGradient id="road" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#10263d"/><stop offset="1" stop-color="#071526"/></linearGradient>
- <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe589"/><stop offset=".48" stop-color="#f4b740"/><stop offset="1" stop-color="#df8d17"/></linearGradient>
- <filter id="glow"><feGaussianBlur stdDeviation="12" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <radialGradient id="bg" cx="50%" cy="42%" r="74%">
+    <stop offset="0" stop-color="#1796ff"/>
+    <stop offset=".19" stop-color="#0d6bdc"/>
+    <stop offset=".43" stop-color="#08499f"/>
+    <stop offset=".70" stop-color="#042862"/>
+    <stop offset="1" stop-color="#02152f"/>
+  </radialGradient>
+  <linearGradient id="road" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#15293a"/><stop offset="1" stop-color="#06121f"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#fff4ad"/><stop offset=".42" stop-color="#f5c14b"/><stop offset="1" stop-color="#e28b17"/>
+  </linearGradient>
+  <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+    <stop stop-color="#ffffff" stop-opacity=".25"/><stop offset="1" stop-color="#ffffff" stop-opacity=".03"/>
+  </linearGradient>
+  <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur stdDeviation="14" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000" flood-opacity=".36"/>
+  </filter>
+  <pattern id="dots" width="32" height="32" patternUnits="userSpaceOnUse">
+    <circle cx="3" cy="3" r="2" fill="#7ec5ff" opacity=".14"/>
+  </pattern>
 </defs>
+
 <rect width="1600" height="900" fill="url(#bg)"/>
-<g opacity=".8" fill="none" stroke="#2b8cff">
- <circle cx="800" cy="420" r="145" stroke-width="24"/><circle cx="800" cy="420" r="255" stroke-width="33" opacity=".8"/><circle cx="800" cy="420" r="385" stroke-width="45" opacity=".55"/><circle cx="800" cy="420" r="540" stroke-width="58" opacity=".3"/>
+<rect width="1600" height="900" fill="url(#dots)"/>
+
+<!-- refletores -->
+<g opacity=".24">
+  <path d="M120 0 L520 650 L700 650 L350 0Z" fill="#75c6ff"/>
+  <path d="M1480 0 L1080 650 L900 650 L1250 0Z" fill="#75c6ff"/>
 </g>
-<path d="M-80 805 C300 700 520 690 820 770 C1120 850 1340 835 1680 715 L1680 900 L-80 900Z" fill="url(#road)" opacity=".96"/>
-<path d="M70 829 C390 742 570 746 818 813 C1090 887 1320 874 1550 795" fill="none" stroke="#fff" stroke-width="12" stroke-dasharray="62 38" opacity=".9"/>
-<g transform="translate(800 382)" filter="url(#glow)">
- <circle r="168" fill="#05245f" stroke="#3d98ff" stroke-width="14"/>
- <circle r="142" fill="#07377f" stroke="#0c63cf" stroke-width="10"/>
- <text x="0" y="-48" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-weight="900" font-size="42">SHOW</text>
- <text x="0" y="-2" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-weight="900" font-size="34">DO</text>
- <text x="0" y="50" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-weight="900" font-size="50">MILHÃO</text>
- <text x="0" y="88" text-anchor="middle" fill="#bfe0ff" font-family="Arial, sans-serif" font-weight="700" font-size="22" letter-spacing="4">DO TRÂNSITO</text>
+
+<!-- anéis -->
+<g fill="none" stroke-linecap="round">
+  <circle cx="800" cy="388" r="132" stroke="#44a4ff" stroke-width="22" opacity=".95"/>
+  <circle cx="800" cy="388" r="220" stroke="#2788ef" stroke-width="31" opacity=".83"/>
+  <circle cx="800" cy="388" r="324" stroke="#176dca" stroke-width="44" opacity=".62"/>
+  <circle cx="800" cy="388" r="455" stroke="#0b4b9d" stroke-width="58" opacity=".42"/>
+  <circle cx="800" cy="388" r="585" stroke="#0a3a78" stroke-width="72" opacity=".30"/>
 </g>
-<g transform="translate(160 130)">
- <rect width="185" height="370" rx="44" fill="#182a3a" stroke="#dce8f4" stroke-width="8"/>
- <circle cx="92.5" cy="82" r="48" fill="#e3433d"/><circle cx="92.5" cy="185" r="48" fill="#f4b740"/><circle cx="92.5" cy="288" r="48" fill="#33a95b"/>
+
+<!-- logo -->
+<g transform="translate(800 380)" filter="url(#glow)">
+  <circle r="168" fill="#041e52" stroke="#4aa8ff" stroke-width="13"/>
+  <circle r="144" fill="#083b88" stroke="#0e6bda" stroke-width="8"/>
+  <circle r="125" fill="#062c6d" stroke="#2d87df" stroke-width="3"/>
+  <text x="0" y="-54" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="42" font-weight="900">SHOW</text>
+  <text x="0" y="-10" text-anchor="middle" fill="#d7ecff" font-family="Arial,sans-serif" font-size="29" font-weight="900">DO</text>
+  <text x="0" y="44" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="51" font-weight="900">MILHÃO</text>
+  <rect x="-108" y="70" width="216" height="38" rx="19" fill="url(#gold)"/>
+  <text x="0" y="96" text-anchor="middle" fill="#10233b" font-family="Arial,sans-serif" font-size="18" font-weight="900" letter-spacing="2">DO TRÂNSITO</text>
 </g>
-<g transform="translate(1265 125)">
- <circle cx="80" cy="80" r="77" fill="#fff" stroke="#de3c3c" stroke-width="17"/><text x="80" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="68" fill="#15273c">40</text>
+
+<!-- semáforo -->
+<g transform="translate(130 165)" filter="url(#shadow)">
+  <rect width="190" height="390" rx="48" fill="#122538" stroke="#dce9f5" stroke-width="8"/>
+  <rect x="22" y="20" width="146" height="350" rx="35" fill="#071522"/>
+  <circle cx="95" cy="90" r="47" fill="#e33e38"/>
+  <circle cx="95" cy="195" r="47" fill="#f1b736"/>
+  <circle cx="95" cy="300" r="47" fill="#2eaa5f"/>
+  <circle cx="78" cy="73" r="13" fill="#fff" opacity=".25"/>
 </g>
-<g transform="translate(1020 610)">
- <rect width="420" height="170" rx="28" fill="#f7f9fc" stroke="#b7c6d8" stroke-width="6"/>
- <g font-family="Arial,sans-serif" font-weight="900" font-size="30" fill="#103761">
-  <circle cx="54" cy="49" r="29" fill="#0e66d3"/><text x="54" y="59" text-anchor="middle" fill="#fff">A</text><text x="98" y="60">FAIXA</text>
-  <circle cx="54" cy="120" r="29" fill="#0e66d3"/><text x="54" y="130" text-anchor="middle" fill="#fff">B</text><text x="98" y="131">CINTO</text>
- </g>
+
+<!-- placa 40 -->
+<g transform="translate(1280 140)" filter="url(#shadow)">
+  <circle cx="92" cy="92" r="86" fill="#f7f8fb" stroke="#e33f3a" stroke-width="18"/>
+  <circle cx="92" cy="92" r="66" fill="#fff"/>
+  <text x="92" y="114" text-anchor="middle" font-family="Arial,sans-serif" font-size="70" font-weight="900" fill="#17283a">40</text>
 </g>
-<g transform="translate(120 625)">
- <rect width="430" height="108" rx="24" fill="#062350" stroke="#4d92e2" stroke-width="3"/>
- <text x="24" y="46" fill="#9dd3ff" font-family="Arial,sans-serif" font-size="24" font-weight="700">MOBILIZA EDUCA</text>
- <text x="24" y="82" fill="#fff" font-family="Arial,sans-serif" font-size="30" font-weight="900">QUIZ DO MILHÃO</text>
+
+<!-- palco inferior -->
+<path d="M-60 725 C250 625 505 665 760 746 C1030 832 1325 790 1660 655 L1660 900 L-60 900Z" fill="url(#road)"/>
+<path d="M0 785 C300 692 520 713 765 786 C1040 870 1305 823 1585 725" fill="none" stroke="#fff" stroke-width="12" stroke-dasharray="58 38" opacity=".92"/>
+
+<!-- painel A/B -->
+<g transform="translate(1088 555)" filter="url(#shadow)">
+  <rect width="390" height="180" rx="28" fill="#f7f9fc" stroke="#cad6e4" stroke-width="7"/>
+  <rect x="18" y="18" width="354" height="144" rx="20" fill="url(#glass)"/>
+  <circle cx="58" cy="58" r="26" fill="#0e66d3"/><text x="58" y="68" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="900" font-size="28">A</text>
+  <text x="101" y="68" fill="#173853" font-family="Arial,sans-serif" font-weight="900" font-size="28">FAIXA</text>
+  <circle cx="58" cy="122" r="26" fill="#0e66d3"/><text x="58" y="132" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="900" font-size="28">B</text>
+  <text x="101" y="132" fill="#173853" font-family="Arial,sans-serif" font-weight="900" font-size="28">CINTO</text>
 </g>
+
+<!-- selo -->
+<g transform="translate(130 610)" filter="url(#shadow)">
+  <rect width="470" height="116" rx="26" fill="#041e52" stroke="#3789dc" stroke-width="4"/>
+  <text x="28" y="45" fill="#9fd8ff" font-family="Arial,sans-serif" font-size="23" font-weight="700">MOBILIZA EDUCA</text>
+  <text x="28" y="84" fill="#fff" font-family="Arial,sans-serif" font-size="31" font-weight="900">SHOW DO MILHÃO DO TRÂNSITO</text>
+</g>
+
+<!-- brilho superior -->
+<ellipse cx="800" cy="115" rx="520" ry="95" fill="#6bbcff" opacity=".08"/>
 </svg>
