@@ -1,6 +1,6 @@
 {
   "name":"Mobiliza Educa",
-  "short_name":"Mobiliza",
+  "short_name":"Mobiliza Educa",
   "description":"Plataforma aberta de educação para o trânsito.",
   "start_url":"./",
   "scope":"./",
@@ -9,7 +9,6 @@
   "theme_color":"#0f3c66",
   "lang":"pt-BR",
   "icons":[
-    {"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"},
-    {"src":"assets/brand-icon.webp","sizes":"96x96","type":"image/webp","purpose":"any"}
+    {"src":"assets/brand-icon.webp","sizes":"96x96","type":"image/webp","purpose":"any maskable"}
   ]
 }
