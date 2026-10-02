@@ -6,7 +6,7 @@ export const audiences=[
 
 export const games=[
 {id:'quiz',icon:'⚡',title:'Quiz Relâmpago',description:'Perguntas rápidas, pontuação, sequência de acertos e explicações pedagógicas.',tags:['funcional','offline'],ready:true},
-{id:'milhao',icon:'💡',title:'Show do Milhão do Trânsito',description:'Perguntas, cronômetro, pulos, cartas, plateia, ranking e modo telão.',tags:['Windows → Web','prioridade'],ready:false},
+{id:'milhao',icon:'💡',title:'Show do Milhão do Trânsito',description:'Perguntas, cronômetro, pulos, cartas, plateia, progressão e resultado final.',tags:['web','v0.2 alpha'],ready:true},
 {id:'trilha',icon:'🎲',title:'Trilha do Trânsito',description:'Tabuleiro, dado animado, avanço por casas e desafios educativos.',tags:['Windows → Web','multijogador'],ready:false},
 {id:'memoria',icon:'🧠',title:'Jogo da Memória',description:'Associação visual de placas, comportamentos e situações seguras.',tags:['atenção','visual'],ready:false},
 {id:'cidade',icon:'🏙️',title:'Cidade Mirim',description:'Missões em ambiente urbano com papéis de pedestre, ciclista e condutor.',tags:['simulação','missões'],ready:false},
