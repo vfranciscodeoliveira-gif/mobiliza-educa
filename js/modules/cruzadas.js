@@ -1,10 +1,10 @@
 const words=[
-{word:'TRANSITO',clue:'Espaço de convivência e circulação de pessoas e veículos.',row:1,col:2,dir:'H'},
-{word:'RESPEITO',clue:'Valor essencial para uma convivência segura.',row:1,col:3,dir:'V'},
-{word:'SEGURANCA',clue:'Objetivo principal da educação para o trânsito.',row:3,col:3,dir:'H'},
-{word:'PEDESTRE',clue:'Pessoa que se desloca a pé.',row:5,col:2,dir:'H'},
-{word:'CINTO',clue:'Equipamento de proteção obrigatório no veículo.',row:7,col:0,dir:'H'},
-{word:'SEMAFORO',clue:'Sinal luminoso que organiza os fluxos.',row:0,col:11,dir:'V'}
+{word:'TRANSITO',image:'assets/memory/faixa.svg?v=23',clue:'Espaço de convivência e circulação de pessoas e veículos.',row:1,col:2,dir:'H'},
+{word:'RESPEITO',image:'assets/memory/pedestre.svg?v=23',clue:'Valor essencial para uma convivência segura.',row:1,col:3,dir:'V'},
+{word:'SEGURANCA',image:'assets/memory/capacete.svg?v=23',clue:'Objetivo principal da educação para o trânsito.',row:3,col:3,dir:'H'},
+{word:'PEDESTRE',image:'assets/memory/pedestre.svg?v=23',clue:'Pessoa que se desloca a pé.',row:5,col:2,dir:'H'},
+{word:'CINTO',image:'assets/memory/cinto.svg?v=23',clue:'Equipamento de proteção obrigatório no veículo.',row:7,col:0,dir:'H'},
+{word:'SEMAFORO',image:'assets/memory/semaforo.svg?v=23',clue:'Sinal luminoso que organiza os fluxos.',row:0,col:11,dir:'V'}
 ];
 const clean=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z]/g,'');
 export function openCruzadas(dialog,host,onFinish){
@@ -12,8 +12,8 @@ export function openCruzadas(dialog,host,onFinish){
  const cells=new Map(),starts=new Map();
  words.forEach((w,wi)=>{[...w.word].forEach((ch,i)=>{const r=w.row+(w.dir==='V'?i:0),c=w.col+(w.dir==='H'?i:0),k=`${r}-${c}`;if(!cells.has(k))cells.set(k,{r,c,letter:ch,words:[]});cells.get(k).words.push(wi);});starts.set(`${w.row}-${w.col}`,wi+1);});
  const grid=()=>{let html='';for(let r=0;r<8;r++)for(let c=0;c<12;c++){const k=`${r}-${c}`,cell=cells.get(k);html+=cell?`<label class="cw-cell" data-cell="${k}">${starts.has(k)?`<span>${starts.get(k)}</span>`:''}<input maxlength="1" inputmode="text" autocomplete="off" aria-label="Linha ${r+1}, coluna ${c+1}" data-r="${r}" data-c="${c}"></label>`:`<span class="cw-cell block"></span>`;}return html;};
- const clueList=()=>words.map((w,i)=>`<button type="button" class="cw-clue ${solved.has(i)?'solved':''}" data-clue="${i}"><span>${i+1}</span><div><strong>${w.dir==='H'?'Horizontal':'Vertical'}</strong><p>${w.clue}</p></div><b>${solved.has(i)?'✓':'Conferir'}</b></button>`).join('');
- const render=()=>{host.innerHTML=`<section class="game crossword-game"><div class="crossword-hero"><img src="assets/games/palavras_cruzadas_do_transito.webp?v=8" alt=""><div><p class="eyebrow">PALAVRAS CRUZADAS DO TRÂNSITO</p><h2>Complete a grade pelas pistas</h2><p>Cada letra correta ajuda a formar outras palavras.</p></div></div><div class="crossword-layout"><div class="crossword-board" id="cwBoard">${grid()}</div><div class="crossword-clues">${clueList()}</div></div><div class="game-score crossword-score"><span>Concluídas: <strong id="crossCount">${solved.size}/${words.length}</strong></span><span>Tentativas: <strong id="crossAttempts">${attempts}</strong></span><button type="button" class="btn ghost" id="crossHelp">💡 Mostrar uma letra</button></div></section>`;
+ const clueList=()=>words.map((w,i)=>`<button type="button" class="cw-clue ${solved.has(i)?'solved':''}" data-clue="${i}"><span>${i+1}</span><img class="cw-clue-thumb" src="${w.image}" alt=""><div><strong>${w.dir==='H'?'Horizontal':'Vertical'}</strong><p>${w.clue}</p></div><b>${solved.has(i)?'✓':'Conferir'}</b></button>`).join('');
+ const render=()=>{host.innerHTML=`<section class="game crossword-game"><div class="crossword-hero"><img src="assets/games/palavras_cruzadas_do_transito.svg?v=23" alt=""><div><p class="eyebrow">PALAVRAS CRUZADAS DO TRÂNSITO</p><h2>Complete a grade pelas pistas</h2><p>Cada letra correta ajuda a formar outras palavras.</p></div></div><div class="crossword-layout"><div class="crossword-board" id="cwBoard">${grid()}</div><div class="crossword-clues">${clueList()}</div></div><div class="game-score crossword-score"><span>Concluídas: <strong id="crossCount">${solved.size}/${words.length}</strong></span><span>Tentativas: <strong id="crossAttempts">${attempts}</strong></span><button type="button" class="btn ghost" id="crossHelp">💡 Mostrar uma letra</button></div></section>`;
   host.querySelectorAll('.cw-cell input').forEach(inp=>{inp.addEventListener('input',()=>{inp.value=clean(inp.value).slice(-1);if(inp.value){const all=[...host.querySelectorAll('.cw-cell input')],idx=all.indexOf(inp);all[idx+1]?.focus();}});inp.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!inp.value){const all=[...host.querySelectorAll('.cw-cell input')],idx=all.indexOf(inp);all[idx-1]?.focus();}});});
   host.querySelectorAll('[data-clue]').forEach(b=>b.onclick=()=>check(+b.dataset.clue));
   host.querySelector('#crossHelp').onclick=help;
