@@ -2,13 +2,13 @@ const BOARD_SIZE=24;
 const COLS=6;
 
 const SPECIALS={
-  4:{icon:'🚦',image:'assets/memory/semaforo.svg?v=24',label:'Semáforo',title:'Atenção no amarelo',message:'Boa conduta no semáforo. Avance 1 casa.',delta:1,tone:'good'},
-  7:{icon:'🚶',image:'assets/memory/pedestre.svg?v=24',label:'Pedestre',title:'Faixa respeitada',message:'Você deu preferência ao pedestre. Avance 2 casas.',delta:2,tone:'good'},
-  10:{icon:'📵',image:'assets/memory/celular.svg?v=24',label:'Celular',title:'Distração ao volante',message:'Usar o celular tira a atenção da via. Volte 2 casas.',delta:-2,tone:'bad'},
-  13:{icon:'🚲',image:'assets/memory/bicicleta.svg?v=24',label:'Ciclista',title:'Convivência segura',message:'Você manteve distância segura do ciclista. Avance 2 casas.',delta:2,tone:'good'},
-  16:{icon:'🛡️',image:'assets/memory/cinto.svg?v=24',label:'Cinto',title:'Proteção para todos',message:'Todos estão usando cinto de segurança. Avance 1 casa.',delta:1,tone:'good'},
-  19:{icon:'⚠️',image:'assets/memory/velocidade.svg?v=24',label:'Velocidade',title:'Excesso de velocidade',message:'Velocidade incompatível aumenta o risco. Volte 3 casas.',delta:-3,tone:'bad'},
-  21:{icon:'🚸',image:'assets/memory/escola.svg?v=24',label:'Escola',title:'Área escolar',message:'Você reduziu a velocidade e redobrou a atenção. Avance 1 casa.',delta:1,tone:'good'}
+  4:{icon:'🚦',image:'assets/memory/semaforo.svg?v=31',label:'Semáforo',title:'Atenção no amarelo',message:'Boa conduta no semáforo. Avance 1 casa.',delta:1,tone:'good'},
+  7:{icon:'🚶',image:'assets/memory/pedestre.svg?v=31',label:'Pedestre',title:'Faixa respeitada',message:'Você deu preferência ao pedestre. Avance 2 casas.',delta:2,tone:'good'},
+  10:{icon:'📵',image:'assets/memory/celular.svg?v=31',label:'Celular',title:'Distração ao volante',message:'Usar o celular tira a atenção da via. Volte 2 casas.',delta:-2,tone:'bad'},
+  13:{icon:'🚲',image:'assets/memory/bicicleta.svg?v=31',label:'Ciclista',title:'Convivência segura',message:'Você manteve distância segura do ciclista. Avance 2 casas.',delta:2,tone:'good'},
+  16:{icon:'🛡️',image:'assets/memory/cinto.svg?v=31',label:'Cinto',title:'Proteção para todos',message:'Todos estão usando cinto de segurança. Avance 1 casa.',delta:1,tone:'good'},
+  19:{icon:'⚠️',image:'assets/memory/velocidade.svg?v=31',label:'Velocidade',title:'Excesso de velocidade',message:'Velocidade incompatível aumenta o risco. Volte 3 casas.',delta:-3,tone:'bad'},
+  21:{icon:'🚸',image:'assets/memory/escola.svg?v=31',label:'Escola',title:'Área escolar',message:'Você reduziu a velocidade e redobrou a atenção. Avance 1 casa.',delta:1,tone:'good'}
 };
 
 const BONUS_HOUSES=new Set([3,8,12,18,22]);
@@ -39,8 +39,8 @@ function saveResult(score){
 }
 
 export function openTrilha(dialog,host,onFinish){
-  dialog.classList.add('trail-v29-dialog');
-  dialog.addEventListener('close',()=>dialog.classList.remove('trail-v29-dialog'),{once:true});
+  dialog.classList.add('trail-v31-dialog');
+  dialog.addEventListener('close',()=>dialog.classList.remove('trail-v31-dialog'),{once:true});
   let players=[
     {name:'Azul',pos:0,color:'blue'},
     {name:'Amarelo',pos:0,color:'yellow'}
@@ -56,6 +56,19 @@ export function openTrilha(dialog,host,onFinish){
   let qCursor=0;
 
   const current=()=>players[turn];
+
+  // A trilha precisa recalcular o zigue-zague conforme a quantidade real
+  // de colunas. Desktop usa 6; celular vertical usa 3.
+  const boardCols=()=>window.matchMedia('(max-width:760px)').matches?3:COLS;
+  const visualOrder=(index,cols=boardCols())=>{
+    const row=Math.floor(index/cols);
+    const col=index%cols;
+    return row%2===0 ? row*cols+col : row*cols+(cols-1-col);
+  };
+  const directionFor=(index,cols=boardCols())=>{
+    const row=Math.floor(index/cols);
+    return row%2===0?'→':'←';
+  };
 
   const ensureAudio=()=>{
     if(!soundOn)return null;
@@ -95,12 +108,6 @@ export function openTrilha(dialog,host,onFinish){
     win:()=>{tone(523,.10,0,'triangle',.05);tone(659,.10,.10,'triangle',.05);tone(784,.10,.20,'triangle',.05);tone(1046,.28,.30,'triangle',.06);}
   };
 
-  const visualOrder=index=>{
-    const row=Math.floor(index/COLS);
-    const col=index%COLS;
-    return row%2===0 ? row*COLS+col : row*COLS+(COLS-1-col);
-  };
-
   const pawnHtml=p=>`<span class="trail-pawn ${p.color}" title="${p.name}" aria-label="${p.name}"></span>`;
 
   const cellLabel=i=>{
@@ -109,13 +116,14 @@ export function openTrilha(dialog,host,onFinish){
     return String(i+1);
   };
 
-  const drawBoard=()=>Array.from({length:BOARD_SIZE},(_,i)=>{
+  const drawBoard=()=>{
+    const cols=boardCols();
+    return Array.from({length:BOARD_SIZE},(_,i)=>{
     const here=players.filter(p=>p.pos===i);
     const sp=SPECIALS[i];
     const bonus=BONUS_HOUSES.has(i);
-    const row=Math.floor(i/COLS);
-    const direction=row%2===0?'→':'←';
-    return `<div class="trail-cell ${i===0?'start':''} ${i===BOARD_SIZE-1?'finish':''} ${sp?'special':''} ${bonus?'quiz-house':''}" data-cell="${i}" style="order:${visualOrder(i)}">
+    const direction=directionFor(i,cols);
+    return `<div class="trail-cell ${i===0?'start':''} ${i===BOARD_SIZE-1?'finish':''} ${sp?'special':''} ${bonus?'quiz-house':''}" data-cell="${i}" style="order:${visualOrder(i,cols)}" data-step="${i+1}">
       <div class="trail-cell-top">
         <span class="trail-cell-no">${cellLabel(i)}</span>
         ${i!==BOARD_SIZE-1&&i!==0?`<span class="trail-direction" aria-hidden="true">${direction}</span>`:''}
@@ -124,6 +132,7 @@ export function openTrilha(dialog,host,onFinish){
       <div class="trail-pawns">${here.map(pawnHtml).join('')}</div>
     </div>`;
   }).join('');
+  };
 
   const playerStatus=()=>players.map((p,i)=>{
     const percent=Math.round((p.pos/(BOARD_SIZE-1))*100);
@@ -134,10 +143,58 @@ export function openTrilha(dialog,host,onFinish){
     </div>`;
   }).join('');
 
+  const applyBoardLayout=()=>{
+    const cols=boardCols();
+    const board=host.querySelector('#trailBoard');
+    if(board)board.dataset.cols=String(cols);
+
+    host.querySelectorAll('.trail-cell').forEach(el=>{
+      const index=Number(el.dataset.cell);
+      if(!Number.isFinite(index))return;
+      el.style.order=String(visualOrder(index,cols));
+      const arrow=el.querySelector('.trail-direction');
+      if(arrow)arrow.textContent=directionFor(index,cols);
+    });
+  };
+
+  const focusCurrentCell=(smooth=true)=>{
+    const wrap=host.querySelector('.trail-board-wrap');
+    const cell=host.querySelector(`[data-cell="${current().pos}"]`);
+    if(!wrap||!cell)return;
+
+    host.querySelectorAll('.trail-cell').forEach(el=>el.classList.remove('occupied-current'));
+    cell.classList.add('occupied-current');
+
+    if(window.matchMedia('(max-width:760px)').matches){
+      if(current().pos===0){
+        wrap.scrollTo({top:0,behavior:smooth?'smooth':'auto'});
+        return;
+      }
+      const target=Math.max(0,cell.offsetTop-(wrap.clientHeight/2)+(cell.clientHeight/2));
+      wrap.scrollTo({top:target,behavior:smooth?'smooth':'auto'});
+    }
+  };
+
+  let lastResponsiveCols=boardCols();
+  let resizeTimer=null;
+  const onTrailResize=()=>{
+    clearTimeout(resizeTimer);
+    resizeTimer=setTimeout(()=>{
+      const cols=boardCols();
+      if(cols!==lastResponsiveCols){
+        lastResponsiveCols=cols;
+        applyBoardLayout();
+        focusCurrentCell(false);
+      }
+    },80);
+  };
+  window.addEventListener('resize',onTrailResize,{passive:true});
+  dialog.addEventListener('close',()=>window.removeEventListener('resize',onTrailResize),{once:true});
+
   const render=()=>{
-    host.innerHTML=`<section class="game trail-game trail-v18 trail-v29">
+    host.innerHTML=`<section class="game trail-game trail-v18 trail-v31">
       <div class="trail-hero">
-        <img src="assets/games/trilha_do_transito_agentes_mirins.svg?v=29" alt="Trilha do Trânsito">
+        <img src="assets/games/trilha_do_transito_agentes_mirins.svg?v=31" alt="Trilha do Trânsito">
         <div>
           <p class="eyebrow">TRILHA DO TRÂNSITO</p>
           <h2>Corrida pela segurança</h2>
@@ -188,8 +245,12 @@ export function openTrilha(dialog,host,onFinish){
       localStorage.setItem('mobiliza.trilha.sound',soundOn?'1':'0');
       if(soundOn){ensureAudio();sounds.click();}
       render();
-      host.querySelector(`[data-cell="${current().pos}"]`)?.classList.add('occupied-current');
+      applyBoardLayout();
+      focusCurrentCell(false);
     };
+
+    applyBoardLayout();
+    requestAnimationFrame(()=>focusCurrentCell(false));
   };
 
   const repaint=()=>{
@@ -198,12 +259,8 @@ export function openTrilha(dialog,host,onFinish){
       const box=host.querySelector(`[data-cell="${p.pos}"] .trail-pawns`);
       if(box)box.insertAdjacentHTML('beforeend',pawnHtml(p));
     });
-    host.querySelectorAll('.trail-cell').forEach(el=>el.classList.remove('occupied-current'));
-    const currentCell=host.querySelector(`[data-cell="${current().pos}"]`);
-    currentCell?.classList.add('occupied-current');
-    if(window.matchMedia('(max-width:760px)').matches){
-      currentCell?.scrollIntoView({block:'nearest',behavior:'smooth'});
-    }
+    applyBoardLayout();
+    focusCurrentCell(true);
   };
 
   const overlay=(html,extra='')=>{
@@ -492,7 +549,7 @@ export function openTrilha(dialog,host,onFinish){
     onFinish?.();
 
     host.innerHTML=`<section class="game trail-result trail-v18">
-      <img class="trail-result-cover" src="assets/games/trilha_do_transito_agentes_mirins.svg?v=29" alt="">
+      <img class="trail-result-cover" src="assets/games/trilha_do_transito_agentes_mirins.svg?v=31" alt="">
       <div class="result-trophy">🏁</div>
       <p class="eyebrow">CHEGADA!</p>
       <h2><span class="trail-pawn ${p.color}"></span> ${p.name} venceu a Trilha do Trânsito!</h2>
