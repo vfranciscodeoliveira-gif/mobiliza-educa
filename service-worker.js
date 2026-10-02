@@ -1,4 +1,4 @@
-const CACHE='mobiliza-educa-v0.10.9';
+const CACHE='mobiliza-educa-v0.11.0';
 const ASSETS=[
  './','./index.html','./assets/app.css?v=24','./assets/showcase.css?v=14',
  './assets/icon.svg','./assets/mobiliza_educa_caminhos_para_a_vida.webp','./assets/icon-32.webp','./assets/icon-192.webp','./assets/brand-cover.webp',
@@ -7,8 +7,8 @@ const ASSETS=[
  './assets/games/jogo_da_memoria_mobiliza_educa.svg',
  './assets/games/palavras_cruzadas_do_transito.svg',
  './assets/memory/pare.svg','./assets/memory/semaforo.svg','./assets/memory/pedestre.svg','./assets/memory/bicicleta.svg','./assets/memory/cinto.svg','./assets/memory/celular.svg','./assets/memory/velocidade.svg','./assets/memory/escola.svg','./assets/memory/capacete.svg','./assets/memory/faixa.svg',
- './js/app.js?v=27','./js/content.js?v=24','./js/modules/quiz.js?v=24','./js/modules/milhao.js?v=14',
- './js/modules/trilha.js?v=24','./js/modules/memoria.js?v=27','./js/modules/cruzadas.js?v=24',
+ './js/app.js?v=28','./js/content.js?v=24','./js/modules/quiz.js?v=24','./js/modules/milhao.js?v=14',
+ './js/modules/trilha.js?v=24','./js/modules/memoria.js?v=27','./js/modules/cruzadas.js?v=28',
  './js/modules/admin.js','./js/modules/auth.js','./js/modules/notifications.js','./manifest.webmanifest'
 ];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
