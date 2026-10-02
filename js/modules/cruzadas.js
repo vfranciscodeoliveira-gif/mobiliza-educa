@@ -604,6 +604,83 @@ function ensureCrosswordV30Styles(){
     .crossword-v30 .cross-board-panel{min-height:430px!important}
     .crossword-v30 .cross-side{min-height:520px!important}
     .crossword-v30 .cross-footer{height:auto!important;grid-template-columns:1fr!important;margin-top:7px!important}
+
+    /* Resultado final realmente responsivo no celular */
+    .crossword-result-v30{
+      height:auto!important;
+      min-height:0!important;
+      max-height:none!important;
+      overflow:visible!important;
+      grid-template-rows:auto!important;
+      padding:10px!important;
+      gap:8px!important;
+    }
+    .crossword-result-v30 .cross-result-hero{
+      grid-template-columns:92px minmax(0,1fr) 48px!important;
+      gap:8px!important;
+      padding:8px!important;
+      border-radius:14px!important;
+    }
+    .crossword-result-v30 .cross-result-hero img{
+      width:92px!important;
+      height:62px!important;
+      border-radius:9px!important;
+    }
+    .crossword-result-v30 .cross-result-hero h2{
+      font-size:1.05rem!important;
+      line-height:1.05!important;
+    }
+    .crossword-result-v30 .cross-result-trophy{
+      width:46px!important;
+      height:46px!important;
+      font-size:1.45rem!important;
+    }
+    .crossword-result-v30 .cross-result-stats{
+      grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      gap:6px!important;
+    }
+    .crossword-result-v30 .cross-result-stat{
+      min-width:0!important;
+      padding:7px 9px!important;
+    }
+    .crossword-result-v30 .cross-result-stat span{
+      font-size:.58rem!important;
+    }
+    .crossword-result-v30 .cross-result-stat strong{
+      font-size:.88rem!important;
+    }
+    .crossword-result-v30 .cross-result-body{
+      overflow:visible!important;
+      grid-template-columns:1fr!important;
+      gap:6px!important;
+      padding:6px!important;
+    }
+    .crossword-result-v30 .cross-result-word{
+      grid-template-columns:58px minmax(0,1fr)!important;
+      min-width:0!important;
+      padding:6px!important;
+    }
+    .crossword-result-v30 .cross-result-word img{
+      width:58px!important;
+      height:44px!important;
+    }
+    .crossword-result-v30 .cross-result-word strong{
+      font-size:.64rem!important;
+    }
+    .crossword-result-v30 .cross-result-word small{
+      font-size:.48rem!important;
+    }
+    .crossword-result-v30 .cross-result-actions{
+      display:grid!important;
+      grid-template-columns:1fr 1fr!important;
+      gap:7px!important;
+    }
+    .crossword-result-v30 .cross-result-actions .btn{
+      min-width:0!important;
+      width:100%!important;
+      padding:8px!important;
+      font-size:.72rem!important;
+    }
   }`;
   document.head.appendChild(style);
 }
