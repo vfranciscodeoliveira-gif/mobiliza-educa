@@ -35,6 +35,7 @@
     <button class="nav-item" data-view="educador">👩‍🏫 Educador</button>
     <button class="nav-item" data-view="eventos">📅 Eventos</button>
     <button class="nav-item" data-view="resultados">🏆 Resultados</button>
+    <button class="nav-item" data-view="gestao">🛠️ Gestão</button>
   </nav>
 
   <main id="conteudo" tabindex="-1">
@@ -104,6 +105,27 @@
       <div class="callout card"><strong>Próxima entrega</strong><p>Cadastro de evento, turmas, participantes, check-in por QR Code e modo telão sincronizado.</p></div>
     </section>
 
+    <section id="view-gestao" class="view" aria-labelledby="gestao-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">CENTRO DE GESTÃO WEB</p>
+          <h2 id="gestao-title">Administração completa do Mobiliza Educa</h2>
+          <p>O núcleo administrativo do Windows está sendo reorganizado para web com menos telas soltas, mais contexto e operação guiada.</p>
+        </div>
+      </div>
+      <div class="admin-summary card">
+        <div><span>Ambiente</span><strong>Local / demonstração</strong></div>
+        <div><span>Perfil</span><strong>Administrador</strong></div>
+        <div><span>Dados</span><strong>Armazenamento local</strong></div>
+        <div><span>Sincronização</span><strong>Backend futuro</strong></div>
+      </div>
+      <div id="adminGrid" class="admin-grid"></div>
+      <div class="callout card">
+        <strong>Estratégia de migração</strong>
+        <p>Cada módulo administrativo será ativado primeiro com fluxo e interface web; depois conectaremos persistência, autenticação, permissões, relatórios e sincronização institucional.</p>
+      </div>
+    </section>
+
     <section id="view-resultados" class="view" aria-labelledby="resultados-title">
       <div class="section-heading"><div><p class="eyebrow">IMPACTO</p><h2 id="resultados-title">Resultados que contam uma história</h2></div></div>
       <div class="stats-grid">
@@ -116,6 +138,13 @@
     </section>
   </main>
 
+  <dialog id="adminDialog">
+    <form method="dialog" class="dialog-shell admin-dialog-shell">
+      <button class="dialog-close" aria-label="Fechar">×</button>
+      <div id="adminHost"></div>
+    </form>
+  </dialog>
+
   <dialog id="gameDialog">
     <form method="dialog" class="dialog-shell">
       <button class="dialog-close" aria-label="Fechar">×</button>
@@ -123,7 +152,7 @@
     </form>
   </dialog>
 
-  <footer><span>Mobiliza Educa • versão web 0.1</span><span id="networkStatus">● online</span></footer>
+  <footer><span>Mobiliza Educa • versão web 0.2</span><span id="networkStatus">● online</span></footer>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
