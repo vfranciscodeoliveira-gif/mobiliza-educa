@@ -70,7 +70,7 @@ export function openTrilha(dialog,host,onFinish){
         <span class="trail-cell-no">${cellLabel(i)}</span>
         ${i!==BOARD_SIZE-1&&i!==0?`<span class="trail-direction" aria-hidden="true">${direction}</span>`:''}
       </div>
-      ${sp?`<div class="trail-special"><em>${sp.icon}</em><small>${sp.label}</small></div>`:quiz?'<div class="trail-special"><em>❓</em><small>DESAFIO</small></div>':''}
+      ${i===0?'<div class="trail-special trail-start-mark"><em>🚦</em><small>LARGADA</small></div>':i===BOARD_SIZE-1?'<div class="trail-special trail-finish-mark"><em>🏁</em><small>CHEGADA</small></div>':sp?`<div class="trail-special"><em>${sp.icon}</em><small>${sp.label}</small></div>`:quiz?'<div class="trail-special"><em>❓</em><small>DESAFIO</small></div>':''}
       <div class="trail-pawns">${here.map(pawnHtml).join('')}</div>
     </div>`;
   }).join('');
@@ -114,7 +114,8 @@ export function openTrilha(dialog,host,onFinish){
 
       <div class="trail-controls">
         <div class="trail-tip">
-          <strong>Objetivo:</strong> chegue à casa ${BOARD_SIZE} antes do adversário.
+          <span class="trail-route-icon">🛣️</span>
+          <div><strong>Objetivo:</strong> chegue à casa ${BOARD_SIZE} antes do adversário.<small>Siga as setas do percurso e atenção às casas especiais.</small></div>
         </div>
         <button type="button" class="btn primary big trail-roll-button" id="rollDice">🎲 JOGAR DADO</button>
       </div>
