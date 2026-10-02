@@ -1,12 +1,12 @@
-const CACHE='mobiliza-educa-v0.9.5';
+const CACHE='mobiliza-educa-v0.9.6';
 const ASSETS=[
- './','./index.html','./assets/app.css?v=13','./assets/showcase.css?v=13',
+ './','./index.html','./assets/app.css?v=14','./assets/showcase.css?v=14',
  './assets/icon.svg','./assets/mobiliza_educa_caminhos_para_a_vida.webp','./assets/icon-32.webp','./assets/icon-192.webp','./assets/brand-cover.webp',
  './assets/games/quiz_do_milhao_do_transito.svg',
  './assets/games/trilha_do_transito_agentes_mirins.svg',
  './assets/games/jogo_da_memoria_mobiliza_educa.svg',
  './assets/games/palavras_cruzadas_do_transito.svg',
- './js/app.js?v=13','./js/content.js?v=13','./js/modules/quiz.js','./js/modules/milhao.js?v=13',
+ './js/app.js?v=14','./js/content.js?v=14','./js/modules/quiz.js','./js/modules/milhao.js?v=14',
  './js/modules/trilha.js','./js/modules/memoria.js','./js/modules/cruzadas.js',
  './js/modules/admin.js','./js/modules/auth.js','./js/modules/notifications.js','./manifest.webmanifest'
 ];
