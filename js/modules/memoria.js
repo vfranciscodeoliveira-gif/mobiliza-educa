@@ -147,7 +147,7 @@ export function openMemoria(dialog,host,onFinish){
 
   let level=localStorage.getItem('mobiliza.memoria.level')||'medium';
   if(!LEVELS[level])level='medium';
-  let deck=[],opened=[],matched=new Set(),moves=0,start=Date.now(),timerId=null,lock=false,finished=false;
+  let deck=[],firstCard=null,secondCard=null,matched=new Set(),moves=0,start=Date.now(),timerId=null,lock=false,finished=false;
   let soundOn=localStorage.getItem('mobiliza.memoria.sound')!=='0';
   let audioCtx=null;
 
@@ -192,8 +192,8 @@ export function openMemoria(dialog,host,onFinish){
       cards.push({uid:`${p.key}-a-${idx}-${Math.random()}`,key:p.key,pair:p});
       cards.push({uid:`${p.key}-b-${idx}-${Math.random()}`,key:p.key,pair:p});
     });
-    deck=shuffle(cards).map((c,index)=>({...c,number:index+1}));
-    opened=[];matched=new Set();moves=0;lock=false;finished=false;start=Date.now();
+    deck=shuffle(cards).map((c,index)=>({...c,index,number:index+1,state:'closed'}));
+    firstCard=null;secondCard=null;matched=new Set();moves=0;lock=false;finished=false;start=Date.now();
   };
 
   const bestText=()=>{
@@ -228,10 +228,10 @@ export function openMemoria(dialog,host,onFinish){
 
       <div class="memory-board-wrap">
         <div class="memory-grid" id="memoryGrid">
-          ${deck.map(c=>`<button type="button" class="memory-card ${matched.has(c.uid)?'matched open':''}" data-card="${c.uid}" aria-label="Carta ${c.number}">
+          ${deck.map(c=>`<button type="button" class="memory-card ${c.state==='matched'?'matched open':c.state==='open'?'open':''}" data-card-index="${c.index}" aria-label="Carta ${c.number}">
             <span class="memory-card-inner">
               <span class="memory-back"><b class="memory-card-no">${c.number}</b><small>CARTA</small></span>
-              <span class="memory-front"><img src="${c.pair.image}" alt="${c.pair.title}"><strong>${c.pair.title}</strong></span>
+              <span class="memory-front"><img src="${c.pair.image}" alt="${c.pair.title}" onerror="this.style.display='none'"><strong>${c.pair.title}</strong></span>
             </span>
           </button>`).join('')}
         </div>
@@ -246,7 +246,7 @@ export function openMemoria(dialog,host,onFinish){
       <div id="memoryOverlay" class="memory-overlay"></div>
     </section>`;
 
-    host.querySelectorAll('[data-card]').forEach(btn=>btn.onclick=e=>{e.preventDefault();flip(btn.dataset.card);});
+    host.querySelectorAll('[data-card-index]').forEach(btn=>btn.onclick=e=>{e.preventDefault();flip(Number(btn.dataset.cardIndex));});
     host.querySelectorAll('[data-level]').forEach(btn=>btn.onclick=()=>changeLevel(btn.dataset.level));
     host.querySelector('#memorySound').onclick=()=>{soundOn=!soundOn;localStorage.setItem('mobiliza.memoria.sound',soundOn?'1':'0');if(soundOn){ensureAudio();sounds.click();}render();};
     host.querySelector('#memoryRules').onclick=showRules;
@@ -287,28 +287,72 @@ export function openMemoria(dialog,host,onFinish){
     setTimeout(()=>{if(t)t.className='memory-toast';},ok?1700:950);
   };
 
-  const flip=async uid=>{
-    if(lock||finished||matched.has(uid)||opened.includes(uid))return;
-    ensureAudio();sounds.flip();
-    const card=deck.find(c=>c.uid===uid);if(!card)return;
-    const el=host.querySelector(`[data-card="${uid}"]`);if(!el)return;
-    el.classList.add('open');opened.push(uid);
-    if(opened.length<2)return;
+  const flip=async index=>{
+    if(lock||finished)return;
 
-    lock=true;moves++;updateHud();
-    const [a,b]=opened.map(x=>deck.find(c=>c.uid===x));
-    if(a.key===b.key){
-      matched.add(a.uid);matched.add(b.uid);
-      host.querySelector(`[data-card="${a.uid}"]`)?.classList.add('matched');
-      host.querySelector(`[data-card="${b.uid}"]`)?.classList.add('matched');
-      opened=[];sounds.match();showToast(a.pair,true);lock=false;updateHud();
-      if(matched.size===deck.length){await sleep(850);finish();}
-    }else{
-      sounds.miss();showToast(a.pair,false);
-      await sleep(900);
-      opened.forEach(x=>host.querySelector(`[data-card="${x}"]`)?.classList.remove('open'));
-      opened=[];lock=false;
+    const card=deck[index];
+    if(!card||card.state==='matched'||card.state==='open')return;
+
+    ensureAudio();
+    sounds.flip();
+
+    const el=host.querySelector(`[data-card-index="${index}"]`);
+    if(!el)return;
+
+    card.state='open';
+    el.classList.add('open');
+
+    if(firstCard===null){
+      firstCard=index;
+      return;
     }
+
+    secondCard=index;
+    lock=true;
+    moves++;
+    updateHud();
+
+    const a=deck[firstCard];
+    const b=deck[secondCard];
+    const aEl=host.querySelector(`[data-card-index="${firstCard}"]`);
+    const bEl=host.querySelector(`[data-card-index="${secondCard}"]`);
+
+    if(a&&b&&a.key===b.key&&firstCard!==secondCard){
+      a.state='matched';
+      b.state='matched';
+      matched.add(firstCard);
+      matched.add(secondCard);
+      aEl?.classList.add('matched','open');
+      bEl?.classList.add('matched','open');
+
+      sounds.match();
+      showToast(a.pair,true);
+
+      firstCard=null;
+      secondCard=null;
+      lock=false;
+      updateHud();
+
+      if(matched.size===deck.length){
+        await sleep(850);
+        finish();
+      }
+      return;
+    }
+
+    sounds.miss();
+    showToast(a?.pair||b?.pair,false);
+
+    await sleep(1050);
+
+    if(a)a.state='closed';
+    if(b)b.state='closed';
+    aEl?.classList.remove('open');
+    bEl?.classList.remove('open');
+
+    firstCard=null;
+    secondCard=null;
+    lock=false;
   };
 
   const changeLevel=newLevel=>{
