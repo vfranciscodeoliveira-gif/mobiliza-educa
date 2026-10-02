@@ -1,0 +1,69 @@
+import { games, audiences, learning, educatorModules, tips } from './content.js';
+import { openQuiz } from './modules/quiz.js';
+
+const qs = s => document.querySelector(s);
+const qsa = s => [...document.querySelectorAll(s)];
+let deferredPrompt = null;
+
+const moduleCard = (item, actionLabel='Abrir') => `
+  <article class="module-card card">
+    <div class="module-icon" aria-hidden="true">${item.icon}</div>
+    <h3>${item.title}</h3>
+    <p>${item.description}</p>
+    <div class="module-meta">${(item.tags||[]).map(t=>`<span class="chip">${t}</span>`).join('')}</div>
+    <button class="btn ${item.ready ? 'primary':'ghost'}" data-module="${item.id}" ${item.disabled?'disabled':''}>${item.ready ? actionLabel : 'Em evolução'}</button>
+  </article>`;
+
+function render(){
+  qs('#audienceGrid').innerHTML = audiences.map(x=>moduleCard(x,'Explorar')).join('');
+  qs('#gameGrid').innerHTML = games.map(x=>moduleCard(x,'Jogar agora')).join('');
+  qs('#learningGrid').innerHTML = learning.map(x=>moduleCard(x,'Começar')).join('');
+  qs('#educatorGrid').innerHTML = educatorModules.map(x=>moduleCard(x,'Abrir módulo')).join('');
+  bindModuleButtons();
+  showTip(0);
+  updateResults();
+}
+
+function navigate(view){
+  qsa('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${view}`));
+  qsa('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  qs('#conteudo').focus();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function bindModuleButtons(){
+  qsa('[data-module]').forEach(btn=>btn.addEventListener('click',()=>{
+    if(btn.dataset.module==='quiz') openQuiz(qs('#gameDialog'), qs('#gameHost'), updateResults);
+    else if(!btn.disabled) alert('Este módulo já está reservado na arquitetura e será ativado nas próximas entregas.');
+  }));
+}
+
+let tipIndex=0;
+function showTip(index){
+  tipIndex=index%tips.length;
+  qs('#tipTitle').textContent=tips[tipIndex].title;
+  qs('#tipText').textContent=tips[tipIndex].text;
+}
+
+function updateResults(){
+  const s=JSON.parse(localStorage.getItem('mobiliza.results')||'{"games":0,"correct":0,"answers":0,"best":0,"streak":0}');
+  qs('#localPartidas').textContent=s.games||0;
+  qs('#localAcertos').textContent=s.answers?`${Math.round((s.correct/s.answers)*100)}%`:'0%';
+  qs('#localRecorde').textContent=s.best||0;
+  qs('#localStreak').textContent=s.streak||0;
+}
+
+qsa('.nav-item').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.view)));
+qsa('[data-go]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.go)));
+qs('#nextTip').addEventListener('click',()=>showTip(tipIndex+1));
+qs('#btnContrast').addEventListener('click',()=>document.documentElement.classList.toggle('high-contrast'));
+qs('#btnFont').addEventListener('click',()=>document.documentElement.classList.toggle('large-text'));
+
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;qs('#btnInstall').hidden=false;});
+qs('#btnInstall').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;qs('#btnInstall').hidden=true;});
+
+function network(){qs('#networkStatus').textContent=navigator.onLine?'● online':'● offline';}
+window.addEventListener('online',network);window.addEventListener('offline',network);network();
+
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js'));
+render();
