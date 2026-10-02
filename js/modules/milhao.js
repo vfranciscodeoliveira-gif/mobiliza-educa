@@ -86,7 +86,7 @@ export function openMilhao(dialog,host,onFinish){
  };
  const playIntro=async()=>{
   stopTimer();
-  host.innerHTML=`<section class="game milhao windows-look milhao-intro"><div class="milhao-rings intro-rings"></div><div class="intro-flare"></div><div class="intro-stage"><div class="intro-logo-wrap"><img class="milhao-intro-art" src="assets/games/quiz_do_milhao_do_transito.webp?v=10" alt=""><div class="intro-title">MOBILIZA EDUCA</div></div><p class="intro-player">Prepare-se, <strong>${name}</strong>!</p><div class="intro-count"><span>3</span></div></div></section>`;
+  host.innerHTML=`<section class="game milhao windows-look milhao-intro"><div class="milhao-rings intro-rings"></div><div class="intro-flare"></div><div class="intro-stage"><div class="intro-logo-wrap"><img class="milhao-intro-art" src="assets/games/quiz_do_milhao_do_transito.webp?v=11" alt=""><div class="intro-title">MOBILIZA EDUCA</div></div><p class="intro-player">Prepare-se, <strong>${name}</strong>!</p><div class="intro-count"><span>3</span></div></div></section>`;
   beep(360,.08);await sleep(650);const el=()=>host.querySelector('.intro-count span');if(el()){el().textContent='2';beep(430,.08);}await sleep(650);if(el()){el().textContent='1';beep(520,.08);}await sleep(650);if(el()){el().textContent='VALENDO!';el().classList.add('go');beep(880,.16);}await sleep(800);
  };
  const resetGame=()=>{
@@ -95,7 +95,7 @@ export function openMilhao(dialog,host,onFinish){
  };
  const openStart=()=>{
   stopTimer();
-  host.innerHTML=`<section class="game milhao milhao-start windows-look"><div class="milhao-rings"></div><div class="milhao-start-stage"><div class="milhao-start-emblem"><img class="milhao-start-art" src="assets/games/quiz_do_milhao_do_transito.webp?v=10" alt="Quiz do Milhão do Trânsito"></div><div class="milhao-start-copy"><p class="eyebrow">MOBILIZA EDUCA • DESAFIO PRINCIPAL</p><h2 class="milhao-title-3d">Quiz do Milhão do Trânsito</h2><p>Responda 15 perguntas e avance até 1.000.000. O pulo troca somente a pergunta, sem mudar o nível ou a premiação.</p><label class="player-name">Nome do jogador<input id="milhaoName" maxlength="40" value="${name==='Jogador'?'':name}" placeholder="Digite seu nome"></label><div class="milhao-rules"><span>⏱ 30 s</span><span>⏭ 3 pulos</span><span>🃏 1 cartas</span><span>👥 1 plateia</span></div><button type="button" class="btn primary big milhao-start-button" id="milhaoStart">▶ COMEÇAR DESAFIO</button></div></div></section>`;
+  host.innerHTML=`<section class="game milhao milhao-start windows-look"><div class="milhao-rings"></div><div class="milhao-start-stage"><div class="milhao-start-emblem"><div class="milhao-cover-frame"><img class="milhao-start-art" src="assets/games/quiz_do_milhao_do_transito.webp?v=11" alt="Quiz do Milhão do Trânsito"><div class="milhao-cover-badge">SHOW DO MILHÃO<br><small>DO TRÂNSITO</small></div></div></div><div class="milhao-start-copy"><p class="eyebrow">MOBILIZA EDUCA • DESAFIO PRINCIPAL</p><h2 class="milhao-title-3d">Quiz do Milhão do Trânsito</h2><p>Responda 15 perguntas e avance até 1.000.000. O pulo troca somente a pergunta, sem mudar o nível ou a premiação.</p><label class="player-name">Nome do jogador<input id="milhaoName" maxlength="40" value="${name==='Jogador'?'':name}" placeholder="Digite seu nome"></label><div class="milhao-rules"><span>⏱ 30 s</span><span>⏭ 3 pulos</span><span>🃏 1 cartas</span><span>👥 1 plateia</span></div><button type="button" class="btn primary big milhao-start-button" id="milhaoStart">▶ COMEÇAR DESAFIO</button></div></div></section>`;
   host.querySelector('#milhaoStart').onclick=async()=>{const btn=host.querySelector('#milhaoStart');btn.disabled=true;name=host.querySelector('#milhaoName').value.trim()||'Jogador';resetGame();await playIntro();render();};
  };
  const ladderHtml=()=>ladder.map((v,n)=>`<span class="${n<level?'done':n===level?'current':''}"><small>${n+1}</small> ${v.toLocaleString('pt-BR')}</span>`).reverse().join('');
@@ -117,16 +117,58 @@ export function openMilhao(dialog,host,onFinish){
    questionCursor++;
    render();
   };
-  host.querySelector('#cards').onclick=async()=>{
+  host.querySelector('#cards').onclick=()=>{
    if(!cartas||locked||finished)return;
-   locked=true;stopTimer();cartas--;
-   const cardPool=[{label:'REI',remove:0},{label:'ÁS',remove:1},{label:'2',remove:2},{label:'3',remove:3}];
-   const drawn=cardPool[Math.floor(Math.random()*cardPool.length)];
-   const o=host.querySelector('#milhaoHelpOverlay');o.className='milhao-help-overlay show';o.innerHTML=`<div class="help-stage cards-help"><div class="flying-cards"><span>🂠</span><span>🂠</span><span>🂠</span><span>🂠</span></div><h3>CARTA: ${drawn.label}</h3><p>${drawn.remove===0?'Nenhuma alternativa será eliminada.':`${drawn.remove} alternativa(s) incorreta(s) será(ão) eliminada(s).`}</p></div>`;
-   await sleep(1150);o.classList.remove('show');
-   const wrong=q.a.map((_,n)=>n).filter(n=>n!==q.correct).sort(()=>Math.random()-.5).slice(0,drawn.remove);
-   wrong.forEach(n=>{opts[n].disabled=true;opts[n].classList.add('eliminated');});
-   host.querySelector('#cards').disabled=true;resumeAfterHelp();
+   locked=true;stopTimer();
+
+   const cardPool=[
+    {key:'rei',label:'REI',remove:0,icon:'♔',desc:'Nenhuma alternativa será eliminada.'},
+    {key:'as',label:'ÁS',remove:1,icon:'A',desc:'1 alternativa incorreta será eliminada.'},
+    {key:'dois',label:'2',remove:2,icon:'2',desc:'2 alternativas incorretas serão eliminadas.'},
+    {key:'tres',label:'3',remove:3,icon:'3',desc:'3 alternativas incorretas serão eliminadas.'}
+   ].sort(()=>Math.random()-.5);
+
+   const o=host.querySelector('#milhaoHelpOverlay');
+   o.className='milhao-help-overlay show cards-pick-overlay';
+   o.innerHTML=`<div class="help-stage cards-help cards-picker">
+      <div class="cards-picker-title">
+       <span class="cards-picker-icon">🃏</span>
+       <div><h3>ESCOLHA UMA CARTA</h3><p>Clique em uma das cartas para virá-la e revelar a ajuda.</p></div>
+      </div>
+      <div class="milhao-card-grid">
+       ${cardPool.map(card=>`<button type="button" class="milhao-card-pick" data-card="${card.key}">
+         <span class="milhao-card-face milhao-card-back"><i>🂠</i><strong>CARTA</strong></span>
+         <span class="milhao-card-face milhao-card-front"><i>${card.icon}</i><strong>${card.label}</strong><small>${card.desc}</small></span>
+       </button>`).join('')}
+      </div>
+    </div>`;
+
+   o.querySelectorAll('.milhao-card-pick').forEach(btn=>btn.onclick=async e=>{
+    e.preventDefault();e.stopPropagation();
+    const drawn=cardPool.find(x=>x.key===btn.dataset.card);
+    if(!drawn)return;
+
+    o.querySelectorAll('.milhao-card-pick').forEach(x=>x.disabled=true);
+    btn.classList.add('flipped','chosen');
+    cartas=0;
+    beep(620,.09);
+
+    await sleep(900);
+
+    const wrong=q.a.map((_,n)=>n).filter(n=>n!==q.correct).sort(()=>Math.random()-.5).slice(0,drawn.remove);
+    wrong.forEach(n=>{
+      opts[n].disabled=true;
+      opts[n].classList.add('eliminated');
+    });
+
+    host.querySelector('#cards').disabled=true;
+    host.querySelector('#feedback').innerHTML=`<div class="quiz-feedback milhao-feedback"><strong>🃏 Carta ${drawn.label}</strong><p>${drawn.desc}</p></div>`;
+
+    await sleep(950);
+    o.className='milhao-help-overlay';
+    o.innerHTML='';
+    resumeAfterHelp();
+   });
   };
   host.querySelector('#audience').onclick=async()=>{
    if(!plateia||locked||finished)return;
