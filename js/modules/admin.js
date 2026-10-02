@@ -1,146 +1,198 @@
+import {changeAdminPassword,lockAdmin} from './auth.js';
+
 const modules={
-'admin-dashboard':{title:'Dashboard administrativo',intro:'Painel único para acompanhar operação, alcance e qualidade pedagógica.',sections:['Atividade recente','Pendências da operação','Indicadores pedagógicos','Próximos eventos']},
-'admin-cadastros':{title:'Cadastros educacionais',intro:'Escolas, turmas, professores e alunos com inclusão, edição, exclusão, pesquisa e armazenamento local.'},
-'admin-eventos':{title:'Eventos e agenda',intro:'Planejamento das ações educativas com agenda, status, prioridade, responsáveis e vínculo com escolas.'},
+'admin-dashboard':{title:'Dashboard administrativo',intro:'Painel único para acompanhar operação, alcance e qualidade pedagógica.'},
+'admin-cadastros':{title:'Cadastros educacionais',intro:'Escolas, turmas, professores e alunos com importação em lote, validação, pesquisa, ordenação e paginação.'},
+'admin-eventos':{title:'Eventos, agenda e operação',intro:'Planejamento das ações educativas com recorrência, turmas, materiais, equipe, parceiros e presença.'},
 'admin-conteudo':{title:'Conteúdo pedagógico',intro:'Governança do conteúdo usado em jogos, avaliações e atividades.',sections:['Banco de perguntas','Categorias','Dificuldade','Centro Editorial','Revisão e homologação','Histórico de alterações']},
 'admin-avaliacao':{title:'Presença e avaliações',intro:'Registro de participação e medição de aprendizagem.',sections:['Presença','Pré-teste','Pós-teste','Evolução por turma','Indicadores','Comparativos']},
 'admin-passaporte':{title:'Passaporte e certificados',intro:'Reconhecimento da participação e progressão educativa.',sections:['Passaporte digital','Medalhas','Certificados','Validação por QR Code','Histórico']},
-'admin-relatorios':{title:'Relatórios e indicadores',intro:'Transformar dados da operação em gestão e comprovação de impacto.',sections:['Relatório de atividades','Relatório por evento','Relatório por escola','Ranking','Estatísticas','Exportação PDF/CSV']},
-'admin-acessos':{title:'Usuários, perfis e auditoria',intro:'Controle de acesso e rastreabilidade administrativa.',sections:['Usuários','Perfis','Permissões','Auditoria','Acessibilidade','Segurança']},
+'admin-relatorios':{title:'Relatórios e indicadores',intro:'Relatórios operacionais, pedagógicos e comprovação de impacto.'},
+'admin-acessos':{title:'Usuários, perfis e auditoria',intro:'Controle de acesso e rastreabilidade administrativa.',sections:['Usuários','Perfis','Permissões','Auditoria','Acessibilidade','Segurança local']},
 'admin-sistema':{title:'Configurações, backup e sincronização',intro:'Configurações gerais e continuidade operacional.',sections:['Identidade institucional','Preferências','Telão e projeção','Backup local','Importação/exportação','Sincronização futura']}
 };
 
-const KEYS={
- escolas:'mobiliza.admin.escolas',
- turmas:'mobiliza.admin.turmas',
- professores:'mobiliza.admin.professores',
- alunos:'mobiliza.admin.alunos',
- eventos:'mobiliza.admin.eventos'
-};
-const read=k=>JSON.parse(localStorage.getItem(KEYS[k])||'[]');
-const write=(k,v)=>localStorage.setItem(KEYS[k],JSON.stringify(v));
-const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const KEYS=['escolas','turmas','professores','alunos','eventos'];
+const read=k=>JSON.parse(localStorage.getItem('mobiliza.admin.'+k)||'[]');
+const write=(k,v)=>{localStorage.setItem('mobiliza.admin.'+k,JSON.stringify(v));window.dispatchEvent(new CustomEvent('mobiliza-data-change',{detail:{entity:k}}));};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const fmtDate=v=>v?new Date(v+'T00:00:00').toLocaleDateString('pt-BR'):'—';
+const today=()=>new Date().toISOString().slice(0,10);
+const fmtDate=v=>v?new Date(v+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+const fmtPhone=v=>String(v||'').replace(/\D/g,'').replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d{4}).*/,'$1-$2');
+const toLines=(arr,kind)=>kind==='materials'?(arr||[]).map(x=>`${x.nome};${x.quantidade||0}`).join('\n'):kind==='team'?(arr||[]).map(x=>`${x.nome};${x.funcao||''}`).join('\n'):(arr||[]).join('\n');
+const parseLines=(txt,kind)=>String(txt||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(line=>{if(kind==='materials'){const [nome,quantidade]=line.split(';');return {nome:nome.trim(),quantidade:Number(quantidade||0)};}if(kind==='team'){const [nome,funcao]=line.split(';');return {nome:nome.trim(),funcao:(funcao||'').trim()};}return line;});
+const csvEscape=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+const download=(name,text,type='text/csv;charset=utf-8')=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
 
-function genericShell(m,inner){
- return `<section class="admin-module"><p class="eyebrow">CENTRO DE GESTÃO WEB • LOCAL</p><h2>${m.title}</h2><p class="admin-intro">${m.intro}</p>${inner}</section>`;
-}
+function shell(m,inner){return `<section class="admin-module"><p class="eyebrow">CENTRO DE GESTÃO WEB • v0.3</p><h2>${m.title}</h2><p class="admin-intro">${m.intro}</p>${inner}</section>`;}
+function byId(entity,id){return read(entity).find(x=>x.id===id);}
+function label(entity,id){const r=byId(entity,id);return r?.nome||'—';}
+function uniqueName(entity,name,exclude){return !read(entity).some(x=>x.id!==exclude&&String(x.nome||'').trim().toLowerCase()===String(name||'').trim().toLowerCase());}
+function addDays(v,n){const d=new Date(v+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function addMonths(v,n){const d=new Date(v+'T12:00:00'),day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+n);const max=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,max));return d.toISOString().slice(0,10);}
+function addYears(v,n){const d=new Date(v+'T12:00:00'),m=d.getMonth(),day=d.getDate();d.setFullYear(d.getFullYear()+n);if(d.getMonth()!==m){d.setMonth(m+1,0);}else d.setDate(day);return d.toISOString().slice(0,10);}
+function dateDiffDays(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000);}
 
-function renderDashboard(host){
- const e=read('escolas').length,a=read('alunos').length,ev=read('eventos').length;
+function renderDashboard(host,authDialog){
+ const eventos=read('eventos'),agora=today();
+ const upcoming=eventos.filter(x=>(x.dataInicio||x.data)>=agora&&x.status!=='Cancelado').sort((a,b)=>(a.dataInicio||a.data).localeCompare(b.dataInicio||b.data)).slice(0,7);
  const games=JSON.parse(localStorage.getItem('mobiliza.results')||'{"games":0}').games||0;
- const upcoming=read('eventos').filter(x=>x.data&&x.data>=new Date().toISOString().slice(0,10)).sort((a,b)=>a.data.localeCompare(b.data)).slice(0,5);
- host.innerHTML=genericShell(modules['admin-dashboard'],`
+ const materiais=eventos.reduce((s,e)=>s+(e.materiais||[]).reduce((q,m)=>q+(Number(m.quantidade)||0),0),0);
+ host.innerHTML=shell(modules['admin-dashboard'],`
  <div class="admin-kpis">
-  <article class="admin-kpi"><span>Escolas</span><strong>${e}</strong></article>
-  <article class="admin-kpi"><span>Participantes</span><strong>${a}</strong></article>
-  <article class="admin-kpi"><span>Eventos</span><strong>${ev}</strong></article>
-  <article class="admin-kpi"><span>Partidas</span><strong>${games}</strong></article>
+  <article class="admin-kpi"><span>Escolas</span><strong>${read('escolas').length}</strong></article>
+  <article class="admin-kpi"><span>Alunos</span><strong>${read('alunos').length}</strong></article>
+  <article class="admin-kpi"><span>Eventos</span><strong>${eventos.length}</strong></article>
+  <article class="admin-kpi"><span>Materiais distribuídos</span><strong>${materiais}</strong></article>
  </div>
- <div class="admin-panel card"><h3>Próximos eventos</h3>${upcoming.length?upcoming.map(x=>`<div class="admin-list-row"><div><strong>${esc(x.nome)}</strong><small>${fmtDate(x.data)} • ${esc(x.local||'Local não informado')}</small></div><span class="status-chip">${esc(x.status||'Planejado')}</span></div>`).join(''):'<p class="empty-state">Nenhum evento futuro cadastrado.</p>'}</div>`);
+ <div class="admin-dashboard-grid">
+  <div class="admin-panel card"><div class="panel-head"><h3>Próximos eventos</h3><span>${upcoming.length}</span></div>${upcoming.length?upcoming.map(x=>`<div class="admin-list-row"><div><strong>${esc(x.nome)}</strong><small>${fmtDate(x.dataInicio||x.data)} • ${esc(x.horaInicio||'')} • ${esc(x.local||'Local não informado')}</small></div><span class="status-chip">${esc(x.status||'Planejado')}</span></div>`).join(''):'<p class="empty-state">Nenhum evento futuro cadastrado.</p>'}</div>
+  <div class="admin-panel card"><h3>Ferramentas do gestor</h3><button class="btn ghost admin-tool" id="adminChangePass">🔑 Alterar senha administrativa</button><button class="btn ghost admin-tool" id="adminExportAll">💾 Backup dos dados locais</button><button class="btn danger admin-tool" id="adminLogout">🔒 Bloquear painel do gestor</button><p class="admin-help">Partidas registradas neste dispositivo: <strong>${games}</strong>.</p></div>
+ </div>`);
+ host.querySelector('#adminChangePass').onclick=()=>changeAdminPassword(authDialog);
+ host.querySelector('#adminLogout').onclick=()=>{lockAdmin();location.reload();};
+ host.querySelector('#adminExportAll').onclick=()=>{const data={version:'0.3',exportedAt:new Date().toISOString()};KEYS.forEach(k=>data[k]=read(k));download('mobiliza-educa-backup.json',JSON.stringify(data,null,2),'application/json');};
 }
 
 const defs={
- escolas:{label:'Escolas',fields:[['nome','Nome da escola','text'],['municipio','Município','text'],['contato','Contato','text'],['telefone','Telefone','text'],['observacao','Observações','text']]},
- turmas:{label:'Turmas',fields:[['nome','Turma','text'],['turno','Turno','select',['Manhã','Tarde','Noite','Integral']],['ano','Ano/Série','text'],['idEscola','Escola','school']]},
- professores:{label:'Professores',fields:[['nome','Nome','text'],['email','E-mail','email'],['telefone','Telefone','text'],['idEscola','Escola','school']]},
- alunos:{label:'Alunos',fields:[['nome','Nome','text'],['dataNascimento','Nascimento','date'],['idTurma','Turma','class'],['responsavel','Responsável','text']]}
+ escolas:{label:'Escolas',headers:['nome','municipio','endereco','contato','telefone','email'],fields:[['nome','Nome da escola','text'],['municipio','Município','text'],['endereco','Endereço','text'],['contato','Contato','text'],['telefone','Telefone','tel'],['email','E-mail','email']]},
+ turmas:{label:'Turmas',headers:['nome','turno','ano','escola'],fields:[['nome','Turma','text'],['turno','Turno','select',['Manhã','Tarde','Noite','Integral']],['ano','Ano/Série','text'],['idEscola','Escola','school']]},
+ professores:{label:'Professores',headers:['nome','email','telefone','escola'],fields:[['nome','Nome','text'],['email','E-mail','email'],['telefone','Telefone','tel'],['idEscola','Escola','school']]},
+ alunos:{label:'Alunos',headers:['nome','dataNascimento','turma','responsavel','telefoneResponsavel'],fields:[['nome','Nome','text'],['dataNascimento','Nascimento','date'],['idTurma','Turma','class'],['responsavel','Responsável','text'],['telefoneResponsavel','Telefone do responsável','tel']]}
 };
 
-function fieldHtml(k,f,val=''){
- const [name,label,type,opts]=f;
- if(type==='select')return `<label>${label}<select name="${name}" required><option value="">Selecione</option>${opts.map(o=>`<option ${val===o?'selected':''}>${o}</option>`).join('')}</select></label>`;
- if(type==='school'){const rows=read('escolas');return `<label>${label}<select name="${name}"><option value="">Sem vínculo</option>${rows.map(r=>`<option value="${r.id}" ${val===r.id?'selected':''}>${esc(r.nome)}</option>`).join('')}</select></label>`;}
- if(type==='class'){const rows=read('turmas');return `<label>${label}<select name="${name}"><option value="">Sem vínculo</option>${rows.map(r=>`<option value="${r.id}" ${val===r.id?'selected':''}>${esc(r.nome)} • ${esc(r.turno||'')}</option>`).join('')}</select></label>`;}
- return `<label>${label}<input name="${name}" type="${type}" value="${esc(val)}" ${name==='nome'?'required':''}></label>`;
+function fieldHtml(f,val=''){
+ const [name,labelTxt,type,opts]=f;
+ if(type==='select')return `<label>${labelTxt}<select name="${name}" required><option value="">Selecione</option>${opts.map(o=>`<option ${val===o?'selected':''}>${o}</option>`).join('')}</select></label>`;
+ if(type==='school')return `<label>${labelTxt}<select name="${name}"><option value="">Sem vínculo</option>${read('escolas').map(r=>`<option value="${r.id}" ${val===r.id?'selected':''}>${esc(r.nome)}</option>`).join('')}</select></label>`;
+ if(type==='class')return `<label>${labelTxt}<select name="${name}"><option value="">Sem vínculo</option>${read('turmas').map(r=>`<option value="${r.id}" ${val===r.id?'selected':''}>${esc(r.nome)} • ${esc(r.turno||'')}</option>`).join('')}</select></label>`;
+ return `<label>${labelTxt}<input name="${name}" type="${type}" value="${esc(type==='tel'?fmtPhone(val):val)}" ${name==='nome'?'required':''} ${type==='tel'?'data-phone maxlength="15"':''}></label>`;
 }
 
-function labelFor(type,id){
- if(!id)return '—';
- const src=type==='turmas'?read('escolas'):type==='alunos'?read('turmas'):type==='professores'?read('escolas'):[];
- const r=src.find(x=>x.id===id);return r?r.nome:'—';
+function entityDetail(entity,r){
+ if(entity==='escolas')return [r.municipio||'—',r.email||r.telefone||'—'];
+ if(entity==='turmas')return [label('escolas',r.idEscola),[r.turno,r.ano].filter(Boolean).join(' • ')||'—'];
+ if(entity==='professores')return [label('escolas',r.idEscola),r.email||r.telefone||'—'];
+ return [label('turmas',r.idTurma),[r.responsavel,r.telefoneResponsavel].filter(Boolean).join(' • ')||'—'];
 }
 
-function renderCrudTable(entity,host,query=''){
- const rows=read(entity),d=defs[entity],q=query.trim().toLowerCase();
- const filtered=!q?rows:rows.filter(r=>Object.values(r).some(v=>String(v??'').toLowerCase().includes(q)));
- const extra=entity==='turmas'?'Escola':entity==='professores'?'Escola':entity==='alunos'?'Turma':'Detalhes';
- const body=filtered.map(r=>`<tr><td><strong>${esc(r.nome)}</strong></td><td>${entity==='escolas'?esc(r.municipio||'—'):esc(labelFor(entity,entity==='alunos'?r.idTurma:r.idEscola))}</td><td>${entity==='turmas'?esc(r.turno||'—'):entity==='professores'?esc(r.email||'—'):entity==='alunos'?fmtDate(r.dataNascimento):esc(r.contato||r.telefone||'—')}</td><td class="table-actions"><button class="btn ghost small" data-edit="${r.id}">Editar</button><button class="btn danger small" data-delete="${r.id}">Excluir</button></td></tr>`).join('');
- host.querySelector('#crudBody').innerHTML=body||`<tr><td colspan="4" class="empty-state">Nenhum registro encontrado.</td></tr>`;
- host.querySelector('#crudCount').textContent=`${filtered.length} registro(s)`;
+function parseCsv(text,entity){
+ const lines=String(text).replace(/^\ufeff/,'').split(/\r?\n/).filter(x=>x.trim());
+ if(lines.length<2)return [];
+ const delim=(lines[0].match(/;/g)||[]).length>=(lines[0].match(/,/g)||[]).length?';':',';
+ const split=line=>{let out=[],cur='',q=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}else if(c===delim&&!q){out.push(cur.trim());cur='';}else cur+=c;}out.push(cur.trim());return out;};
+ const heads=split(lines[0]).map(x=>x.trim());
+ return lines.slice(1).map(line=>{const vals=split(line),o={};heads.forEach((h,i)=>o[h]=vals[i]||'');return o;});
+}
+
+function normalizeImport(entity,row){
+ const base={id:uid(),createdAt:new Date().toISOString()};
+ if(entity==='escolas')return {...base,nome:row.nome||'',municipio:row.municipio||'',endereco:row.endereco||'',contato:row.contato||'',telefone:fmtPhone(row.telefone),email:row.email||''};
+ if(entity==='turmas'){const escola=read('escolas').find(x=>x.nome.toLowerCase()===String(row.escola||'').toLowerCase());return {...base,nome:row.nome||'',turno:row.turno||'',ano:row.ano||'',idEscola:escola?.id||''};}
+ if(entity==='professores'){const escola=read('escolas').find(x=>x.nome.toLowerCase()===String(row.escola||'').toLowerCase());return {...base,nome:row.nome||'',email:row.email||'',telefone:fmtPhone(row.telefone),idEscola:escola?.id||''};}
+ const turma=read('turmas').find(x=>x.nome.toLowerCase()===String(row.turma||'').toLowerCase());return {...base,nome:row.nome||'',dataNascimento:row.dataNascimento||'',idTurma:turma?.id||'',responsavel:row.responsavel||'',telefoneResponsavel:fmtPhone(row.telefoneResponsavel)};
 }
 
 function renderCadastros(host){
- let current='escolas';
- host.innerHTML=genericShell(modules['admin-cadastros'],`
+ let entity='escolas',page=1,pageSize=10,sort='nameAsc',query='';
+ host.innerHTML=shell(modules['admin-cadastros'],`
  <div class="admin-tabs">${Object.keys(defs).map((k,i)=>`<button class="admin-tab ${i===0?'active':''}" data-entity="${k}">${defs[k].label}</button>`).join('')}</div>
- <div class="crud-toolbar"><div><h3 id="crudTitle">Escolas</h3><span id="crudCount"></span></div><div class="crud-toolbar-actions"><input id="crudSearch" type="search" placeholder="Pesquisar..."><button class="btn primary" id="crudNew">+ Novo</button></div></div>
- <div class="table-wrap"><table class="admin-table"><thead><tr><th>Nome</th><th>Vínculo/Local</th><th>Detalhes</th><th>Ações</th></tr></thead><tbody id="crudBody"></tbody></table></div>
+ <div class="crud-toolbar"><div><h3 id="crudTitle">Escolas</h3><span id="crudCount"></span></div><div class="crud-toolbar-actions"><input id="crudSearch" type="search" placeholder="Pesquisar..."><select id="crudSort"><option value="nameAsc">Nome A–Z</option><option value="nameDesc">Nome Z–A</option><option value="recent">Mais recentes</option></select><button class="btn ghost" id="crudImport">⬆ Importar</button><button class="btn primary" id="crudNew">+ Novo</button></div></div>
+ <div class="table-wrap"><table class="admin-table"><thead><tr><th>Nome</th><th>Vínculo / Local</th><th>Detalhes</th><th>Ações</th></tr></thead><tbody id="crudBody"></tbody></table></div>
+ <div class="pagination"><button class="btn ghost small" id="pagePrev">←</button><span id="pageInfo"></span><button class="btn ghost small" id="pageNext">→</button></div>
  <div id="crudEditor" class="crud-editor" hidden></div>`);
 
- const refresh=()=>renderCrudTable(current,host,host.querySelector('#crudSearch').value);
- const openEditor=(id=null)=>{
-  const row=id?read(current).find(x=>x.id===id):null,d=defs[current],box=host.querySelector('#crudEditor');
-  box.hidden=false;box.innerHTML=`<form id="crudForm"><div class="crud-editor-head"><div><span class="eyebrow">${row?'EDITAR':'NOVO REGISTRO'}</span><h3>${d.label}</h3></div><button type="button" class="icon-btn" id="crudCancel">×</button></div><div class="form-grid">${d.fields.map(f=>fieldHtml(current,f,row?.[f[0]]||'')).join('')}</div><div class="form-actions"><button type="button" class="btn ghost" id="crudCancel2">Cancelar</button><button class="btn primary">Salvar</button></div></form>`;
-  const close=()=>box.hidden=true;box.querySelector('#crudCancel').onclick=close;box.querySelector('#crudCancel2').onclick=close;
-  box.querySelector('#crudForm').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target).entries());const all=read(current);if(row)Object.assign(row,data,{updatedAt:new Date().toISOString()});else all.unshift({id:uid(),...data,createdAt:new Date().toISOString()});write(current,all);close();refresh();};
- };
- host.querySelectorAll('[data-entity]').forEach(b=>b.onclick=()=>{current=b.dataset.entity;host.querySelectorAll('.admin-tab').forEach(x=>x.classList.toggle('active',x===b));host.querySelector('#crudTitle').textContent=defs[current].label;host.querySelector('#crudSearch').value='';host.querySelector('#crudEditor').hidden=true;refresh();});
- host.querySelector('#crudSearch').oninput=refresh;host.querySelector('#crudNew').onclick=()=>openEditor();
- host.querySelector('#crudBody').onclick=e=>{const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');if(edit)openEditor(edit.dataset.edit);if(del&&confirm('Excluir este registro?')){write(current,read(current).filter(x=>x.id!==del.dataset.delete));refresh();}};
- refresh();
-}
+ const allFiltered=()=>{let rows=read(entity),q=query.toLowerCase();if(q)rows=rows.filter(r=>Object.values(r).some(v=>String(v??'').toLowerCase().includes(q)));rows.sort((a,b)=>sort==='recent'?String(b.createdAt||'').localeCompare(String(a.createdAt||'')):sort==='nameDesc'?String(b.nome||'').localeCompare(String(a.nome||''),'pt-BR'):String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));return rows;};
+ const draw=()=>{const rows=allFiltered(),pages=Math.max(1,Math.ceil(rows.length/pageSize));page=Math.min(page,pages);const visible=rows.slice((page-1)*pageSize,page*pageSize);host.querySelector('#crudBody').innerHTML=visible.map(r=>{const d=entityDetail(entity,r);return `<tr><td><strong>${esc(r.nome)}</strong></td><td>${esc(d[0])}</td><td>${esc(d[1])}</td><td class="table-actions"><button class="btn ghost small" data-edit="${r.id}">Editar</button><button class="btn danger small" data-delete="${r.id}">Excluir</button></td></tr>`;}).join('')||'<tr><td colspan="4" class="empty-state">Nenhum registro encontrado.</td></tr>';host.querySelector('#crudCount').textContent=`${rows.length} registro(s)`;host.querySelector('#pageInfo').textContent=`Página ${page} de ${pages}`;host.querySelector('#pagePrev').disabled=page<=1;host.querySelector('#pageNext').disabled=page>=pages;};
 
-function eventForm(row,host,onDone){
- const schools=read('escolas');
- host.innerHTML=`<form id="eventForm"><div class="crud-editor-head"><div><span class="eyebrow">${row?'EDITAR':'NOVO EVENTO'}</span><h3>Evento / compromisso</h3></div><button type="button" class="icon-btn" id="eventCancel">×</button></div><div class="form-grid">
- <label>Nome<input name="nome" required value="${esc(row?.nome||'')}"></label>
- <label>Tipo<select name="tipo"><option>Escolar</option><option>Palestra</option><option>SIPAT</option><option>Campanha</option><option>Outro</option></select></label>
- <label>Data<input name="data" type="date" value="${esc(row?.data||'')}"></label>
- <label>Hora inicial<input name="horaInicio" type="time" value="${esc(row?.horaInicio||'')}"></label>
- <label>Hora final<input name="horaFim" type="time" value="${esc(row?.horaFim||'')}"></label>
- <label>Status<select name="status">${['Planejado','Em andamento','Concluído','Cancelado'].map(x=>`<option ${row?.status===x?'selected':''}>${x}</option>`).join('')}</select></label>
- <label>Prioridade<select name="prioridade">${['Baixa','Normal','Alta','Urgente'].map(x=>`<option ${row?.prioridade===x?'selected':''}>${x}</option>`).join('')}</select></label>
- <label>Escola<select name="idEscola"><option value="">Sem vínculo</option>${schools.map(s=>`<option value="${s.id}" ${row?.idEscola===s.id?'selected':''}>${esc(s.nome)}</option>`).join('')}</select></label>
- <label>Local<input name="local" value="${esc(row?.local||'')}"></label>
- <label>Responsável<input name="responsavel" value="${esc(row?.responsavel||'')}"></label>
- <label>Público-alvo<input name="publico" value="${esc(row?.publico||'')}"></label>
- <label class="span-2">Observações<textarea name="observacao" rows="3">${esc(row?.observacao||'')}</textarea></label>
- </div><div class="form-actions"><button type="button" class="btn ghost" id="eventCancel2">Cancelar</button><button class="btn primary">Salvar evento</button></div></form>`;
- const close=()=>onDone(null);host.querySelector('#eventCancel').onclick=close;host.querySelector('#eventCancel2').onclick=close;
- host.querySelector('#eventForm').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target).entries());const all=read('eventos');if(row)Object.assign(row,data,{updatedAt:new Date().toISOString()});else all.unshift({id:uid(),...data,createdAt:new Date().toISOString()});write('eventos',all);onDone(true);};
-}
+ const bindMasks=box=>box.querySelectorAll('[data-phone]').forEach(i=>i.addEventListener('input',()=>i.value=fmtPhone(i.value)));
+ const openEditor=id=>{const row=id?byId(entity,id):null,d=defs[entity],box=host.querySelector('#crudEditor');box.hidden=false;box.innerHTML=`<form id="crudForm"><div class="crud-editor-head"><div><span class="eyebrow">${row?'EDITAR':'NOVO REGISTRO'}</span><h3>${d.label}</h3></div><button type="button" class="icon-btn" id="crudCancel">×</button></div><div class="form-grid">${d.fields.map(f=>fieldHtml(f,row?.[f[0]]||'')).join('')}</div><p class="form-error" id="crudError" hidden></p><div class="form-actions"><button type="button" class="btn ghost" id="crudCancel2">Cancelar</button><button class="btn primary">Salvar</button></div></form>`;bindMasks(box);const close=()=>box.hidden=true;box.querySelector('#crudCancel').onclick=close;box.querySelector('#crudCancel2').onclick=close;box.querySelector('#crudForm').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target).entries()),err=box.querySelector('#crudError');if(!uniqueName(entity,data.nome,row?.id)){err.hidden=false;err.textContent='Já existe um registro com este nome.';return;}if(data.dataNascimento&&data.dataNascimento>today()){err.hidden=false;err.textContent='A data de nascimento não pode estar no futuro.';return;}Object.keys(data).filter(k=>k.toLowerCase().includes('telefone')).forEach(k=>data[k]=fmtPhone(data[k]));const all=read(entity);if(row)Object.assign(row,data,{updatedAt:new Date().toISOString()});else all.unshift({id:uid(),...data,createdAt:new Date().toISOString()});write(entity,all);close();draw();};};
 
-function renderEventos(host){
- let status='';
- const draw=()=>{
-  const q=host.querySelector('#eventSearch')?.value?.toLowerCase()||'',rows=read('eventos').filter(x=>(!status||x.status===status)&&(!q||Object.values(x).some(v=>String(v??'').toLowerCase().includes(q)))).sort((a,b)=>(a.data||'9999').localeCompare(b.data||'9999'));
-  host.querySelector('#eventBody').innerHTML=rows.map(r=>`<tr><td><strong>${esc(r.nome)}</strong><small>${esc(r.tipo||'')}</small></td><td>${fmtDate(r.data)}<small>${esc(r.horaInicio||'')} ${r.horaFim?'– '+esc(r.horaFim):''}</small></td><td>${esc(r.local||'—')}</td><td><span class="status-chip status-${esc((r.status||'').toLowerCase().replace(/\s/g,'-'))}">${esc(r.status||'Planejado')}</span></td><td class="table-actions"><button class="btn ghost small" data-event-edit="${r.id}">Editar</button><button class="btn danger small" data-event-delete="${r.id}">Excluir</button></td></tr>`).join('')||`<tr><td colspan="5" class="empty-state">Nenhum evento encontrado.</td></tr>`;
-  host.querySelector('#eventCount').textContent=`${rows.length} evento(s)`;
- };
- host.innerHTML=genericShell(modules['admin-eventos'],`
- <div class="crud-toolbar"><div><h3>Agenda e eventos</h3><span id="eventCount"></span></div><div class="crud-toolbar-actions"><input id="eventSearch" type="search" placeholder="Pesquisar evento..."><button class="btn primary" id="eventNew">+ Novo evento</button></div></div>
- <div class="filter-row"><button class="chip-filter active" data-status="">Todos</button>${['Planejado','Em andamento','Concluído','Cancelado'].map(s=>`<button class="chip-filter" data-status="${s}">${s}</button>`).join('')}</div>
- <div class="table-wrap"><table class="admin-table"><thead><tr><th>Evento</th><th>Data/Hora</th><th>Local</th><th>Status</th><th>Ações</th></tr></thead><tbody id="eventBody"></tbody></table></div>
- <div id="eventEditor" class="crud-editor" hidden></div>`);
- const editor=host.querySelector('#eventEditor');
- const open=(id=null)=>{const row=id?read('eventos').find(x=>x.id===id):null;editor.hidden=false;eventForm(row,editor,saved=>{editor.hidden=true;if(saved)draw();});};
- host.querySelector('#eventNew').onclick=()=>open();host.querySelector('#eventSearch').oninput=draw;
- host.querySelectorAll('[data-status]').forEach(b=>b.onclick=()=>{status=b.dataset.status;host.querySelectorAll('[data-status]').forEach(x=>x.classList.toggle('active',x===b));draw();});
- host.querySelector('#eventBody').onclick=e=>{const edit=e.target.closest('[data-event-edit]'),del=e.target.closest('[data-event-delete]');if(edit)open(edit.dataset.eventEdit);if(del&&confirm('Excluir este evento?')){write('eventos',read('eventos').filter(x=>x.id!==del.dataset.eventDelete));draw();}};
+ const openImport=()=>{const box=host.querySelector('#crudEditor'),d=defs[entity];box.hidden=false;box.innerHTML=`<div class="crud-editor-head"><div><span class="eyebrow">IMPORTAÇÃO EM LOTE</span><h3>${d.label}</h3></div><button class="icon-btn" id="importClose">×</button></div><p>Use CSV com cabeçalho: <code>${d.headers.join(';')}</code></p><input id="importFile" type="file" accept=".csv,text/csv"><textarea id="importText" rows="8" placeholder="Ou cole o conteúdo CSV aqui..."></textarea><p class="form-error" id="importMsg" hidden></p><div class="form-actions"><button class="btn ghost" id="downloadTemplate">Baixar modelo</button><button class="btn primary" id="runImport">Importar dados</button></div>`;box.querySelector('#importClose').onclick=()=>box.hidden=true;box.querySelector('#downloadTemplate').onclick=()=>download(`modelo-${entity}.csv`,d.headers.join(';')+'\n');box.querySelector('#importFile').onchange=async e=>box.querySelector('#importText').value=await e.target.files[0].text();box.querySelector('#runImport').onclick=()=>{const rows=parseCsv(box.querySelector('#importText').value,entity).map(r=>normalizeImport(entity,r)).filter(r=>r.nome);if(!rows.length){const m=box.querySelector('#importMsg');m.hidden=false;m.textContent='Nenhum registro válido encontrado.';return;}const existing=read(entity),names=new Set(existing.map(x=>x.nome.toLowerCase()));const fresh=rows.filter(x=>!names.has(x.nome.toLowerCase()));write(entity,[...fresh,...existing]);box.hidden=true;page=1;draw();alert(`${fresh.length} registro(s) importado(s). Duplicados por nome foram ignorados.`);};};
+
+ host.querySelectorAll('[data-entity]').forEach(b=>b.onclick=()=>{entity=b.dataset.entity;page=1;query='';host.querySelectorAll('.admin-tab').forEach(x=>x.classList.toggle('active',x===b));host.querySelector('#crudTitle').textContent=defs[entity].label;host.querySelector('#crudSearch').value='';host.querySelector('#crudEditor').hidden=true;draw();});
+ host.querySelector('#crudSearch').oninput=e=>{query=e.target.value;page=1;draw();};host.querySelector('#crudSort').onchange=e=>{sort=e.target.value;page=1;draw();};host.querySelector('#crudNew').onclick=()=>openEditor();host.querySelector('#crudImport').onclick=openImport;host.querySelector('#pagePrev').onclick=()=>{page--;draw();};host.querySelector('#pageNext').onclick=()=>{page++;draw();};
+ host.querySelector('#crudBody').onclick=e=>{const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');if(edit)openEditor(edit.dataset.edit);if(del&&confirm('Excluir este registro?')){write(entity,read(entity).filter(x=>x.id!==del.dataset.delete));draw();}};
  draw();
 }
 
-function renderPlaceholder(id,host){
- const m=modules[id];host.innerHTML=genericShell(m,`<div class="admin-module-grid">${m.sections.map((s,i)=>`<article class="admin-feature"><span class="admin-feature-index">${String(i+1).padStart(2,'0')}</span><div><strong>${s}</strong><p>Fluxo previsto e pronto para ativação progressiva na versão web.</p></div><button type="button" class="btn ghost">Em breve</button></article>`).join('')}</div><div class="admin-note"><strong>Fase atual:</strong> estrutura pronta para a próxima implementação funcional.</div>`);
+function occurrenceSeries(data){
+ const freq=data.recorrencia||'Nenhuma',until=data.repetirAte||data.dataInicio;if(freq==='Nenhuma'||!data.dataInicio||!until||until<data.dataInicio)return [{...data}];
+ const group=uid(),duration=Math.max(0,dateDiffDays(data.dataInicio,data.dataFim||data.dataInicio));let d=data.dataInicio,n=0,out=[];
+ while(d<=until&&n<500){const end=addDays(d,duration);out.push({...data,dataInicio:d,dataFim:end,recorrenciaGrupo:group,recorrenciaOrigem:data.dataInicio,recorrenciaIndice:n});n++;d=freq==='Semanal'?addDays(d,7):freq==='Mensal'?addMonths(d,1):addYears(d,1);}
+ return out;
 }
 
-export function openAdminModule(id,dialog,host){
+function eventForm(row,host,onDone){
+ const escolas=read('escolas'),turmas=read('turmas'),selected=new Set(row?.idsTurmas||[]);
+ host.innerHTML=`<form id="eventForm"><div class="crud-editor-head"><div><span class="eyebrow">${row?'EDITAR OCORRÊNCIA':'NOVO EVENTO / AÇÃO / PROGRAMA'}</span><h3>Agenda inteligente</h3></div><button type="button" class="icon-btn" id="eventCancel">×</button></div>
+ <div class="form-grid">
+ <label>Nome / ação / programa<input name="nome" required value="${esc(row?.nome||'')}"></label>
+ <label>Tipo<select name="tipo">${['Escolar','Palestra','SIPAT','Campanha','Programa','Ação','Outro'].map(x=>`<option ${row?.tipo===x?'selected':''}>${x}</option>`).join('')}</select></label>
+ <label>Data inicial<input name="dataInicio" type="date" required value="${esc(row?.dataInicio||row?.data||today())}"></label>
+ <label>Hora inicial<input name="horaInicio" type="time" value="${esc(row?.horaInicio||'')}"></label>
+ <label>Data final<input name="dataFim" type="date" required value="${esc(row?.dataFim||row?.dataInicio||row?.data||today())}"></label>
+ <label>Hora final<input name="horaFim" type="time" value="${esc(row?.horaFim||'')}"></label>
+ <label>Status<select name="status">${['Planejado','Em andamento','Concluído','Cancelado'].map(x=>`<option ${row?.status===x?'selected':''}>${x}</option>`).join('')}</select></label>
+ <label>Prioridade<select name="prioridade">${['Baixa','Normal','Alta','Urgente'].map(x=>`<option ${row?.prioridade===x?'selected':''}>${x}</option>`).join('')}</select></label>
+ <label>Escola principal<select name="idEscola"><option value="">Sem vínculo</option>${escolas.map(s=>`<option value="${s.id}" ${row?.idEscola===s.id?'selected':''}>${esc(s.nome)}</option>`).join('')}</select></label>
+ <label>Local<input name="local" value="${esc(row?.local||'')}"></label>
+ <label>Responsável<input name="responsavel" value="${esc(row?.responsavel||'')}"></label>
+ <label>Público-alvo<input name="publico" value="${esc(row?.publico||'')}"></label>
+ </div>
+ <fieldset class="form-section"><legend>Recorrência e replicação</legend><div class="form-grid"><label>Repetir<select name="recorrencia" id="recorrencia">${['Nenhuma','Semanal','Mensal','Anual'].map(x=>`<option ${row?.recorrencia===x?'selected':''}>${x}</option>`).join('')}</select></label><label>Replicar até<input name="repetirAte" type="date" value="${esc(row?.repetirAte||'')}"></label></div><p class="field-help">Ao criar um evento recorrente, as ocorrências são geradas automaticamente no período. Limite técnico: 500 ocorrências por série.</p></fieldset>
+ <fieldset class="form-section"><legend>Turmas vinculadas</legend><div class="check-grid">${turmas.length?turmas.map(t=>`<label class="check-card"><input type="checkbox" name="turma" value="${t.id}" ${selected.has(t.id)?'checked':''}><span><strong>${esc(t.nome)}</strong><small>${esc(label('escolas',t.idEscola))} • ${esc(t.turno||'')}</small></span></label>`).join(''):'<p class="empty-state">Cadastre turmas antes de vinculá-las ao evento.</p>'}</div></fieldset>
+ <fieldset class="form-section"><legend>Operação</legend><div class="form-grid"><label>Materiais distribuídos <small>Uma linha: material;quantidade</small><textarea name="materiaisText" rows="5" placeholder="Cartilha;100\nPanfleto;250">${esc(toLines(row?.materiais,'materials'))}</textarea></label><label>Equipe <small>Uma linha: nome;função</small><textarea name="equipeText" rows="5" placeholder="Maria;Educadora\nJoão;Operador">${esc(toLines(row?.equipe,'team'))}</textarea></label><label>Parceiros <small>Um por linha</small><textarea name="parceirosText" rows="5">${esc(toLines(row?.parceiros,'partners'))}</textarea></label><label>Observações<textarea name="observacao" rows="5">${esc(row?.observacao||'')}</textarea></label></div></fieldset>
+ <p class="form-error" id="eventError" hidden></p><div class="form-actions"><button type="button" class="btn ghost" id="eventCancel2">Cancelar</button><button class="btn primary">Salvar ${row?'alterações':'e agendar'}</button></div></form>`;
+ const close=()=>onDone(null);host.querySelector('#eventCancel').onclick=close;host.querySelector('#eventCancel2').onclick=close;
+ host.querySelector('#eventForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target),data=Object.fromEntries(fd.entries()),err=host.querySelector('#eventError');data.idsTurmas=fd.getAll('turma');data.materiais=parseLines(data.materiaisText,'materials');data.equipe=parseLines(data.equipeText,'team');data.parceiros=parseLines(data.parceirosText,'partners');delete data.materiaisText;delete data.equipeText;delete data.parceirosText;if(data.dataFim<data.dataInicio){err.hidden=false;err.textContent='A data final não pode ser anterior à data inicial.';return;}if(data.horaFim&&data.dataFim===data.dataInicio&&data.horaInicio&&data.horaFim<=data.horaInicio){err.hidden=false;err.textContent='A hora final deve ser posterior à hora inicial.';return;}if(data.recorrencia!=='Nenhuma'&&(!data.repetirAte||data.repetirAte<data.dataInicio)){err.hidden=false;err.textContent='Informe uma data válida para o fim da recorrência.';return;}const all=read('eventos');if(row){Object.assign(row,data,{updatedAt:new Date().toISOString()});write('eventos',all);}else{const series=occurrenceSeries(data).map(x=>({id:uid(),...x,presenca:{},createdAt:new Date().toISOString()}));write('eventos',[...series,...all]);}onDone(true);};
+}
+
+function attendanceEditor(event,host,onDone){
+ const turmaIds=event.idsTurmas||[],alunos=read('alunos').filter(a=>turmaIds.includes(a.idTurma)),presence=event.presenca||{};
+ host.innerHTML=`<div class="crud-editor-head"><div><span class="eyebrow">PRESENÇA</span><h3>${esc(event.nome)}</h3><p>${fmtDate(event.dataInicio||event.data)} • ${alunos.length} aluno(s) nas turmas vinculadas</p></div><button class="icon-btn" id="presenceClose">×</button></div><div class="presence-toolbar"><button class="btn ghost small" id="markAll">Marcar todos</button><button class="btn ghost small" id="clearAll">Limpar</button></div><div class="presence-list">${alunos.length?alunos.map(a=>`<label class="check-card"><input type="checkbox" data-presence="${a.id}" ${presence[a.id]?'checked':''}><span><strong>${esc(a.nome)}</strong><small>${esc(label('turmas',a.idTurma))}</small></span></label>`).join(''):'<p class="empty-state">Nenhum aluno encontrado nas turmas vinculadas.</p>'}</div><div class="form-actions"><button class="btn primary" id="savePresence">Salvar presença</button></div>`;
+ host.querySelector('#presenceClose').onclick=()=>onDone(false);host.querySelector('#markAll').onclick=()=>host.querySelectorAll('[data-presence]').forEach(x=>x.checked=true);host.querySelector('#clearAll').onclick=()=>host.querySelectorAll('[data-presence]').forEach(x=>x.checked=false);host.querySelector('#savePresence').onclick=()=>{const map={};host.querySelectorAll('[data-presence]').forEach(x=>map[x.dataset.presence]=x.checked);event.presenca=map;event.updatedAt=new Date().toISOString();write('eventos',read('eventos'));onDone(true);};
+}
+
+function renderEventos(host){
+ let status='',query='',page=1,sort='dateAsc';const pageSize=10;
+ host.innerHTML=shell(modules['admin-eventos'],`
+ <div class="crud-toolbar"><div><h3>Agenda e eventos</h3><span id="eventCount"></span></div><div class="crud-toolbar-actions"><input id="eventSearch" type="search" placeholder="Pesquisar evento..."><select id="eventSort"><option value="dateAsc">Data crescente</option><option value="dateDesc">Data decrescente</option><option value="nameAsc">Nome A–Z</option></select><button class="btn primary" id="eventNew">+ Agendar</button></div></div>
+ <div class="filter-row"><button class="chip-filter active" data-status="">Todos</button>${['Planejado','Em andamento','Concluído','Cancelado'].map(s=>`<button class="chip-filter" data-status="${s}">${s}</button>`).join('')}</div>
+ <div class="table-wrap"><table class="admin-table"><thead><tr><th>Evento</th><th>Data/Hora</th><th>Turmas</th><th>Status</th><th>Ações</th></tr></thead><tbody id="eventBody"></tbody></table></div>
+ <div class="pagination"><button class="btn ghost small" id="eventPrev">←</button><span id="eventPage"></span><button class="btn ghost small" id="eventNext">→</button></div><div id="eventEditor" class="crud-editor" hidden></div>`);
+ const rowsFiltered=()=>{let rows=read('eventos').filter(x=>(!status||x.status===status)&&(!query||Object.values(x).some(v=>String(v??'').toLowerCase().includes(query.toLowerCase()))));rows.sort((a,b)=>sort==='dateDesc'?String(b.dataInicio||b.data||'').localeCompare(String(a.dataInicio||a.data||'')):sort==='nameAsc'?String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'):String(a.dataInicio||a.data||'9999').localeCompare(String(b.dataInicio||b.data||'9999')));return rows;};
+ const draw=()=>{const rows=rowsFiltered(),pages=Math.max(1,Math.ceil(rows.length/pageSize));page=Math.min(page,pages);const vis=rows.slice((page-1)*pageSize,page*pageSize);host.querySelector('#eventBody').innerHTML=vis.map(r=>{const presentes=Object.values(r.presenca||{}).filter(Boolean).length;return `<tr><td><strong>${esc(r.nome)}</strong><small>${esc(r.tipo||'')} ${r.recorrenciaGrupo?'• Série '+(Number(r.recorrenciaIndice)+1):''}</small></td><td>${fmtDate(r.dataInicio||r.data)}<small>${esc(r.horaInicio||'')} ${r.horaFim?'– '+esc(r.horaFim):''}</small></td><td>${(r.idsTurmas||[]).length}<small>${presentes} presente(s)</small></td><td><span class="status-chip status-${esc((r.status||'').toLowerCase().replace(/\s/g,'-'))}">${esc(r.status||'Planejado')}</span></td><td class="table-actions"><button class="btn ghost small" data-presence="${r.id}">Presença</button><button class="btn ghost small" data-event-edit="${r.id}">Editar</button><button class="btn danger small" data-event-delete="${r.id}">Excluir</button></td></tr>`;}).join('')||'<tr><td colspan="5" class="empty-state">Nenhum evento encontrado.</td></tr>';host.querySelector('#eventCount').textContent=`${rows.length} evento(s)`;host.querySelector('#eventPage').textContent=`Página ${page} de ${pages}`;host.querySelector('#eventPrev').disabled=page<=1;host.querySelector('#eventNext').disabled=page>=pages;};
+ const editor=host.querySelector('#eventEditor'),open=id=>{const row=id?byId('eventos',id):null;editor.hidden=false;eventForm(row,editor,s=>{editor.hidden=true;if(s)draw();});};
+ host.querySelector('#eventNew').onclick=()=>open();host.querySelector('#eventSearch').oninput=e=>{query=e.target.value;page=1;draw();};host.querySelector('#eventSort').onchange=e=>{sort=e.target.value;page=1;draw();};host.querySelector('#eventPrev').onclick=()=>{page--;draw();};host.querySelector('#eventNext').onclick=()=>{page++;draw();};host.querySelectorAll('[data-status]').forEach(b=>b.onclick=()=>{status=b.dataset.status;page=1;host.querySelectorAll('[data-status]').forEach(x=>x.classList.toggle('active',x===b));draw();});
+ host.querySelector('#eventBody').onclick=e=>{const edit=e.target.closest('[data-event-edit]'),del=e.target.closest('[data-event-delete]'),pres=e.target.closest('[data-presence]');if(edit)open(edit.dataset.eventEdit);if(pres){const ev=byId('eventos',pres.dataset.presence);editor.hidden=false;attendanceEditor(ev,editor,s=>{editor.hidden=true;if(s)draw();});}if(del&&confirm('Excluir esta ocorrência?')){write('eventos',read('eventos').filter(x=>x.id!==del.dataset.eventDelete));draw();}};
+ draw();
+}
+
+function reportData(from,to,status){
+ return read('eventos').filter(e=>{const d=e.dataInicio||e.data||'';return (!from||d>=from)&&(!to||d<=to)&&(!status||e.status===status);}).sort((a,b)=>(a.dataInicio||a.data||'').localeCompare(b.dataInicio||b.data||''));
+}
+function reportHtml(rows){
+ const totalPeople=rows.reduce((s,e)=>s+Object.values(e.presenca||{}).filter(Boolean).length,0),materials=rows.reduce((s,e)=>s+(e.materiais||[]).reduce((q,m)=>q+(Number(m.quantidade)||0),0),0);
+ return `<div class="report-sheet" id="reportSheet"><div class="report-brand"><img src="assets/brand-icon.webp"><div><h1>MOBILIZA EDUCA</h1><p>Relatório de atividades e ações educativas</p></div></div><div class="report-kpis"><div><strong>${rows.length}</strong><span>Eventos</span></div><div><strong>${totalPeople}</strong><span>Presenças</span></div><div><strong>${materials}</strong><span>Materiais</span></div></div><table><thead><tr><th>Data</th><th>Ação/Evento</th><th>Local</th><th>Status</th><th>Presença</th><th>Materiais</th></tr></thead><tbody>${rows.map(e=>`<tr><td>${fmtDate(e.dataInicio||e.data)}</td><td>${esc(e.nome)}</td><td>${esc(e.local||'—')}</td><td>${esc(e.status||'')}</td><td>${Object.values(e.presenca||{}).filter(Boolean).length}</td><td>${(e.materiais||[]).reduce((s,m)=>s+(Number(m.quantidade)||0),0)}</td></tr>`).join('')}</tbody></table><footer>Gerado em ${new Date().toLocaleString('pt-BR')}</footer></div>`;
+}
+function renderReports(host){
+ host.innerHTML=shell(modules['admin-relatorios'],`<div class="report-filters card"><label>Data inicial<input id="reportFrom" type="date"></label><label>Data final<input id="reportTo" type="date"></label><label>Status<select id="reportStatus"><option value="">Todos</option>${['Planejado','Em andamento','Concluído','Cancelado'].map(x=>`<option>${x}</option>`).join('')}</select></label><button class="btn primary" id="runReport">Gerar relatório</button></div><div id="reportHost"></div>`);
+ const run=()=>{const rows=reportData(host.querySelector('#reportFrom').value,host.querySelector('#reportTo').value,host.querySelector('#reportStatus').value);host.querySelector('#reportHost').innerHTML=`<div class="report-actions"><button class="btn ghost" id="printReport">🖨 Imprimir / Salvar PDF</button><button class="btn ghost" id="csvReport">⬇ Exportar CSV</button></div>${reportHtml(rows)}`;host.querySelector('#printReport').onclick=()=>{const w=window.open('','_blank');w.document.write(`<!doctype html><html><head><title>Relatório Mobiliza Educa</title><style>body{font-family:Arial;padding:28px;color:#14283b}.report-brand{display:flex;gap:14px;align-items:center}.report-brand img{width:60px;border-radius:12px}.report-kpis{display:flex;gap:24px;margin:20px 0}.report-kpis div{border:1px solid #ddd;padding:12px 18px;border-radius:10px}.report-kpis strong,.report-kpis span{display:block}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f3f6f8}footer{margin-top:20px;font-size:12px;color:#666}</style></head><body>${reportHtml(rows)}</body></html>`);w.document.close();setTimeout(()=>w.print(),250);};host.querySelector('#csvReport').onclick=()=>download('relatorio-mobiliza-educa.csv','Data;Evento;Local;Status;Presencas;Materiais\n'+rows.map(e=>[fmtDate(e.dataInicio||e.data),e.nome,e.local||'',e.status||'',Object.values(e.presenca||{}).filter(Boolean).length,(e.materiais||[]).reduce((s,m)=>s+(Number(m.quantidade)||0),0)].map(csvEscape).join(';')).join('\n'));};
+ host.querySelector('#runReport').onclick=run;run();
+}
+
+function renderPlaceholder(id,host){
+ const m=modules[id];host.innerHTML=shell(m,`<div class="admin-module-grid">${(m.sections||[]).map((s,i)=>`<article class="admin-feature"><span class="admin-feature-index">${String(i+1).padStart(2,'0')}</span><div><strong>${s}</strong><p>Fluxo preparado para implementação progressiva.</p></div><button class="btn ghost">Em breve</button></article>`).join('')}</div>`);
+}
+
+export function openAdminModule(id,dialog,host,authDialog){
  if(!modules[id])return;
- if(id==='admin-dashboard')renderDashboard(host);
+ if(id==='admin-dashboard')renderDashboard(host,authDialog);
  else if(id==='admin-cadastros')renderCadastros(host);
  else if(id==='admin-eventos')renderEventos(host);
+ else if(id==='admin-relatorios')renderReports(host);
  else renderPlaceholder(id,host);
  dialog.showModal();
 }
