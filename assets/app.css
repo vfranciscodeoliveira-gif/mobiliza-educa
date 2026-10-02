@@ -121,3 +121,45 @@ filter:drop-shadow(0 0 24px rgba(44,146,255,.55));pointer-events:none}
 .milhao-feedback .btn{min-height:38px!important;padding:8px 14px!important}
 @media(max-width:900px){.memory-hero{grid-template-columns:1fr}.memory-hero img{max-height:220px}}
 @media(max-width:620px){.memory-hero{margin:-24px -24px 18px;padding:16px 24px}.memory-grid{grid-template-columns:repeat(2,1fr)!important}.memory-game .memory-card{min-height:112px}}
+
+/* v0.9.3 • Milhão layout + cartas interativas */
+.milhao-cover-frame{position:relative;width:min(100%,650px);aspect-ratio:16/9;overflow:hidden;border-radius:28px;background:radial-gradient(circle at 50% 46%,#2389ff 0 14%,#0e59c4 15% 31%,#062d79 32% 52%,#031846 53% 100%);border:2px solid rgba(255,255,255,.28);box-shadow:0 28px 85px rgba(0,0,0,.48),0 0 45px rgba(39,135,255,.25)}
+.milhao-cover-frame::after{content:"";position:absolute;inset:12px;border-radius:20px;border:1px solid rgba(255,255,255,.18);pointer-events:none}
+.milhao-start-art{width:100%!important;height:100%!important;aspect-ratio:16/9!important;object-fit:cover!important;display:block!important}
+.milhao-cover-badge{position:absolute;left:20px;bottom:18px;padding:11px 15px;border-radius:14px;background:rgba(2,20,58,.78);border:1px solid rgba(255,255,255,.22);color:#fff;font-weight:1000;line-height:.95;letter-spacing:.02em;text-shadow:0 2px 8px rgba(0,0,0,.45);backdrop-filter:blur(7px)}
+.milhao-cover-badge small{display:block;font-size:.72rem;letter-spacing:.1em;margin-top:4px}
+.milhao-start-stage{grid-template-columns:minmax(360px,1.08fr) minmax(330px,.92fr);gap:36px;min-height:610px}
+.milhao-start-copy{max-width:560px}
+.milhao-title-3d{font-size:clamp(2.35rem,4vw,3.9rem)!important;line-height:.94}
+.milhao-play,.milhao.windows-look{isolation:isolate}
+.milhao .windows-layout{grid-template-columns:minmax(0,1fr) 185px;gap:22px}
+.milhao-brand-stage{min-height:175px}
+.milhao-logo-disc{width:178px;height:178px;font-size:1.72rem}
+.milhao-logo-disc strong{font-size:2rem}
+.milhao-question-wrap{padding:15px 18px}
+.milhao .quiz-option{min-height:58px}
+.milhao-aids{gap:9px;padding:11px}
+.milhao-aids .btn{min-width:118px}
+.cards-pick-overlay.show{background:rgba(0,10,35,.82)}
+.cards-picker{width:min(880px,92%);min-height:360px;padding:28px 30px}
+.cards-picker-title{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px}
+.cards-picker-title h3{margin:0;font-size:1.8rem}
+.cards-picker-title p{margin:4px 0 0;color:#d7e8ff}
+.cards-picker-icon{display:grid;place-items:center;width:68px;height:68px;border-radius:50%;background:linear-gradient(145deg,#f4b740,#f08a24);font-size:2rem;box-shadow:0 0 0 8px rgba(244,183,64,.12)}
+.milhao-card-grid{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:10px}
+.milhao-card-pick{position:relative;height:235px;border:0;padding:0;background:transparent;cursor:pointer;perspective:1000px}
+.milhao-card-pick:disabled{opacity:1;cursor:default}
+.milhao-card-face{position:absolute;inset:0;display:grid;place-items:center;align-content:center;padding:16px;border-radius:22px;backface-visibility:hidden;transition:transform .72s cubic-bezier(.2,.75,.2,1),box-shadow .25s ease}
+.milhao-card-back{background:linear-gradient(145deg,#0d55c6,#05255f);border:2px solid rgba(255,255,255,.28);color:#fff;box-shadow:0 16px 35px rgba(0,0,0,.34)}
+.milhao-card-back i{font-style:normal;font-size:4rem}
+.milhao-card-back strong{margin-top:8px;letter-spacing:.09em}
+.milhao-card-front{transform:rotateY(180deg);background:linear-gradient(180deg,#fff5bf,#f4b740 58%,#d88912);border:2px solid rgba(255,255,255,.42);color:#102033;box-shadow:0 18px 40px rgba(0,0,0,.38)}
+.milhao-card-front i{font-style:normal;font-size:3.8rem;font-weight:1000;line-height:1}
+.milhao-card-front strong{font-size:2rem;line-height:1;margin-top:8px}
+.milhao-card-front small{display:block;margin-top:12px;font-size:.9rem;line-height:1.3}
+.milhao-card-pick:not(:disabled):hover .milhao-card-back{transform:translateY(-7px);box-shadow:0 24px 48px rgba(0,0,0,.42)}
+.milhao-card-pick.flipped .milhao-card-back{transform:rotateY(180deg)}
+.milhao-card-pick.flipped .milhao-card-front{transform:rotateY(360deg)}
+.milhao-card-pick.chosen .milhao-card-front{box-shadow:0 0 0 4px rgba(255,237,130,.72),0 22px 48px rgba(0,0,0,.45)}
+@media(max-width:980px){.milhao-start-stage{grid-template-columns:1fr}.milhao .windows-layout{grid-template-columns:1fr}.milhao-card-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.milhao-card-grid{grid-template-columns:1fr 1fr}.milhao-card-pick{height:190px}.cards-picker-title{flex-direction:column;text-align:center}.milhao-cover-badge{left:12px;bottom:12px}}
