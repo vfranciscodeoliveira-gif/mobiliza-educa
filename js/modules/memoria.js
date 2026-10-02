@@ -28,103 +28,329 @@ function shuffle(a){
 }
 function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 
-function ensureMemoryV26Styles(){
-  if(document.getElementById('memory-v26-styles')) return;
+function ensureMemoryV27Styles(){
+  if(document.getElementById('memory-v27-styles')) return;
   const style=document.createElement('style');
-  style.id='memory-v26-styles';
+  style.id='memory-v27-styles';
   style.textContent=`
-  #gameDialog.memory-v26-dialog{width:min(1320px,96vw)!important;max-width:96vw!important;max-height:94vh!important;overflow:hidden!important}
-  #gameDialog.memory-v26-dialog>.dialog-shell{height:94vh!important;max-height:94vh!important;overflow:hidden!important;background:#fff!important}
-  #gameDialog.memory-v26-dialog #gameHost{height:100%!important;min-height:0!important;overflow:hidden!important}
-  #gameDialog.memory-v26-dialog .dialog-close{position:absolute!important;top:12px!important;right:12px!important;z-index:300!important}
+  #gameDialog.memory-v27-dialog{width:min(1320px,96vw)!important;max-width:96vw!important;max-height:94vh!important;overflow:hidden!important}
+  #gameDialog.memory-v27-dialog>.dialog-shell{height:94vh!important;max-height:94vh!important;overflow:hidden!important;background:#fff!important}
+  #gameDialog.memory-v27-dialog #gameHost{height:100%!important;min-height:0!important;overflow:hidden!important}
+  #gameDialog.memory-v27-dialog .dialog-close{position:absolute!important;top:12px!important;right:12px!important;z-index:300!important}
 
-  .memory-v26{height:100%!important;min-height:0!important;box-sizing:border-box!important;overflow:hidden!important;display:grid!important;grid-template-rows:64px 46px minmax(0,1fr) 32px!important;gap:6px!important;padding:8px 12px 10px!important;background:linear-gradient(180deg,#f9fcff,#edf6fb)!important;position:relative!important}
-  .memory-v26 .mem-hero{display:grid!important;grid-template-columns:126px minmax(0,1fr)!important;align-items:center!important;gap:12px!important;padding:6px 10px!important;border-radius:14px!important;background:linear-gradient(135deg,#0a3f70,#0f6ca4 58%,#1491b6)!important;color:#fff!important;overflow:hidden!important}
-  .memory-v26 .mem-hero img{width:126px!important;height:52px!important;object-fit:cover!important;border-radius:10px!important}
-  .memory-v26 .mem-hero .eyebrow{margin:0 0 1px!important;font-size:.48rem!important;letter-spacing:.12em!important;color:#fff!important}
-  .memory-v26 .mem-hero h2{margin:0 0 2px!important;font-size:1.18rem!important;line-height:1.05!important;color:#fff!important}
-  .memory-v26 .mem-hero p{margin:0!important;font-size:.60rem!important;color:#e9f6ff!important}
+  .memory-v27{height:100%!important;min-height:0!important;box-sizing:border-box!important;overflow:hidden!important;display:grid!important;grid-template-rows:64px 46px minmax(0,1fr) 32px!important;gap:6px!important;padding:8px 12px 10px!important;background:linear-gradient(180deg,#f9fcff,#edf6fb)!important;position:relative!important}
+  .memory-v27 .mem-hero{display:grid!important;grid-template-columns:126px minmax(0,1fr)!important;align-items:center!important;gap:12px!important;padding:6px 10px!important;border-radius:14px!important;background:linear-gradient(135deg,#0a3f70,#0f6ca4 58%,#1491b6)!important;color:#fff!important;overflow:hidden!important}
+  .memory-v27 .mem-hero img{width:126px!important;height:52px!important;object-fit:cover!important;border-radius:10px!important}
+  .memory-v27 .mem-hero .eyebrow{margin:0 0 1px!important;font-size:.48rem!important;letter-spacing:.12em!important;color:#fff!important}
+  .memory-v27 .mem-hero h2{margin:0 0 2px!important;font-size:1.18rem!important;line-height:1.05!important;color:#fff!important}
+  .memory-v27 .mem-hero p{margin:0!important;font-size:.60rem!important;color:#e9f6ff!important}
 
-  .memory-v26 .mem-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:6px!important}
-  .memory-v26 .mem-stats{display:grid!important;grid-template-columns:repeat(4,minmax(76px,1fr))!important;gap:5px!important}
-  .memory-v26 .mem-stat,.memory-v26 .mem-tools{height:46px!important;border:1px solid #d5e5ee!important;border-radius:11px!important;background:#fff!important;box-shadow:0 3px 9px rgba(15,60,102,.05)!important}
-  .memory-v26 .mem-stat{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;padding:5px 8px!important}
-  .memory-v26 .mem-stat span{font-size:.55rem!important;color:#6a8090!important;font-weight:800!important}
-  .memory-v26 .mem-stat strong{font-size:.90rem!important;color:#173f60!important}
-  .memory-v26 .mem-tools{display:flex!important;align-items:center!important;gap:4px!important;padding:4px!important}
-  .memory-v26 .mem-level,.memory-v26 .mem-tool{min-height:28px!important;padding:4px 7px!important;border:1px solid #cfdee8!important;border-radius:8px!important;background:#fff!important;color:#31536b!important;font-size:.55rem!important;font-weight:900!important;cursor:pointer!important}
-  .memory-v26 .mem-level.active{background:#0e659d!important;color:#fff!important;border-color:#0e659d!important}
+  .memory-v27 .mem-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:6px!important}
+  .memory-v27 .mem-stats{display:grid!important;grid-template-columns:repeat(4,minmax(76px,1fr))!important;gap:5px!important}
+  .memory-v27 .mem-stat,.memory-v27 .mem-tools{height:46px!important;border:1px solid #d5e5ee!important;border-radius:11px!important;background:#fff!important;box-shadow:0 3px 9px rgba(15,60,102,.05)!important}
+  .memory-v27 .mem-stat{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;padding:5px 8px!important}
+  .memory-v27 .mem-stat span{font-size:.55rem!important;color:#6a8090!important;font-weight:800!important}
+  .memory-v27 .mem-stat strong{font-size:.90rem!important;color:#173f60!important}
+  .memory-v27 .mem-tools{display:flex!important;align-items:center!important;gap:4px!important;padding:4px!important}
+  .memory-v27 .mem-level,.memory-v27 .mem-tool{min-height:28px!important;padding:4px 7px!important;border:1px solid #cfdee8!important;border-radius:8px!important;background:#fff!important;color:#31536b!important;font-size:.55rem!important;font-weight:900!important;cursor:pointer!important}
+  .memory-v27 .mem-level.active{background:#0e659d!important;color:#fff!important;border-color:#0e659d!important}
 
-  .memory-v26 .mem-board-wrap{height:100%!important;min-height:0!important;overflow:hidden!important;padding:5px!important;border:1px solid #c9dfeb!important;border-radius:16px!important;background:linear-gradient(145deg,#e8f7ff,#fffaf0)!important}
-  .memory-v26 .mem-grid{width:100%!important;height:100%!important;min-height:0!important;display:grid!important;gap:5px!important}
-  .memory-v26.level-easy .mem-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(3,minmax(0,1fr))!important}
-  .memory-v26.level-medium .mem-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(4,minmax(0,1fr))!important}
-  .memory-v26.level-hard .mem-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-template-rows:repeat(4,minmax(0,1fr))!important}
-  .memory-v26 .mem-grid.locked{pointer-events:none!important}
+  .memory-v27 .mem-board-wrap{height:100%!important;min-height:0!important;overflow:hidden!important;padding:5px!important;border:1px solid #c9dfeb!important;border-radius:16px!important;background:linear-gradient(145deg,#e8f7ff,#fffaf0)!important}
+  .memory-v27 .mem-grid{width:100%!important;height:100%!important;min-height:0!important;display:grid!important;gap:5px!important}
+  .memory-v27.level-easy .mem-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(3,minmax(0,1fr))!important}
+  .memory-v27.level-medium .mem-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(4,minmax(0,1fr))!important}
+  .memory-v27.level-hard .mem-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-template-rows:repeat(4,minmax(0,1fr))!important}
+  .memory-v27 .mem-grid.locked{pointer-events:none!important}
 
-  .memory-v26 .mem-card{position:relative!important;display:grid!important;place-items:center!important;min-height:0!important;height:auto!important;margin:0!important;padding:0!important;border:0!important;border-radius:12px!important;overflow:hidden!important;cursor:pointer!important;background:linear-gradient(145deg,#145fc3,#063a83)!important;color:#fff!important;box-shadow:inset 0 0 0 2px rgba(255,255,255,.14),0 4px 10px rgba(0,0,0,.12)!important;transition:transform .16s ease,box-shadow .16s ease!important}
-  .memory-v26 .mem-card:hover:not(.is-open):not(.is-matched){transform:translateY(-2px)!important;box-shadow:inset 0 0 0 2px rgba(255,255,255,.22),0 7px 15px rgba(0,0,0,.16)!important}
-  .memory-v26 .mem-card.is-open,.memory-v26 .mem-card.is-matched{background:#fff!important;color:#173e5d!important;box-shadow:inset 0 0 0 2px #cbdfea,0 4px 10px rgba(15,60,102,.10)!important;animation:memReveal .23s ease both!important}
-  .memory-v26 .mem-card.is-matched{box-shadow:inset 0 0 0 3px #39b86d,0 0 16px rgba(57,184,109,.28)!important}
-  .memory-v26 .mem-card.is-matched::after{content:'✓';position:absolute!important;top:5px!important;right:5px!important;z-index:4!important;width:18px!important;height:18px!important;display:grid!important;place-items:center!important;border-radius:50%!important;background:#28a962!important;color:#fff!important;font-size:.62rem!important;font-weight:1000!important}
+  .memory-v27 .mem-card{position:relative!important;display:grid!important;place-items:center!important;min-height:0!important;height:auto!important;margin:0!important;padding:0!important;border:0!important;border-radius:12px!important;overflow:hidden!important;cursor:pointer!important;background:linear-gradient(145deg,#145fc3,#063a83)!important;color:#fff!important;box-shadow:inset 0 0 0 2px rgba(255,255,255,.14),0 4px 10px rgba(0,0,0,.12)!important;transition:transform .16s ease,box-shadow .16s ease!important}
+  .memory-v27 .mem-card:hover:not(.is-open):not(.is-matched){transform:translateY(-2px)!important;box-shadow:inset 0 0 0 2px rgba(255,255,255,.22),0 7px 15px rgba(0,0,0,.16)!important}
+  .memory-v27 .mem-card.is-open,.memory-v27 .mem-card.is-matched{background:#fff!important;color:#173e5d!important;box-shadow:inset 0 0 0 2px #cbdfea,0 4px 10px rgba(15,60,102,.10)!important;animation:memReveal .23s ease both!important}
+  .memory-v27 .mem-card.is-matched{box-shadow:inset 0 0 0 3px #39b86d,0 0 16px rgba(57,184,109,.28)!important}
+  .memory-v27 .mem-card.is-matched::after{content:'✓';position:absolute!important;top:5px!important;right:5px!important;z-index:4!important;width:18px!important;height:18px!important;display:grid!important;place-items:center!important;border-radius:50%!important;background:#28a962!important;color:#fff!important;font-size:.62rem!important;font-weight:1000!important}
   @keyframes memReveal{0%{transform:scale(.94) rotateY(12deg)}100%{transform:scale(1) rotateY(0)}}
 
-  .memory-v26 .mem-closed{display:grid!important;place-items:center!important;gap:3px!important}
-  .memory-v26 .mem-number{display:grid!important;place-items:center!important;width:46px!important;height:46px!important;border-radius:50%!important;background:linear-gradient(145deg,#fff,#ddecfb)!important;color:#0b4e90!important;border:3px solid rgba(255,255,255,.72)!important;font-size:1.38rem!important;font-weight:1000!important;box-shadow:0 4px 10px rgba(0,0,0,.18)!important}
-  .memory-v26 .mem-closed small{font-size:.38rem!important;letter-spacing:.13em!important;font-weight:900!important;opacity:.82!important}
+  .memory-v27 .mem-closed{display:grid!important;place-items:center!important;gap:3px!important}
+  .memory-v27 .mem-number{display:grid!important;place-items:center!important;width:46px!important;height:46px!important;border-radius:50%!important;background:linear-gradient(145deg,#fff,#ddecfb)!important;color:#0b4e90!important;border:3px solid rgba(255,255,255,.72)!important;font-size:1.38rem!important;font-weight:1000!important;box-shadow:0 4px 10px rgba(0,0,0,.18)!important}
+  .memory-v27 .mem-closed small{font-size:.38rem!important;letter-spacing:.13em!important;font-weight:900!important;opacity:.82!important}
 
-  .memory-v26 .mem-open{position:absolute!important;inset:0!important;display:grid!important;grid-template-rows:minmax(0,1fr) 20px!important;padding:4px!important;background:#fff!important}
-  .memory-v26 .mem-open img{width:100%!important;height:100%!important;min-height:0!important;object-fit:contain!important;border-radius:8px!important;background:#eef7fb!important}
-  .memory-v26 .mem-open strong{display:flex!important;align-items:center!important;justify-content:center!important;font-size:.48rem!important;color:#173e5d!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-  .memory-v26 .mem-open-number{position:absolute!important;top:6px!important;left:6px!important;z-index:5!important;display:grid!important;place-items:center!important;width:24px!important;height:24px!important;border-radius:50%!important;background:#0b4e90!important;color:#fff!important;font-size:.70rem!important;font-weight:1000!important;box-shadow:0 2px 7px rgba(0,0,0,.22)!important}
-  .memory-v26 .mem-card.first-choice{outline:4px solid #f4c542!important;outline-offset:-4px!important}
-  .memory-v26 .mem-card.second-choice{outline:4px solid #38a7e8!important;outline-offset:-4px!important}
-  .memory-v26 .mem-card.is-matched{outline:4px solid #39b86d!important;outline-offset:-4px!important}
-  .memory-v26 .mem-card:disabled{opacity:1!important;cursor:default!important}
+  .memory-v27 .mem-open{position:absolute!important;inset:0!important;display:grid!important;grid-template-rows:minmax(0,1fr) 20px!important;padding:4px!important;background:#fff!important}
+  .memory-v27 .mem-open img{width:100%!important;height:100%!important;min-height:0!important;object-fit:contain!important;border-radius:8px!important;background:#eef7fb!important}
+  .memory-v27 .mem-open strong{display:flex!important;align-items:center!important;justify-content:center!important;font-size:.48rem!important;color:#173e5d!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .memory-v27 .mem-open-number{position:absolute!important;top:6px!important;left:6px!important;z-index:5!important;display:grid!important;place-items:center!important;width:24px!important;height:24px!important;border-radius:50%!important;background:#0b4e90!important;color:#fff!important;font-size:.70rem!important;font-weight:1000!important;box-shadow:0 2px 7px rgba(0,0,0,.22)!important}
+  .memory-v27 .mem-card.first-choice{outline:4px solid #f4c542!important;outline-offset:-4px!important}
+  .memory-v27 .mem-card.second-choice{outline:4px solid #38a7e8!important;outline-offset:-4px!important}
+  .memory-v27 .mem-card.is-matched{outline:4px solid #39b86d!important;outline-offset:-4px!important}
+  .memory-v27 .mem-card:disabled{opacity:1!important;cursor:default!important}
 
-  .memory-v26 .mem-footer{height:32px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:6px!important}
-  .memory-v26 .mem-hint,.memory-v26 .mem-best{height:32px!important;display:flex!important;align-items:center!important;gap:6px!important;padding:4px 7px!important;border:1px solid #d5e5ee!important;border-radius:10px!important;background:#fff!important;color:#5b7385!important;font-size:.50rem!important}
-  .memory-v26 .mem-best{min-width:190px!important;justify-content:space-between!important}
+  .memory-v27 .mem-footer{height:32px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:6px!important}
+  .memory-v27 .mem-hint,.memory-v27 .mem-best{height:32px!important;display:flex!important;align-items:center!important;gap:6px!important;padding:4px 7px!important;border:1px solid #d5e5ee!important;border-radius:10px!important;background:#fff!important;color:#5b7385!important;font-size:.50rem!important}
+  .memory-v27 .mem-best{min-width:190px!important;justify-content:space-between!important}
 
-  .memory-v26 .mem-toast{position:absolute!important;left:50%!important;bottom:38px!important;z-index:80!important;width:min(560px,80%)!important;transform:translate(-50%,15px)!important;opacity:0!important;pointer-events:none!important;padding:9px 11px!important;border-radius:14px!important;background:rgba(6,45,79,.96)!important;color:#fff!important;box-shadow:0 14px 32px rgba(0,0,0,.24)!important;transition:.2s!important}
-  .memory-v26 .mem-toast.show{opacity:1!important;transform:translate(-50%,0)!important}
-  .memory-v26 .mem-toast.ok{background:rgba(16,108,67,.97)!important}
-  .memory-v26 .mem-toast.miss{background:rgba(112,61,40,.97)!important}
-  .memory-v26 .mem-toast strong{display:block!important;font-size:.70rem!important}
-  .memory-v26 .mem-toast small{display:block!important;margin-top:2px!important;font-size:.55rem!important;line-height:1.2!important;color:#eef7fb!important}
+  .memory-v27 .mem-toast{position:absolute!important;left:50%!important;bottom:38px!important;z-index:80!important;width:min(560px,80%)!important;transform:translate(-50%,15px)!important;opacity:0!important;pointer-events:none!important;padding:9px 11px!important;border-radius:14px!important;background:rgba(6,45,79,.96)!important;color:#fff!important;box-shadow:0 14px 32px rgba(0,0,0,.24)!important;transition:.2s!important}
+  .memory-v27 .mem-toast.show{opacity:1!important;transform:translate(-50%,0)!important}
+  .memory-v27 .mem-toast.ok{background:rgba(16,108,67,.97)!important}
+  .memory-v27 .mem-toast.miss{background:rgba(112,61,40,.97)!important}
+  .memory-v27 .mem-toast strong{display:block!important;font-size:.70rem!important}
+  .memory-v27 .mem-toast small{display:block!important;margin-top:2px!important;font-size:.55rem!important;line-height:1.2!important;color:#eef7fb!important}
 
-  .memory-v26 .mem-overlay{position:absolute!important;inset:0!important;z-index:120!important;display:grid!important;place-items:center!important;opacity:0!important;pointer-events:none!important;background:rgba(3,18,37,.12)!important;transition:.2s!important}
-  .memory-v26 .mem-overlay.show{opacity:1!important;pointer-events:auto!important;background:rgba(3,18,37,.72)!important;backdrop-filter:blur(2px)!important}
-  .memory-v26 .mem-modal{width:min(560px,88%)!important;padding:22px 26px!important;border-radius:22px!important;background:linear-gradient(180deg,#0b477a,#062c54)!important;color:#fff!important;text-align:center!important;border:2px solid rgba(255,255,255,.24)!important;box-shadow:0 26px 74px rgba(0,0,0,.42)!important}
-  .memory-v26 .mem-modal h3{margin:0 0 9px!important;font-size:1.35rem!important}
-  .memory-v26 .mem-modal p{margin:0 0 12px!important;color:#dceefa!important}
-  .memory-v26 .mem-modal-actions{display:flex!important;justify-content:center!important;gap:8px!important;flex-wrap:wrap!important}
+  .memory-v27 .mem-overlay{position:absolute!important;inset:0!important;z-index:120!important;display:grid!important;place-items:center!important;opacity:0!important;pointer-events:none!important;background:rgba(3,18,37,.12)!important;transition:.2s!important}
+  .memory-v27 .mem-overlay.show{opacity:1!important;pointer-events:auto!important;background:rgba(3,18,37,.72)!important;backdrop-filter:blur(2px)!important}
+  .memory-v27 .mem-modal{width:min(560px,88%)!important;padding:22px 26px!important;border-radius:22px!important;background:linear-gradient(180deg,#0b477a,#062c54)!important;color:#fff!important;text-align:center!important;border:2px solid rgba(255,255,255,.24)!important;box-shadow:0 26px 74px rgba(0,0,0,.42)!important}
+  .memory-v27 .mem-modal h3{margin:0 0 9px!important;font-size:1.35rem!important}
+  .memory-v27 .mem-modal p{margin:0 0 12px!important;color:#dceefa!important}
+  .memory-v27 .mem-modal-actions{display:flex!important;justify-content:center!important;gap:8px!important;flex-wrap:wrap!important}
 
   @media(max-height:650px) and (min-width:761px){
-    .memory-v26{grid-template-rows:54px 40px minmax(0,1fr) 28px!important;gap:4px!important;padding:6px 9px 7px!important}
-    .memory-v26 .mem-hero{grid-template-columns:100px minmax(0,1fr)!important;padding:4px 8px!important}
-    .memory-v26 .mem-hero img{width:100px!important;height:42px!important}
-    .memory-v26 .mem-hero h2{font-size:1rem!important}
-    .memory-v26 .mem-hero p{font-size:.50rem!important}
-    .memory-v26 .mem-stat,.memory-v26 .mem-tools{height:40px!important}
-    .memory-v26 .mem-level,.memory-v26 .mem-tool{min-height:24px!important;font-size:.47rem!important;padding:3px 5px!important}
-    .memory-v26 .mem-number{width:34px!important;height:34px!important;font-size:1rem!important;border-width:2px!important}
-    .memory-v26 .mem-open{grid-template-rows:minmax(0,1fr) 16px!important}
-    .memory-v26 .mem-open strong{font-size:.38rem!important}
-    .memory-v26 .mem-footer,.memory-v26 .mem-hint,.memory-v26 .mem-best{height:28px!important}
+    .memory-v27{grid-template-rows:54px 40px minmax(0,1fr) 28px!important;gap:4px!important;padding:6px 9px 7px!important}
+    .memory-v27 .mem-hero{grid-template-columns:100px minmax(0,1fr)!important;padding:4px 8px!important}
+    .memory-v27 .mem-hero img{width:100px!important;height:42px!important}
+    .memory-v27 .mem-hero h2{font-size:1rem!important}
+    .memory-v27 .mem-hero p{font-size:.50rem!important}
+    .memory-v27 .mem-stat,.memory-v27 .mem-tools{height:40px!important}
+    .memory-v27 .mem-level,.memory-v27 .mem-tool{min-height:24px!important;font-size:.47rem!important;padding:3px 5px!important}
+    .memory-v27 .mem-number{width:34px!important;height:34px!important;font-size:1rem!important;border-width:2px!important}
+    .memory-v27 .mem-open{grid-template-rows:minmax(0,1fr) 16px!important}
+    .memory-v27 .mem-open strong{font-size:.38rem!important}
+    .memory-v27 .mem-footer,.memory-v27 .mem-hint,.memory-v27 .mem-best{height:28px!important}
   }
 
+
+  /* Resultado final independente do grid da partida */
+  .memory-result-v27{
+    box-sizing:border-box!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    display:grid!important;
+    grid-template-rows:auto auto minmax(0,1fr) auto!important;
+    gap:10px!important;
+    padding:14px 18px 16px!important;
+    background:
+      radial-gradient(circle at 15% 10%,rgba(49,162,224,.14),transparent 28%),
+      radial-gradient(circle at 85% 90%,rgba(244,190,58,.12),transparent 30%),
+      linear-gradient(180deg,#f9fcff,#edf7fb)!important;
+    color:#173e5d!important;
+  }
+  .memory-result-v27 .mem-result-hero{
+    display:grid!important;
+    grid-template-columns:150px minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:14px!important;
+    padding:10px 14px!important;
+    border-radius:18px!important;
+    background:linear-gradient(135deg,#0b4779,#0f6ca4 58%,#1593b8)!important;
+    color:#fff!important;
+    box-shadow:0 12px 28px rgba(15,60,102,.13)!important;
+  }
+  .memory-result-v27 .mem-result-hero img{
+    width:150px!important;
+    height:76px!important;
+    object-fit:cover!important;
+    border-radius:12px!important;
+    box-shadow:0 5px 14px rgba(0,0,0,.18)!important;
+  }
+  .memory-result-v27 .mem-result-hero .eyebrow{
+    margin:0 0 2px!important;
+    font-size:.56rem!important;
+    letter-spacing:.12em!important;
+    color:#d8effd!important;
+  }
+  .memory-result-v27 .mem-result-hero h2{
+    margin:0!important;
+    font-size:1.45rem!important;
+    line-height:1.05!important;
+    color:#fff!important;
+  }
+  .memory-result-v27 .mem-result-trophy{
+    display:grid!important;
+    place-items:center!important;
+    width:68px!important;
+    height:68px!important;
+    border-radius:50%!important;
+    background:linear-gradient(145deg,#ffd85b,#f1a623)!important;
+    box-shadow:0 0 0 8px rgba(255,216,91,.14),0 8px 20px rgba(0,0,0,.18)!important;
+    font-size:2.15rem!important;
+  }
+
+  .memory-result-v27 .mem-result-summary{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+  .memory-result-v27 .mem-result-stat{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:8px!important;
+    min-height:58px!important;
+    padding:9px 12px!important;
+    border:1px solid #d4e5ef!important;
+    border-radius:14px!important;
+    background:#fff!important;
+    box-shadow:0 5px 14px rgba(15,60,102,.06)!important;
+  }
+  .memory-result-v27 .mem-result-stat span{
+    color:#6c8292!important;
+    font-size:.68rem!important;
+    font-weight:800!important;
+  }
+  .memory-result-v27 .mem-result-stat strong{
+    color:#123f63!important;
+    font-size:1.05rem!important;
+  }
+
+  .memory-result-v27 .mem-result-body{
+    min-height:0!important;
+    overflow:hidden!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 300px!important;
+    gap:12px!important;
+  }
+  .memory-result-v27 .mem-result-pairs{
+    min-height:0!important;
+    overflow:hidden!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-auto-rows:minmax(0,1fr)!important;
+    gap:8px!important;
+    padding:10px!important;
+    border:1px solid #d4e5ef!important;
+    border-radius:16px!important;
+    background:#fff!important;
+  }
+  .memory-result-v27 .mem-result-pair{
+    min-height:0!important;
+    display:grid!important;
+    grid-template-columns:76px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:8px!important;
+    padding:7px!important;
+    border:1px solid #dbe8ef!important;
+    border-radius:12px!important;
+    background:linear-gradient(180deg,#fbfdff,#f2f8fb)!important;
+  }
+  .memory-result-v27 .mem-result-pair img{
+    width:76px!important;
+    height:54px!important;
+    object-fit:contain!important;
+    border-radius:8px!important;
+    background:#edf6fa!important;
+  }
+  .memory-result-v27 .mem-result-pair strong{
+    display:block!important;
+    color:#173e5d!important;
+    font-size:.68rem!important;
+    line-height:1.05!important;
+  }
+  .memory-result-v27 .mem-result-pair small{
+    display:block!important;
+    margin-top:2px!important;
+    color:#748b9b!important;
+    font-size:.50rem!important;
+    line-height:1.15!important;
+  }
+
+  .memory-result-v27 .mem-result-message{
+    min-height:0!important;
+    display:grid!important;
+    align-content:center!important;
+    justify-items:center!important;
+    gap:10px!important;
+    padding:18px!important;
+    border-radius:16px!important;
+    text-align:center!important;
+    background:linear-gradient(180deg,#0d4d7d,#08345b)!important;
+    color:#fff!important;
+    box-shadow:0 12px 28px rgba(15,60,102,.12)!important;
+  }
+  .memory-result-v27 .mem-result-message .big{
+    font-size:3rem!important;
+  }
+  .memory-result-v27 .mem-result-message h3{
+    margin:0!important;
+    font-size:1.25rem!important;
+    color:#fff!important;
+  }
+  .memory-result-v27 .mem-result-message p{
+    margin:0!important;
+    color:#d9ecf8!important;
+    font-size:.75rem!important;
+    line-height:1.35!important;
+  }
+  .memory-result-v27 .mem-result-actions{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:10px!important;
+    min-height:46px!important;
+  }
+  .memory-result-v27 .mem-result-actions .btn{
+    min-width:150px!important;
+  }
+
+  @media(max-height:650px) and (min-width:761px){
+    .memory-result-v27{
+      gap:6px!important;
+      padding:9px 12px 10px!important;
+    }
+    .memory-result-v27 .mem-result-hero{
+      grid-template-columns:118px minmax(0,1fr) 52px!important;
+      padding:6px 10px!important;
+    }
+    .memory-result-v27 .mem-result-hero img{
+      width:118px!important;
+      height:56px!important;
+    }
+    .memory-result-v27 .mem-result-hero h2{
+      font-size:1.15rem!important;
+    }
+    .memory-result-v27 .mem-result-trophy{
+      width:50px!important;height:50px!important;font-size:1.55rem!important;
+    }
+    .memory-result-v27 .mem-result-stat{
+      min-height:44px!important;
+      padding:6px 8px!important;
+    }
+    .memory-result-v27 .mem-result-stat span{font-size:.56rem!important}
+    .memory-result-v27 .mem-result-stat strong{font-size:.86rem!important}
+    .memory-result-v27 .mem-result-body{
+      grid-template-columns:minmax(0,1fr) 245px!important;
+      gap:7px!important;
+    }
+    .memory-result-v27 .mem-result-pairs{
+      gap:5px!important;
+      padding:6px!important;
+    }
+    .memory-result-v27 .mem-result-pair{
+      grid-template-columns:56px minmax(0,1fr)!important;
+      padding:5px!important;
+    }
+    .memory-result-v27 .mem-result-pair img{
+      width:56px!important;height:40px!important;
+    }
+    .memory-result-v27 .mem-result-pair strong{font-size:.56rem!important}
+    .memory-result-v27 .mem-result-pair small{font-size:.42rem!important}
+    .memory-result-v27 .mem-result-message{
+      padding:10px!important;
+      gap:6px!important;
+    }
+    .memory-result-v27 .mem-result-message .big{font-size:2.1rem!important}
+    .memory-result-v27 .mem-result-message h3{font-size:1rem!important}
+    .memory-result-v27 .mem-result-message p{font-size:.62rem!important}
+    .memory-result-v27 .mem-result-actions{min-height:38px!important}
+  }
   @media(max-width:760px){
-    #gameDialog.memory-v26-dialog>.dialog-shell{height:auto!important;max-height:94vh!important;overflow:auto!important}
-    #gameDialog.memory-v26-dialog #gameHost{height:auto!important;overflow:visible!important}
-    .memory-v26{height:auto!important;display:block!important;overflow:visible!important}
-    .memory-v26 .mem-toolbar{grid-template-columns:1fr!important;margin:7px 0!important}
-    .memory-v26 .mem-stats{grid-template-columns:repeat(2,1fr)!important}
-    .memory-v26 .mem-tools{height:auto!important;flex-wrap:wrap!important;justify-content:center!important}
-    .memory-v26 .mem-board-wrap{height:auto!important}
-    .memory-v26 .mem-grid{height:auto!important;grid-template-columns:repeat(3,1fr)!important;grid-template-rows:none!important}
-    .memory-v26 .mem-card{min-height:105px!important}
-    .memory-v26 .mem-footer{height:auto!important;grid-template-columns:1fr!important;margin-top:7px!important}
+    #gameDialog.memory-v27-dialog>.dialog-shell{height:auto!important;max-height:94vh!important;overflow:auto!important}
+    #gameDialog.memory-v27-dialog #gameHost{height:auto!important;overflow:visible!important}
+    .memory-v27{height:auto!important;display:block!important;overflow:visible!important}
+    .memory-v27 .mem-toolbar{grid-template-columns:1fr!important;margin:7px 0!important}
+    .memory-v27 .mem-stats{grid-template-columns:repeat(2,1fr)!important}
+    .memory-v27 .mem-tools{height:auto!important;flex-wrap:wrap!important;justify-content:center!important}
+    .memory-v27 .mem-board-wrap{height:auto!important}
+    .memory-v27 .mem-grid{height:auto!important;grid-template-columns:repeat(3,1fr)!important;grid-template-rows:none!important}
+    .memory-v27 .mem-card{min-height:105px!important}
+    .memory-v27 .mem-footer{height:auto!important;grid-template-columns:1fr!important;margin-top:7px!important}
   }`;
   document.head.appendChild(style);
 }
@@ -139,9 +365,9 @@ function saveMemoryResult(pairs,moves,score){
 }
 
 export function openMemoria(dialog,host,onFinish){
-  ensureMemoryV26Styles();
-  dialog.classList.add('memory-v26-dialog');
-  dialog.addEventListener('close',()=>dialog.classList.remove('memory-v26-dialog'),{once:true});
+  ensureMemoryV27Styles();
+  dialog.classList.add('memory-v27-dialog');
+  dialog.addEventListener('close',()=>dialog.classList.remove('memory-v27-dialog'),{once:true});
 
   let level=localStorage.getItem('mobiliza.memoria.level')||'medium';
   if(!MEMORY_LEVELS[level]) level='medium';
@@ -263,12 +489,40 @@ export function openMemoria(dialog,host,onFinish){
     saveMemoryResult(cfg().pairs,moves,finalScore);
     onFinish?.();
 
-    host.innerHTML=`<section class="game memory-v26" style="display:grid!important;place-items:center!important;align-content:center!important;text-align:center!important;gap:12px!important">
-      <img src="assets/games/jogo_da_memoria_mobiliza_educa.svg?v=26" alt="" style="width:min(470px,70%);max-height:250px;object-fit:cover;border-radius:20px">
-      <div style="font-size:2.8rem">🧠</div>
-      <h2 style="margin:0">Todos os pares encontrados!</h2>
-      <p style="margin:0;color:#61788a">Nível <strong>${cfg().label}</strong> • ${moves} jogadas • ${seconds}s • <strong>${finalScore} pontos</strong></p>
-      <div class="hero-actions"><button type="button" class="btn primary" id="memAgain">Jogar novamente</button><button type="button" class="btn ghost" id="memClose">Encerrar</button></div>
+    const completedPairs=MEMORY_PAIRS.slice(0,cfg().pairs);
+    host.innerHTML=`<section class="memory-result-v27">
+      <div class="mem-result-hero">
+        <img src="assets/games/jogo_da_memoria_mobiliza_educa.svg?v=27" alt="Jogo da Memória">
+        <div>
+          <p class="eyebrow">JOGO DA MEMÓRIA • RESULTADO</p>
+          <h2>Todos os pares encontrados!</h2>
+        </div>
+        <div class="mem-result-trophy">🏆</div>
+      </div>
+
+      <div class="mem-result-summary">
+        <div class="mem-result-stat"><span>🎚️ Nível</span><strong>${cfg().label}</strong></div>
+        <div class="mem-result-stat"><span>🎯 Jogadas</span><strong>${moves}</strong></div>
+        <div class="mem-result-stat"><span>⏱ Tempo</span><strong>${seconds}s</strong></div>
+        <div class="mem-result-stat"><span>⭐ Pontos</span><strong>${finalScore}</strong></div>
+      </div>
+
+      <div class="mem-result-body">
+        <div class="mem-result-pairs">
+          ${completedPairs.map(p=>`<div class="mem-result-pair"><img src="${p.image}" alt="${p.title}"><div><strong>✅ ${p.title}</strong><small>${p.detail}</small></div></div>`).join('')}
+        </div>
+        <div class="mem-result-message">
+          <div class="big">🧠✨</div>
+          <h3>Missão cumprida!</h3>
+          <p>Você encontrou os ${cfg().pairs} pares e revisou atitudes importantes para um trânsito mais seguro.</p>
+          <p><strong>Melhor resultado ${cfg().label}:</strong><br>${best()?.score||finalScore} pontos</p>
+        </div>
+      </div>
+
+      <div class="mem-result-actions">
+        <button type="button" class="btn primary" id="memAgain">↻ Jogar novamente</button>
+        <button type="button" class="btn ghost" id="memClose">Encerrar</button>
+      </div>
     </section>`;
     host.querySelector('#memAgain').onclick=()=>{buildDeck();render();};
     host.querySelector('#memClose').onclick=()=>dialog.close();
@@ -394,10 +648,10 @@ export function openMemoria(dialog,host,onFinish){
 
   const render=()=>{
     const b=best();
-    host.innerHTML=`<section class="game memory-v26 level-${level}">
+    host.innerHTML=`<section class="game memory-v27 level-${level}">
       <div class="mem-hero">
-        <img src="assets/games/jogo_da_memoria_mobiliza_educa.svg?v=26" alt="Jogo da Memória">
-        <div><p class="eyebrow">JOGO DA MEMÓRIA • MOTOR v26</p><h2>Encontre os pares do trânsito</h2><p>A primeira carta permanece aberta até a escolha da segunda. O jogo faz a comparação automaticamente.</p></div>
+        <img src="assets/games/jogo_da_memoria_mobiliza_educa.svg?v=27" alt="Jogo da Memória">
+        <div><p class="eyebrow">JOGO DA MEMÓRIA • MOTOR v27</p><h2>Encontre os pares do trânsito</h2><p>A primeira carta permanece aberta até a escolha da segunda. O jogo faz a comparação automaticamente.</p></div>
       </div>
 
       <div class="mem-toolbar">
