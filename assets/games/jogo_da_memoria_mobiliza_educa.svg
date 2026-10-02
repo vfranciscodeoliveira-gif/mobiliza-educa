@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071f4b"/><stop offset=".55" stop-color="#0b5ca8"/><stop offset="1" stop-color="#19a4cf"/></linearGradient><linearGradient id="c" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#eaf3fb"/></linearGradient></defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<g opacity=".2" fill="none" stroke="#8ed9ff" stroke-width="12"><circle cx="150" cy="160" r="110"/><circle cx="1460" cy="720" r="150"/><path d="M0 680 C350 560 510 820 850 675 C1180 535 1400 650 1600 575"/></g>
+<text x="800" y="130" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="64" font-weight="900">JOGO DA MEMÓRIA</text>
+<text x="800" y="182" text-anchor="middle" fill="#b9e8ff" font-family="Arial,sans-serif" font-size="30" font-weight="700">MOBILIZA EDUCA • TRÂNSITO SEGURO</text>
+<g transform="translate(260 250)">
+ <g><rect x="0" y="0" width="230" height="250" rx="30" fill="url(#c)" stroke="#9bc1df" stroke-width="7"/><circle cx="115" cy="94" r="50" fill="#e8423d"/><rect x="104" y="38" width="22" height="112" fill="#fff"/><rect x="59" y="83" width="112" height="22" fill="#fff"/><text x="115" y="210" text-anchor="middle" fill="#163b5b" font-family="Arial,sans-serif" font-size="30" font-weight="900">PARE</text></g>
+ <g transform="translate(285 0)"><rect width="230" height="250" rx="30" fill="#0e4c90" stroke="#3b91df" stroke-width="7"/><text x="115" y="143" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="82" font-weight="900">?</text></g>
+ <g transform="translate(570 0)"><rect width="230" height="250" rx="30" fill="url(#c)" stroke="#9bc1df" stroke-width="7"/><rect x="78" y="38" width="74" height="146" rx="30" fill="#1a2d3d"/><circle cx="115" cy="76" r="21" fill="#e8403a"/><circle cx="115" cy="111" r="21" fill="#f4bd3d"/><circle cx="115" cy="146" r="21" fill="#34a95c"/><text x="115" y="218" text-anchor="middle" fill="#163b5b" font-family="Arial,sans-serif" font-size="27" font-weight="900">SEMÁFORO</text></g>
+ <g transform="translate(855 0)"><rect width="230" height="250" rx="30" fill="#0e4c90" stroke="#3b91df" stroke-width="7"/><text x="115" y="143" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="82" font-weight="900">?</text></g>
+ <g transform="translate(142 300)"><rect width="230" height="250" rx="30" fill="#0e4c90" stroke="#3b91df" stroke-width="7"/><text x="115" y="143" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="82" font-weight="900">?</text></g>
+ <g transform="translate(427 300)"><rect width="230" height="250" rx="30" fill="url(#c)" stroke="#9bc1df" stroke-width="7"/><circle cx="115" cy="92" r="56" fill="#2a78c8"/><path d="M75 133 L115 70 L155 133" fill="none" stroke="#fff" stroke-width="14"/><text x="115" y="213" text-anchor="middle" fill="#163b5b" font-family="Arial,sans-serif" font-size="28" font-weight="900">PEDESTRE</text></g>
+ <g transform="translate(712 300)"><rect width="230" height="250" rx="30" fill="#0e4c90" stroke="#3b91df" stroke-width="7"/><text x="115" y="143" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="82" font-weight="900">?</text></g>
+</g>
+</svg>
