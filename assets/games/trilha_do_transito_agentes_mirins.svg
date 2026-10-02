@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#7fd3ff"/><stop offset="1" stop-color="#e8f7ff"/></linearGradient><linearGradient id="grass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#78c66c"/><stop offset="1" stop-color="#3e9a55"/></linearGradient></defs>
+<rect width="1600" height="900" fill="url(#sky)"/><rect y="570" width="1600" height="330" fill="url(#grass)"/>
+<g opacity=".9"><rect x="70" y="245" width="220" height="325" rx="18" fill="#f8d06b"/><rect x="330" y="315" width="240" height="255" rx="18" fill="#f3a65a"/><rect x="1280" y="265" width="245" height="305" rx="18" fill="#7dc3df"/></g>
+<path d="M95 770 C300 630 455 755 635 630 C825 500 1000 690 1190 565 C1320 480 1415 505 1515 430" fill="none" stroke="#293b4b" stroke-width="145" stroke-linecap="round"/>
+<path d="M95 770 C300 630 455 755 635 630 C825 500 1000 690 1190 565 C1320 480 1415 505 1515 430" fill="none" stroke="#fff" stroke-width="10" stroke-dasharray="48 36" stroke-linecap="round"/>
+<g font-family="Arial,sans-serif" font-weight="900">
+ <g transform="translate(180 646)"><circle r="54" fill="#f4b740" stroke="#fff" stroke-width="8"/><text x="0" y="14" text-anchor="middle" font-size="40" fill="#14314d">1</text></g>
+ <g transform="translate(470 645)"><circle r="54" fill="#40b46d" stroke="#fff" stroke-width="8"/><text x="0" y="14" text-anchor="middle" font-size="40" fill="#fff">5</text></g>
+ <g transform="translate(760 572)"><circle r="54" fill="#4c8ff0" stroke="#fff" stroke-width="8"/><text x="0" y="14" text-anchor="middle" font-size="40" fill="#fff">9</text></g>
+ <g transform="translate(1080 590)"><circle r="54" fill="#e95c55" stroke="#fff" stroke-width="8"/><text x="0" y="14" text-anchor="middle" font-size="40" fill="#fff">13</text></g>
+ <g transform="translate(1388 473)"><circle r="54" fill="#f4b740" stroke="#fff" stroke-width="8"/><text x="0" y="14" text-anchor="middle" font-size="40" fill="#14314d">18</text></g>
+</g>
+<g transform="translate(620 170)"><rect width="360" height="170" rx="35" fill="#0d4774"/><text x="180" y="67" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="44" font-weight="900">TRILHA DO</text><text x="180" y="123" text-anchor="middle" fill="#f6c34a" font-family="Arial,sans-serif" font-size="50" font-weight="900">TRÂNSITO</text></g>
+<g transform="translate(1040 250)"><rect width="120" height="120" rx="24" fill="#fff" stroke="#143e63" stroke-width="8"/><circle cx="36" cy="35" r="11" fill="#16354c"/><circle cx="84" cy="35" r="11" fill="#16354c"/><circle cx="36" cy="84" r="11" fill="#16354c"/><circle cx="84" cy="84" r="11" fill="#16354c"/></g>
+<g transform="translate(360 205)"><circle cx="0" cy="0" r="55" fill="#e63f3a"/><rect x="-11" y="-48" width="22" height="96" fill="#fff"/><rect x="-48" y="-11" width="96" height="22" fill="#fff"/></g>
+<text x="86" y="105" fill="#0f3c66" font-family="Arial,sans-serif" font-weight="900" font-size="35">MOBILIZA EDUCA • AGENTES MIRINS</text>
+</svg>
