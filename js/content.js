@@ -5,13 +5,13 @@ export const audiences=[
 ];
 
 export const games=[
-{id:'quiz',icon:'⚡',title:'Quiz Relâmpago',description:'Perguntas rápidas, pontuação, sequência de acertos e explicações pedagógicas.',tags:['funcional','offline'],ready:true,accent:'quiz'},
-{id:'milhao',icon:'💡',title:'Quiz do Milhão do Trânsito',description:'Experiência de palco com cronômetro, confirmação, pulos, cartas, plateia, ranking e modo telão.',tags:['destaque','telão'],ready:true,image:'assets/games/milhao.webp'},
-{id:'trilha',icon:'🎲',title:'Trilha do Trânsito',description:'Tabuleiro educativo com dado animado, peões, avanço por casas, eventos especiais e desafios.',tags:['multijogador','offline'],ready:true,image:'assets/games/trilha.webp'},
-{id:'memoria',icon:'🧠',title:'Jogo da Memória',description:'Pares visuais de segurança viária com animação, tempo, jogadas e pontuação.',tags:['atenção','visual'],ready:true,image:'assets/games/memoria.webp'},
-{id:'cruzadas',icon:'✏️',title:'Palavras Cruzadas do Trânsito',description:'Pistas educativas, validação imediata e pontuação por desempenho.',tags:['vocabulário','desafio'],ready:true,image:'assets/games/cruzadas.webp'},
-{id:'cidade',icon:'🏙️',title:'Cidade Mirim',description:'Missões em ambiente urbano com decisões de pedestre, ciclista e ocupante de veículo.',tags:['simulação','missões'],ready:true,accent:'city'},
-{id:'plateia',icon:'📱',title:'Plateia Interativa',description:'Modo local para respostas coletivas e percentuais ao vivo, preparado para sincronização futura.',tags:['coletivo','telão'],ready:true,accent:'audience'}
+{id:'quiz',icon:'⚡',title:'Quiz Relâmpago',description:'Perguntas rápidas, pontuação, sequência de acertos e explicações pedagógicas.',tags:['funcional','offline'],ready:true},
+{id:'milhao',icon:'💡',cover:'assets/games/quiz_do_milhao_do_transito.webp',title:'Show do Milhão do Trânsito',description:'Perguntas, cronômetro, pulos, cartas, plateia, progressão e resultado final.',tags:['jogar agora','telão'],ready:true},
+{id:'trilha',icon:'🎲',cover:'assets/games/trilha_do_transito_agentes_mirins.webp',title:'Trilha do Trânsito',description:'Tabuleiro, dado animado, peões, casas especiais e desafios educativos.',tags:['jogar agora','multijogador'],ready:true},
+{id:'memoria',icon:'🧠',cover:'assets/games/jogo_da_memoria_mobiliza_educa.webp',title:'Jogo da Memória',description:'Cartas animadas, pares de sinais e situações seguras, tempo e pontuação.',tags:['jogar agora','atenção'],ready:true},
+{id:'cruzadas',icon:'✏️',cover:'assets/games/palavras_cruzadas_do_transito.webp',title:'Palavras Cruzadas do Trânsito',description:'Pistas educativas, validação das respostas, tentativas e pontuação.',tags:['jogar agora','vocabulário'],ready:true},
+{id:'cidade',icon:'🏙️',title:'Cidade Mirim',description:'Missões em ambiente urbano com papéis de pedestre, ciclista e condutor.',tags:['simulação','missões'],ready:false},
+{id:'plateia',icon:'📱',title:'Plateia Interativa',description:'QR Code, respostas pelo celular, percentuais ao vivo e telão sincronizado.',tags:['coletivo','telão'],ready:false}
 ];
 
 export const learning=[
