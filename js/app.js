@@ -13,14 +13,14 @@ import { renderHomeNotifications } from './modules/notifications.js';
 const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
 let deferredPrompt=null,tipIndex=0;
 
-const moduleCard=(item,actionLabel='Abrir')=>`
-<article class="module-card card ${item.image?'illustrated':''} ${item.accent?'accent-'+item.accent:''}">
-  ${item.image?`<div class="module-cover"><img src="${item.image}" alt="" loading="lazy"><span class="cover-shine"></span></div>`:`<div class="module-icon" aria-hidden="true">${item.icon}</div>`}
+const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image||'';return `
+<article class="module-card card ${image?'illustrated':''} ${item.accent?'accent-'+item.accent:''}">
+  ${image?`<div class="module-cover"><img src="${image}?v=9" alt="${item.title}" loading="lazy" decoding="async"><span class="cover-shine"></span></div>`:`<div class="module-icon" aria-hidden="true">${item.icon}</div>`}
   <div class="module-card-body">
     <h3>${item.title}</h3>
     <p>${item.description}</p>
     <div class="module-meta">${(item.tags||[]).map(t=>`<span class="chip">${t}</span>`).join('')}</div>
-    <button class="btn ${item.ready?'primary':'ghost'}" data-module="${item.id}" ${item.disabled?'disabled':''}>${item.ready?actionLabel:'Em evolução'}</button>
+    <button type="button" class="btn ${item.ready?'primary':'ghost'}" data-module="${item.id}" ${item.disabled?'disabled':''}>${item.ready?actionLabel:'Em evolução'}</button>
   </div>
 </article>`;};
 
