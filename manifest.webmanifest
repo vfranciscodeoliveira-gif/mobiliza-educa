@@ -9,6 +9,6 @@
   "theme_color":"#0f3c66",
   "lang":"pt-BR",
   "icons":[
-    {"src":"assets/brand-icon.webp","sizes":"96x96","type":"image/webp","purpose":"any maskable"}
+    {"src":"assets/brand-icon.webp","sizes":"any","type":"image/webp","purpose":"any maskable"}
   ]
 }
