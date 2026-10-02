@@ -22,7 +22,7 @@ const moduleCard=(item,actionLabel='Abrir')=>`
     <div class="module-meta">${(item.tags||[]).map(t=>`<span class="chip">${t}</span>`).join('')}</div>
     <button class="btn ${item.ready?'primary':'ghost'}" data-module="${item.id}" ${item.disabled?'disabled':''}>${item.ready?actionLabel:'Em evolução'}</button>
   </div>
-</article>`;
+</article>`;};
 
 function updateAuthUI(){
  const unlocked=isAdminUnlocked(),lock=qs('#btnAdminLock'),nav=qs('[data-view="gestao"]');
