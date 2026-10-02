@@ -82,9 +82,11 @@ qs('#btnInstall').addEventListener('click',async()=>{if(!deferredPrompt)return;d
 function network(){qs('#networkStatus').textContent=navigator.onLine?'● online':'● offline';}
 window.addEventListener('online',network);window.addEventListener('offline',network);network();
 const gameDialog=qs('#gameDialog');
-const closeGame=()=>{if(gameDialog?.open)gameDialog.close();};
-qs('#closeGameDialog')?.addEventListener('click',closeGame);
-gameDialog?.addEventListener('cancel',e=>{e.preventDefault();closeGame();});
-gameDialog?.addEventListener('click',e=>{if(e.target===gameDialog)closeGame();});
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=0.8.0'));
+const gameHost=qs('#gameHost');
+const closeGame=()=>{if(!gameDialog?.open)return;gameDialog.dataset.closing='1';gameDialog.close();gameDialog.dataset.closing='';};
+qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closeGame();});
+gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
+gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
+gameHost?.addEventListener('click',e=>e.stopPropagation());
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=0.9.0'));
 render();
