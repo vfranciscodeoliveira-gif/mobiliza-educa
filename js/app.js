@@ -2,7 +2,7 @@ import { games, audiences, learning, educatorModules, adminModules, tips } from 
 import { openQuiz } from './modules/quiz.js?v=24';
 import { openMilhao } from './modules/milhao.js?v=14';
 import { openTrilha } from './modules/trilha.js?v=24';
-import { openMemoria } from './modules/memoria.js?v=24';
+import { openMemoria } from './modules/memoria.js?v=25';
 import { openCruzadas } from './modules/cruzadas.js?v=24';
 import { openCidade } from './modules/cidade.js';
 import { openPlateia } from './modules/plateia.js';
