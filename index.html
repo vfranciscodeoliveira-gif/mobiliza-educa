@@ -23,6 +23,7 @@
     </div>
     <div class="top-actions">
       <button id="btnInstall" class="btn secondary" hidden>Instalar aplicativo</button>
+      <button id="btnAdminLock" class="btn ghost" hidden>🔒 Sair do gestor</button>
       <button id="btnContrast" class="icon-btn" aria-label="Alternar alto contraste" title="Alto contraste">◐</button>
       <button id="btnFont" class="icon-btn" aria-label="Aumentar tamanho do texto" title="Texto maior">A+</button>
     </div>
@@ -59,6 +60,13 @@
         <article class="stat card"><strong>Web + PWA</strong><span>celular, tablet, PC e telão</span></article>
         <article class="stat card"><strong>Aberta</strong><span>pronta para expansão</span></article>
       </div>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <div><p class="eyebrow">CENTRAL DO ADMINISTRADOR</p><h3>Notificações e alertas</h3></div>
+        </div>
+        <div id="homeNotifications"></div>
+      </section>
 
       <section class="section-block">
         <div class="section-heading">
@@ -138,6 +146,8 @@
     </section>
   </main>
 
+  <dialog id="authDialog" class="auth-dialog"></dialog>
+
   <dialog id="adminDialog">
     <form method="dialog" class="dialog-shell admin-dialog-shell">
       <button class="dialog-close" aria-label="Fechar">×</button>
@@ -152,7 +162,7 @@
     </form>
   </dialog>
 
-  <footer><span>Mobiliza Educa • versão web 0.2</span><span id="networkStatus">● online</span></footer>
+  <footer><span>Mobiliza Educa • versão web 0.3</span><span id="networkStatus">● online</span></footer>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
