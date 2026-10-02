@@ -281,7 +281,18 @@ export function openTrilha(dialog,host,onFinish){
     });
   };
 
-  const dieFace=(value)=>`<span class="trail-die-pips">${['⚀','⚁','⚂','⚃','⚄','⚅'][value-1]}</span><span class="trail-die-number">${value}</span>`;
+  const dieFace=value=>{
+    const patterns={
+      1:[5],
+      2:[1,9],
+      3:[1,5,9],
+      4:[1,3,7,9],
+      5:[1,3,5,7,9],
+      6:[1,3,4,6,7,9]
+    };
+    const dots=patterns[value]||patterns[1];
+    return `<span class="trail-die-dots" aria-hidden="true">${Array.from({length:9},(_,i)=>`<i class="${dots.includes(i+1)?'on':''}"></i>`).join('')}</span><span class="trail-die-number">${value}</span>`;
+  };
 
   const throwDice=async()=>{
     const o=overlay(`<div class="trail-modal trail-dice-modal trail-dice-ready">
@@ -317,7 +328,7 @@ export function openTrilha(dialog,host,onFinish){
         die.classList.remove('rolling-a','rolling-b');
         die.classList.add('stopped');
         sounds.diceStop(value);
-        o.querySelector('#trailDiceText').innerHTML=`Você tirou <strong>${value}</strong>!`;
+        o.querySelector('#trailDiceText').innerHTML=`Você tirou <strong>${value}</strong>! <span class="trail-dice-move-hint">Avance ${value} casa${value===1?'':'s'}.</span>`;
         await sleep(900);
         closeOverlay();
         resolve(value);
