@@ -163,3 +163,70 @@ filter:drop-shadow(0 0 24px rgba(44,146,255,.55));pointer-events:none}
 .milhao-card-pick.chosen .milhao-card-front{box-shadow:0 0 0 4px rgba(255,237,130,.72),0 22px 48px rgba(0,0,0,.45)}
 @media(max-width:980px){.milhao-start-stage{grid-template-columns:1fr}.milhao .windows-layout{grid-template-columns:1fr}.milhao-card-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){.milhao-card-grid{grid-template-columns:1fr 1fr}.milhao-card-pick{height:190px}.cards-picker-title{flex-direction:column;text-align:center}.milhao-cover-badge{left:12px;bottom:12px}}
+
+/* v0.9.4 • capas visíveis + cartas clicáveis */
+/* O overlay antigo bloqueava o clique porque mantinha pointer-events:none. */
+.milhao-help-overlay.show{pointer-events:auto!important}
+.cards-pick-overlay,.cards-pick-overlay *{pointer-events:auto}
+.cards-pick-overlay .milhao-card-pick{position:relative;z-index:5;pointer-events:auto!important;cursor:pointer!important}
+.cards-pick-overlay .milhao-card-face{pointer-events:none}
+
+/* Capas: a imagem passa a existir também como background do próprio container.
+   Assim não fica o retângulo azul quando o <img> demora a pintar. */
+.game-showcase .module-card.illustrated{background:#fff}
+.game-showcase .module-cover{
+  position:relative;
+  min-height:250px;
+  aspect-ratio:16/9;
+  background-color:#0f4d7c;
+  background-image:
+    linear-gradient(180deg,rgba(1,15,35,.04) 0%,rgba(1,15,35,.08) 62%,rgba(1,15,35,.58) 100%),
+    var(--cover-image);
+  background-size:cover,cover;
+  background-position:center,center;
+  background-repeat:no-repeat;
+  overflow:hidden;
+}
+.game-showcase .module-cover img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+  opacity:1!important;
+  visibility:visible!important;
+  z-index:1;
+}
+.game-showcase .module-cover.cover-error img{display:none}
+.game-showcase .module-cover .cover-shine{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.15) 43%,transparent 58%);
+  transform:translateX(-120%);
+  transition:transform .55s ease;
+}
+.game-showcase .module-card:hover .cover-shine{transform:translateX(120%)}
+.game-showcase .module-cover-title{
+  position:absolute;left:16px;right:16px;bottom:14px;z-index:3;
+  display:flex;align-items:center;gap:8px;
+  color:#fff;font-weight:1000;font-size:1rem;
+  text-shadow:0 2px 8px rgba(0,0,0,.8);
+  pointer-events:none;
+}
+.game-showcase .module-cover.loaded .module-cover-title{opacity:.96}
+.game-showcase .module-card-body{background:#fff}
+
+/* Abertura do Milhão: força a arte acima dos anéis do fundo. */
+.milhao-start-emblem,.milhao-cover-frame{position:relative;z-index:3}
+.milhao-cover-frame{background-image:
+  linear-gradient(180deg,rgba(1,10,35,.02),rgba(1,10,35,.22)),
+  url('../assets/games/quiz_do_milhao_do_transito.webp?v=12')!important;
+  background-size:cover!important;background-position:center!important;
+}
+.milhao-cover-frame .milhao-start-art{position:relative;z-index:1;opacity:1!important;visibility:visible!important}
+.milhao-cover-badge{z-index:4}
+
+@media(max-width:900px){
+  .game-showcase .module-cover{min-height:210px}
+}
