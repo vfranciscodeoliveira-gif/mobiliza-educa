@@ -1,4 +1,4 @@
-const CACHE='mobiliza-educa-v0.12.1';
+const CACHE='mobiliza-educa-v0.13.0';
 const ASSETS=[
  './','./index.html','./assets/app.css?v=31','./assets/showcase.css?v=14',
  './assets/icon.svg','./assets/mobiliza_educa_caminhos_para_a_vida.webp','./assets/icon-32.webp','./assets/icon-192.webp','./assets/brand-cover.webp',
@@ -7,9 +7,10 @@ const ASSETS=[
  './assets/games/jogo_da_memoria_mobiliza_educa.svg',
  './assets/games/palavras_cruzadas_do_transito.svg',
  './assets/games/cidade_mirim_mobiliza_educa.svg',
+ './assets/games/cidade_mirim_realista_ai.webp',
  './assets/memory/pare.svg','./assets/memory/semaforo.svg','./assets/memory/pedestre.svg','./assets/memory/bicicleta.svg','./assets/memory/cinto.svg','./assets/memory/celular.svg','./assets/memory/velocidade.svg','./assets/memory/escola.svg','./assets/memory/capacete.svg','./assets/memory/faixa.svg',
- './js/app.js?v=33','./js/content.js?v=32','./js/modules/quiz.js?v=24','./js/modules/milhao.js?v=14',
- './js/modules/trilha.js?v=31','./js/modules/memoria.js?v=27','./js/modules/cruzadas.js?v=30','./js/modules/cidade.js?v=33',
+ './js/app.js?v=34','./js/content.js?v=34','./js/modules/quiz.js?v=24','./js/modules/milhao.js?v=14',
+ './js/modules/trilha.js?v=31','./js/modules/memoria.js?v=27','./js/modules/cruzadas.js?v=30','./js/modules/cidade.js?v=34',
  './js/modules/admin.js','./js/modules/auth.js','./js/modules/notifications.js','./manifest.webmanifest'
 ];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
