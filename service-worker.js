@@ -1,6 +1,6 @@
-const CACHE='mobiliza-educa-v0.19.1';
+const CACHE='mobiliza-educa-v0.20.0';
 const ASSETS=[
- './','./index.html','./assets/app.css?v=33','./assets/showcase.css?v=14',
+ './','./index.html','./assets/app.css?v=34','./assets/showcase.css?v=14',
  './assets/icon.svg','./assets/mobiliza_educa_caminhos_para_a_vida.webp','./assets/icon-32.webp','./assets/icon-192.webp','./assets/brand-cover.webp',
  './assets/games/quiz_do_milhao_do_transito.svg',
  './assets/games/trilha_do_transito_agentes_mirins.svg',
@@ -9,9 +9,9 @@ const ASSETS=[
  './assets/games/cidade_mirim_mobiliza_educa.svg',
  './assets/games/cidade_mirim_realista_ai_v35.webp',
  './assets/memory/pare.svg','./assets/memory/semaforo.svg','./assets/memory/pedestre.svg','./assets/memory/bicicleta.svg','./assets/memory/cinto.svg','./assets/memory/celular.svg','./assets/memory/velocidade.svg','./assets/memory/escola.svg','./assets/memory/capacete.svg','./assets/memory/faixa.svg',
- './js/app.js?v=43','./js/content.js?v=42','./js/modules/quiz.js?v=24','./js/modules/milhao.js?v=14',
- './js/modules/trilha.js?v=31','./js/modules/memoria.js?v=27','./js/modules/cruzadas.js?v=30',
- './js/modules/experiencias.js?v=42','./js/modules/admin.js','./js/modules/auth.js','./js/modules/notifications.js','./manifest.webmanifest'
+ './js/app.js?v=44','./js/content.js?v=42','./js/modules/quiz.js?v=25','./js/modules/milhao.js?v=15',
+ './js/modules/trilha.js?v=32','./js/modules/memoria.js?v=27','./js/modules/cruzadas.js?v=30',
+ './js/modules/experiencias.js?v=42','./js/core/soundManager.js?v=1','./js/core/questionEngine.js?v=1','./js/data/questionBank.js?v=1','./js/modules/admin.js','./js/modules/auth.js','./js/modules/notifications.js','./manifest.webmanifest'
 ];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
