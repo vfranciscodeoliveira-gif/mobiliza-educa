@@ -24,5 +24,5 @@ export function openQuiz(dialog,host,onFinish){
     s.games=(s.games||0)+1;s.correct=(s.correct||0)+correct;s.answers=(s.answers||0)+questions.length;s.best=Math.max(s.best||0,score);s.streak=Math.max(s.streak||0,bestStreak);localStorage.setItem('mobiliza.results',JSON.stringify(s));
     SoundManager.play('finish');onFinish?.();host.querySelector('#playAgain').addEventListener('click',()=>openQuiz(dialog,host,onFinish));
   }
-  render();dialog.showModal();
+  render();if(!dialog.open)dialog.showModal();
 }
