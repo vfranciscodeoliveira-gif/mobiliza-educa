@@ -1,3 +1,4 @@
+import { getGameQuestions } from '../core/questionEngine.js?v=1';
 const BOARD_SIZE=24;
 const COLS=6;
 
@@ -13,20 +14,7 @@ const SPECIALS={
 
 const BONUS_HOUSES=new Set([3,8,12,18,22]);
 
-const QUESTIONS=[
-  {q:'Ao se aproximar de uma faixa de pedestres ocupada, o condutor deve:',options:['Acelerar para passar primeiro','Reduzir a velocidade e dar passagem','Buzinar para o pedestre sair','Desviar pela contramão'],correct:1,why:'A travessia deve ser protegida com velocidade compatível e prioridade ao pedestre.'},
-  {q:'O cinto de segurança deve ser usado:',options:['Somente pelo motorista','Somente em rodovias','Por todos os ocupantes','Só nos bancos dianteiros'],correct:2,why:'Todos os ocupantes devem usar cinto, inclusive no banco traseiro.'},
-  {q:'Usar o celular enquanto dirige:',options:['É seguro em baixa velocidade','Só é arriscado à noite','Divide a atenção e aumenta o risco','É permitido se o trânsito estiver parado'],correct:2,why:'A distração visual, manual e cognitiva reduz a percepção e o tempo de reação.'},
-  {q:'Em área escolar, a atitude mais segura é:',options:['Acelerar para liberar a via','Reduzir a velocidade e redobrar a atenção','Buzinar continuamente','Parar sobre a faixa'],correct:1,why:'Áreas escolares exigem velocidade adequada e atenção reforçada aos pedestres.'},
-  {q:'No semáforo amarelo, o condutor deve:',options:['Acelerar sempre','Ignorar a sinalização','Reduzir e parar com segurança quando possível','Parar no meio do cruzamento'],correct:2,why:'O amarelo indica atenção e transição; a parada deve ocorrer de modo seguro.'},
-  {q:'Ao ultrapassar um ciclista, o mais seguro é:',options:['Passar muito perto','Manter distância lateral segura','Buzinar até ele sair da via','Ultrapassar em curva'],correct:1,why:'Distância lateral e visibilidade ajudam a proteger o ciclista.'},
-  {q:'Em pista molhada, é recomendado:',options:['Aumentar a velocidade','Reduzir a distância do veículo da frente','Reduzir a velocidade e aumentar a distância','Frear bruscamente nas curvas'],correct:2,why:'A aderência diminui na chuva e a distância necessária para parar aumenta.'},
-  {q:'Antes de mudar de faixa, o condutor deve:',options:['Sinalizar e verificar espelhos e ponto cego','Mudar rapidamente sem sinalizar','Olhar apenas para frente','Buzinar e mudar imediatamente'],correct:0,why:'A sinalização e a verificação do entorno tornam a manobra previsível e segura.'},
-  {q:'Para atravessar a rua com segurança, o pedestre deve:',options:['Atravessar entre carros estacionados','Usar a faixa e observar os dois sentidos','Correr sem olhar','Usar o celular durante a travessia'],correct:1,why:'A faixa organiza a travessia, mas a atenção ao trânsito continua indispensável.'},
-  {q:'Se o motorista estiver cansado ou sonolento, deve:',options:['Abrir a janela e seguir','Aumentar a velocidade','Interromper a condução e descansar','Usar o celular para se manter acordado'],correct:2,why:'A sonolência compromete atenção e tempo de reação.'},
-  {q:'Manter distância segura do veículo da frente serve para:',options:['Criar espaço para reagir e frear','Diminuir o tempo de reação','Aumentar a velocidade média','Evitar olhar para os espelhos'],correct:0,why:'A distância de segurança fornece espaço para percepção, reação e frenagem.'},
-  {q:'A seta deve ser usada:',options:['Depois que a manobra começou','Somente em rodovias','Antes de conversões e mudanças de faixa','Apenas quando houver fiscalização'],correct:2,why:'A sinalização deve anteceder a manobra para que os demais usuários percebam sua intenção.'}
-];
+let QUESTIONS=[];
 
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
@@ -39,6 +27,7 @@ function saveResult(score){
 }
 
 export function openTrilha(dialog,host,onFinish){
+  QUESTIONS=getGameQuestions('trilha',18).map(x=>({q:x.prompt,options:x.options,correct:x.correct,why:x.why,id:x.id,image:x.image}));
   dialog.classList.add('trail-v31-dialog');
   dialog.addEventListener('close',()=>dialog.classList.remove('trail-v31-dialog'),{once:true});
   let players=[
