@@ -1,4 +1,4 @@
-import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=49';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=50';
 import { openQuiz } from './modules/quiz.js?v=28';
 import { openMilhao } from './modules/milhao.js?v=16';
 import { openTrilha } from './modules/trilha.js?v=33';
@@ -7,7 +7,7 @@ import { openCruzadas } from './modules/cruzadas.js?v=30';
 import { openPlateia } from './modules/plateia.js?v=5';
 import { openLearning } from './modules/learning.js?v=1';
 import { openParticipantMode } from './modules/participant.js?v=2';
-import { openExperience } from './modules/experiencias.js?v=44';
+import { openExperience } from './modules/experiencias.js?v=45';
 import { SoundManager } from './core/soundManager.js?v=1';
 import { openAdminModule } from './modules/admin.js';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
@@ -30,7 +30,7 @@ const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image
 
 const audienceTrackCard=item=>`<article class="audience-track-card"><div class="track-icon">${item.icon}</div><div><span class="track-format">${item.format}</span><h4>${item.title}</h4><p>${item.text}</p></div></article>`;
 
-const experienceCard=item=>`<article class="experience-card ${item.ready?'available':''}">${item.visual?`<div class="experience-visual ${item.visual}" role="img" aria-label="${item.title}"></div>`:`<div class="experience-icon">${item.icon}</div>`}<div class="experience-copy"><span class="track-format">${item.format}</span><h4>${item.title}</h4><p>${item.description}</p><div class="module-meta">${item.audiences.map(a=>`<span class="chip">${audienceProfiles[a]?.title||a}</span>`).join('')}</div>${item.ready?`<button type="button" class="btn primary experience-open" data-experience="${item.id}">Experimentar agora</button>`:''}</div><span class="experience-status ${item.ready?'active':''}">${item.ready?'Disponível':'Em planejamento'}</span></article>`;
+const experienceCard=item=>`<article class="experience-card ${item.ready?'available':''}">${item.cover?`<div class="experience-visual experience-cover"><img src="${item.cover}?v=25" alt="${item.title}" loading="lazy"></div>`:item.visual?`<div class="experience-visual ${item.visual}" role="img" aria-label="${item.title}"></div>`:`<div class="experience-icon">${item.icon}</div>`}<div class="experience-copy"><span class="track-format">${item.format}</span><h4>${item.title}</h4><p>${item.description}</p><div class="module-meta">${item.audiences.map(a=>`<span class="chip">${audienceProfiles[a]?.title||a}</span>`).join('')}</div>${item.ready?`<button type="button" class="btn primary experience-open" data-experience="${item.id}">Experimentar agora</button>`:''}</div><span class="experience-status ${item.ready?'active':''}">${item.ready?'Disponível':'Em planejamento'}</span></article>`;
 
 function renderAudienceProfile(id){
  currentAudience=id in audienceProfiles?id:'criancas';
@@ -124,7 +124,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.26.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.27.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
 const plateiaJoinCode=new URLSearchParams(location.search).get('plateia');
 if(plateiaJoinCode)openParticipantMode(plateiaJoinCode);
