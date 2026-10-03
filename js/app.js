@@ -10,11 +10,13 @@ import { openLearning } from './modules/learning.js?v=3';
 import { openParticipantMode } from './modules/participant.js?v=3';
 import { openExperience } from './modules/experiencias.js?v=46';
 import { SoundManager } from './core/soundManager.js?v=1';
-import { openAdminModule } from './modules/admin.js?v=6';
+import { openAdminModule } from './modules/admin.js?v=7';
 import { openEducatorModule } from './modules/educator.js?v=1';
 import { renderResultsDashboard } from './modules/results.js?v=2';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
-import { renderHomeNotifications } from './modules/notifications.js?v=2';
+import { renderHomeNotifications } from './modules/notifications.js?v=3';
+import { renderPublicService } from './modules/publicService.js?v=1';
+import { syncCloudInbox } from './cloudGateway.js?v=1';
 
 const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
 let deferredPrompt=null,tipIndex=0,currentAudience='criancas';
@@ -75,7 +77,7 @@ function render(){
  qs('#educatorGrid').innerHTML=educatorModules.map(x=>moduleCard(x,'Abrir módulo')).join('');
  qs('#adminGrid').innerHTML=adminModules.map(x=>moduleCard(x,'Abrir')).join('');
  const stat=qs('#statJogos'); if(stat) stat.textContent=games.length;
- bindModuleButtons();bindAudienceUI();bindGlobalSound();renderAudienceProfile(currentAudience);showTip(0);updateResults();updateAuthUI();
+ bindModuleButtons();bindAudienceUI();bindGlobalSound();renderAudienceProfile(currentAudience);renderPublicService(qs('#publicServiceHost'));showTip(0);updateResults();updateAuthUI();
 }
 function navigate(view){
  qsa('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${view}`));
@@ -128,7 +130,8 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.36.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.37.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+const cloudRefresh=()=>syncCloudInbox().catch(()=>{});window.addEventListener('focus',cloudRefresh);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudRefresh();});
 render();
 const plateiaJoinCode=new URLSearchParams(location.search).get('plateia');
 if(plateiaJoinCode)openParticipantMode(plateiaJoinCode);
