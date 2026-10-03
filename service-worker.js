@@ -1,4 +1,4 @@
-const CACHE='mobiliza-educa-v0.25.2';
+const CACHE='mobiliza-educa-v0.25.3';
 const ASSETS=[
  './','./index.html','./assets/app.css?v=37','./assets/showcase.css?v=14',
  './assets/icon.svg','./assets/ai/hero_area_escolar.webp?v=2','./assets/ai/publicos_sprite.webp?v=2','./assets/ai/jogos_experiencias_sprite.webp?v=2','./assets/mobiliza_educa_caminhos_para_a_vida.webp','./assets/icon-32.webp','./assets/icon-192.webp','./assets/brand-cover.webp',
@@ -9,7 +9,7 @@ const ASSETS=[
  './assets/games/cidade_mirim_mobiliza_educa.svg',
  './assets/games/cidade_mirim_realista_ai_v35.webp',
  './assets/memory/pare.svg','./assets/memory/semaforo.svg','./assets/memory/pedestre.svg','./assets/memory/bicicleta.svg','./assets/memory/cinto.svg','./assets/memory/celular.svg','./assets/memory/velocidade.svg','./assets/memory/escola.svg','./assets/memory/capacete.svg','./assets/memory/faixa.svg',
- './js/app.js?v=52','./js/content.js?v=47','./js/modules/quiz.js?v=27','./js/modules/milhao.js?v=16',
+ './js/app.js?v=53','./js/content.js?v=48','./js/modules/quiz.js?v=27','./js/modules/milhao.js?v=16',
  './js/modules/trilha.js?v=33','./js/modules/memoria.js?v=27','./js/modules/cruzadas.js?v=30','./js/modules/plateia.js?v=5','./js/modules/participant.js?v=2','./js/modules/learning.js?v=1','./js/core/sharedSession.js?v=1',
  './js/modules/experiencias.js?v=44','./js/modules/experienciasExtra.js?v=1','./js/core/soundManager.js?v=1','./js/core/questionEngine.js?v=2','./js/data/questionBank.js?v=1','./js/modules/admin.js','./js/modules/auth.js','./js/modules/notifications.js','./manifest.webmanifest'
 ];
