@@ -14,9 +14,9 @@ import { renderHomeNotifications } from './modules/notifications.js';
 const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
 let deferredPrompt=null,tipIndex=0,currentAudience='criancas';
 
-const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image||'';const cover=image?`${image}?v=24`:'';return `
+const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image||'';const visual=item.visual||'';const cover=image?`${image}?v=24`:'';return `
 <article class="module-card card ${image?'illustrated':''} ${item.accent?'accent-'+item.accent:''}">
-  ${image?`<div class="module-cover" style="--cover-image:url('${cover}')"><img src="${cover}" alt="${item.title}" loading="eager" decoding="async" onload="this.closest('.module-cover')?.classList.add('loaded')" onerror="this.closest('.module-cover')?.classList.add('cover-error')"><span class="cover-shine"></span><span class="module-cover-title">${item.icon||'🎮'} ${item.title}</span></div>`:`<div class="module-icon" aria-hidden="true">${item.icon}</div>`}
+  ${visual?`<div class="module-cover sprite-cover ${visual}" role="img" aria-label="${item.title}"><span class="cover-shine"></span><span class="module-cover-title">${item.icon||'🎮'} ${item.title}</span></div>`:image?`<div class="module-cover" style="--cover-image:url('${cover}')"><img src="${cover}" alt="${item.title}" loading="eager" decoding="async" onload="this.closest('.module-cover')?.classList.add('loaded')" onerror="this.closest('.module-cover')?.classList.add('cover-error')"><span class="cover-shine"></span><span class="module-cover-title">${item.icon||'🎮'} ${item.title}</span></div>`:`<div class="module-icon" aria-hidden="true">${item.icon}</div>`}
   <div class="module-card-body">
     <h3>${item.title}</h3>
     <p>${item.description}</p>
@@ -28,13 +28,13 @@ const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image
 
 const audienceTrackCard=item=>`<article class="audience-track-card"><div class="track-icon">${item.icon}</div><div><span class="track-format">${item.format}</span><h4>${item.title}</h4><p>${item.text}</p></div></article>`;
 
-const experienceCard=item=>`<article class="experience-card ${item.ready?'available':''}"><div class="experience-icon">${item.icon}</div><div class="experience-copy"><span class="track-format">${item.format}</span><h4>${item.title}</h4><p>${item.description}</p><div class="module-meta">${item.audiences.map(a=>`<span class="chip">${audienceProfiles[a]?.title||a}</span>`).join('')}</div>${item.ready?`<button type="button" class="btn primary experience-open" data-experience="${item.id}">Experimentar agora</button>`:''}</div><span class="experience-status ${item.ready?'active':''}">${item.ready?'Disponível':'Em planejamento'}</span></article>`;
+const experienceCard=item=>`<article class="experience-card ${item.ready?'available':''}">${item.visual?`<div class="experience-visual ${item.visual}" role="img" aria-label="${item.title}"></div>`:`<div class="experience-icon">${item.icon}</div>`}<div class="experience-copy"><span class="track-format">${item.format}</span><h4>${item.title}</h4><p>${item.description}</p><div class="module-meta">${item.audiences.map(a=>`<span class="chip">${audienceProfiles[a]?.title||a}</span>`).join('')}</div>${item.ready?`<button type="button" class="btn primary experience-open" data-experience="${item.id}">Experimentar agora</button>`:''}</div><span class="experience-status ${item.ready?'active':''}">${item.ready?'Disponível':'Em planejamento'}</span></article>`;
 
 function renderAudienceProfile(id){
  currentAudience=id in audienceProfiles?id:'criancas';
  const p=audienceProfiles[currentAudience];
  const hero=qs('#audienceProfile');
- if(hero)hero.innerHTML=`<div class="profile-icon">${p.icon}</div><div><p class="eyebrow">${p.eyebrow}</p><h3>${p.title}</h3><p>${p.intro}</p><div class="profile-highlights">${p.highlights.map(x=>`<span>${x}</span>`).join('')}</div></div>`;
+ if(hero)hero.innerHTML=`<div class="profile-photo aud-${currentAudience}" role="img" aria-label="${p.title}"></div><div><p class="eyebrow">${p.eyebrow}</p><h3>${p.title}</h3><p>${p.intro}</p><div class="profile-highlights">${p.highlights.map(x=>`<span>${x}</span>`).join('')}</div></div>`;
  const grid=qs('#audienceTrackGrid');
  if(grid)grid.innerHTML=p.tracks.map(audienceTrackCard).join('');
  const exp=qs('#experienceGrid');
@@ -121,5 +121,5 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.20.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.22.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
