@@ -1,4 +1,4 @@
-import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=42';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=43';
 import { openQuiz } from './modules/quiz.js?v=26';
 import { openMilhao } from './modules/milhao.js?v=15';
 import { openTrilha } from './modules/trilha.js?v=32';
@@ -15,7 +15,7 @@ const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
 let deferredPrompt=null,tipIndex=0,currentAudience='criancas';
 
 const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image||'';const visual=item.visual||'';const cover=image?`${image}?v=24`:'';return `
-<article class="module-card card ${image?'illustrated':''} ${item.accent?'accent-'+item.accent:''}">
+<article class="module-card card ${(image||visual)?'illustrated visual-card':''} ${item.accent?'accent-'+item.accent:''}">
   ${visual?`<div class="module-cover sprite-cover ${visual}" role="img" aria-label="${item.title}"><span class="cover-shine"></span><span class="module-cover-title">${item.icon||'🎮'} ${item.title}</span></div>`:image?`<div class="module-cover" style="--cover-image:url('${cover}')"><img src="${cover}" alt="${item.title}" loading="eager" decoding="async" onload="this.closest('.module-cover')?.classList.add('loaded')" onerror="this.closest('.module-cover')?.classList.add('cover-error')"><span class="cover-shine"></span><span class="module-cover-title">${item.icon||'🎮'} ${item.title}</span></div>`:`<div class="module-icon" aria-hidden="true">${item.icon}</div>`}
   <div class="module-card-body">
     <h3>${item.title}</h3>
