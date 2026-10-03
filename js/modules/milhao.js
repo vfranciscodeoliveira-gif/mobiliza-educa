@@ -360,11 +360,22 @@ export function openMilhao(dialog,host,onFinish){
       <div class="milhao-live-audience-head"><div><p class="eyebrow">PLATEIA CONECTADA</p><h3>VOTAÇÃO AO VIVO</h3><p>A pergunta foi enviada para os celulares.</p></div><div class="milhao-live-count"><strong id="milhaoAudienceVoteCount">0</strong><small>votos</small></div></div>
       <div class="milhao-live-voters" id="milhaoAudienceVoters"></div>
       <div class="milhao-live-note">🔒 A distribuição das respostas fica oculta até encerrar a votação.</div>
-      <button type="button" class="btn primary" id="milhaoAudienceReveal" disabled>📊 ENCERRAR VOTAÇÃO</button>
+      <div class="hero-actions"><button type="button" class="btn primary" id="milhaoAudienceReveal" disabled>📊 ENCERRAR VOTAÇÃO</button><button type="button" class="btn ghost" id="milhaoAudienceCancel">CANCELAR AJUDA</button></div>
     </div>`;
     updateAudienceIndicators();
 
-    await new Promise(resolve=>{o.querySelector('#milhaoAudienceReveal').onclick=resolve;});
+    const audienceAction=await new Promise(resolve=>{
+      o.querySelector('#milhaoAudienceReveal').onclick=()=>resolve('reveal');
+      o.querySelector('#milhaoAudienceCancel').onclick=()=>resolve('cancel');
+    });
+    if(audienceAction==='cancel'){
+      plateia++;
+      audienceState='waiting';audienceCurrentResult=null;audienceVotes=new Map();
+      audienceSession.broadcast({type:'waiting',message:'A votação foi cancelada. Aguarde uma nova solicitação do jogador.'});
+      o.className='milhao-help-overlay';o.innerHTML='';
+      resumeAfterHelp();
+      return;
+    }
 
     const counts=[0,0,0,0];
     audienceVotes.forEach(v=>{if(v>=0&&v<4)counts[v]++;});
@@ -492,6 +503,10 @@ export function openMilhao(dialog,host,onFinish){
   if(finished)return;
   finished=true;stopTimer();
   const rank=ranking(name,finalScore);stats(correctCount,answers,finalScore,bestStreak);
+  if(audienceSession){
+   audienceState='waiting';audienceCurrentResult=null;
+   audienceSession.broadcast({type:'waiting',message:'A partida terminou. Aguarde o operador iniciar uma nova rodada ou encerrar a sessão.'});
+  }
   recordGameResult({
     kind:'game',moduleId:'milhao',title:'Show do Milhão do Trânsito',
     score:finalScore,correct:correctCount,answers,durationSec:Math.round((Date.now()-startedAt)/1000),
