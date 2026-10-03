@@ -14,12 +14,18 @@ const TARGETS=[
  {id:'bike',icon:'🚲',title:'Ciclista',text:'Qual item pertence a este modo de deslocamento?'}
 ];
 const MYTHS=[
- {q:'Usar o celular enquanto dirige divide a atenção e reduz o tempo disponível para reagir.',a:true,why:'A condução exige atenção contínua. Desviar os olhos ou a mente da via reduz a percepção do que muda ao redor.'},
- {q:'A seta, sozinha, garante que o condutor já pode mudar de faixa.',a:false,why:'A seta comunica intenção. Ainda é necessário verificar espelhos, ponto cego e se há espaço seguro.'},
- {q:'Na chuva, aumentar a distância do veículo da frente ajuda a compensar a menor aderência.',a:true,why:'Piso molhado pode aumentar a distância necessária para reduzir a velocidade ou parar.'},
- {q:'Dirigir muito próximo do veículo da frente economiza tempo sem aumentar o risco.',a:false,why:'A menor distância reduz a margem para perceber, reagir e frear diante de uma mudança inesperada.'},
- {q:'Um capacete corretamente ajustado e afivelado oferece proteção melhor do que um capacete solto.',a:true,why:'O equipamento precisa permanecer corretamente posicionado para cumprir sua função de proteção.'},
- {q:'Se um pedestre está na calçada, o motorista sempre consegue vê-lo com facilidade.',a:false,why:'Veículos, postes, chuva, iluminação e pontos cegos podem reduzir a visibilidade. Antecipar essa possibilidade é parte da direção preventiva.'}
+ {q:'Usar o celular enquanto dirige divide a atenção e reduz o tempo disponível para reagir.',a:true,img:MEMORY_BASE+'celular.svg',why:'A condução exige atenção contínua. Desviar os olhos ou a mente da via reduz a percepção do que muda ao redor.'},
+ {q:'A seta, sozinha, garante que o condutor já pode mudar de faixa.',a:false,img:MEMORY_BASE+'semaforo.svg',why:'A seta comunica intenção. Ainda é necessário verificar espelhos, ponto cego e se há espaço seguro.'},
+ {q:'Na chuva, aumentar a distância do veículo da frente ajuda a compensar a menor aderência.',a:true,img:MEMORY_BASE+'velocidade.svg',why:'Piso molhado pode aumentar a distância necessária para reduzir a velocidade ou parar.'},
+ {q:'Dirigir muito próximo do veículo da frente economiza tempo sem aumentar o risco.',a:false,img:MEMORY_BASE+'velocidade.svg',why:'A menor distância reduz a margem para perceber, reagir e frear diante de uma mudança inesperada.'},
+ {q:'Um capacete corretamente ajustado e afivelado oferece proteção melhor do que um capacete solto.',a:true,img:MEMORY_BASE+'capacete.svg',why:'O equipamento precisa permanecer corretamente posicionado para cumprir sua função de proteção.'},
+ {q:'Se um pedestre está na calçada, o motorista sempre consegue vê-lo com facilidade.',a:false,img:MEMORY_BASE+'pedestre.svg',why:'Veículos, postes, chuva, iluminação e pontos cegos podem reduzir a visibilidade. Antecipar essa possibilidade é parte da direção preventiva.'},
+ {q:'Mesmo no banco traseiro, o cinto deve ser usado durante todo o deslocamento.',a:true,img:MEMORY_BASE+'cinto.svg',why:'Todos os ocupantes estão sujeitos às forças de uma colisão ou frenagem brusca, inclusive no banco traseiro.'},
+ {q:'Sinal verde significa que não é mais necessário observar o cruzamento.',a:false,img:MEMORY_BASE+'semaforo.svg',why:'A sinalização organiza prioridades, mas ainda podem existir pedestres, ciclistas ou veículos terminando movimentos.'},
+ {q:'Reduzir a velocidade em área escolar aumenta o tempo disponível para perceber crianças e travessias.',a:true,img:MEMORY_BASE+'escola.svg',why:'Velocidade menor amplia a margem de percepção e reação em ambientes com muitos usuários vulneráveis.'},
+ {q:'A faixa de pedestres elimina a necessidade de olhar para os dois sentidos antes de atravessar.',a:false,img:MEMORY_BASE+'faixa.svg',why:'A faixa organiza a travessia, mas a atenção ao ambiente continua indispensável.'},
+ {q:'Ser previsível e sinalizar intenções ajuda a convivência entre bicicletas e demais usuários da via.',a:true,img:MEMORY_BASE+'bicicleta.svg',why:'Previsibilidade permite que outras pessoas antecipem movimentos e reajam com segurança.'},
+ {q:'Em trajeto curto, usar o celular ao volante por poucos segundos não altera o risco.',a:false,img:MEMORY_BASE+'celular.svg',why:'O ambiente muda continuamente. Poucos segundos de atenção desviada podem coincidir com uma situação crítica.'}
 ];
 const PERCEPTION_SET=[
  {id:'semaforo',label:'Semáforo',img:MEMORY_BASE+'semaforo.svg'},
@@ -27,7 +33,11 @@ const PERCEPTION_SET=[
  {id:'celular',label:'Celular',img:MEMORY_BASE+'celular.svg'},
  {id:'escola',label:'Área escolar',img:MEMORY_BASE+'escola.svg'},
  {id:'velocidade',label:'Limite de velocidade',img:MEMORY_BASE+'velocidade.svg'},
- {id:'cinto',label:'Cinto',img:MEMORY_BASE+'cinto.svg'}
+ {id:'cinto',label:'Cinto',img:MEMORY_BASE+'cinto.svg'},
+ {id:'bicicleta',label:'Bicicleta',img:MEMORY_BASE+'bicicleta.svg'},
+ {id:'capacete',label:'Capacete',img:MEMORY_BASE+'capacete.svg'},
+ {id:'faixa',label:'Faixa de pedestres',img:MEMORY_BASE+'faixa.svg'},
+ {id:'pare',label:'Placa PARE',img:MEMORY_BASE+'pare.svg'}
 ];
 const SAFETY_STEPS=[
  {icon:'📱',title:'1. Distração também é tempo perdido',text:'Quando a atenção sai da via, você perde segundos de leitura do ambiente. Em deslocamentos a trabalho, uma mensagem pode esperar; uma situação de trânsito, não.'},
@@ -48,10 +58,10 @@ function css(){
  .ax .feedback{margin-top:12px;padding:12px;border-radius:12px;background:#eef6fb;color:#31536b;font-weight:700}.ax .feedback.ok{background:#eaf7ef;color:#17643a}.ax .feedback.bad{background:#fff0ef;color:#8c302d}
  .ax .perception-stage{position:relative;min-height:360px;border-radius:18px;overflow:hidden;background:linear-gradient(145deg,#0d2f4c,#0f5277 58%,#1785a7);display:grid;place-items:center;padding:30px}.ax .perception-stage:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(255,255,255,.12),transparent 38%),linear-gradient(90deg,transparent 0 49%,rgba(255,255,255,.04) 50% 51%,transparent 52%);pointer-events:none}.ax .scene-icons{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,120px);gap:24px}.ax .scene-icon{height:120px;border-radius:18px;background:#fff;display:grid;place-items:center;padding:10px;box-shadow:0 14px 30px rgba(0,0,0,.22)}.ax .scene-icon img{max-width:82px;max-height:82px}.ax .scene-icon small{font-size:.68rem;color:#385a70;font-weight:800}.ax .countdown{position:absolute;right:18px;top:18px;z-index:3;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:#f4b740;color:#102033;font-size:1.25rem;font-weight:1000;border:4px solid #fff}.ax .curtain{position:absolute;inset:0;z-index:4;display:grid;place-items:center;background:#0d2942;color:#fff;text-align:center;padding:25px}.ax .curtain h3{color:#fff;font-size:1.5rem;margin:0}.ax .curtain p{color:#cde5f2}
  .ax .answer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.ax .answer{border:2px solid #dce8f1;border-radius:14px;background:#fff;padding:10px;cursor:pointer;display:grid;grid-template-columns:48px 1fr;gap:8px;align-items:center;text-align:left}.ax .answer img{width:44px;height:44px}.ax .answer.chosen{border-color:#155a8a;background:#eef6fb}.ax .answer.correct{border-color:#39a86b;background:#edf9f2}.ax .answer.wrong{border-color:#d64a4a;background:#fff0ef}
- .ax .myth{max-width:760px;margin:0 auto}.ax .myth-card{padding:28px;border-radius:18px;background:#fff;border:1px solid #dce8f1;box-shadow:0 12px 32px rgba(15,60,102,.08)}.ax .myth-card h3{font-size:1.35rem;line-height:1.4}.ax .tf{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.ax .tf button{min-height:70px;border:2px solid #dce8f1;border-radius:14px;background:#fff;color:#0f3c66;font-weight:900;cursor:pointer;font-size:1.05rem}.ax .tf button:hover{border-color:#155a8a;background:#eef6fb}.ax .myth-explain{margin-top:14px;padding:14px;border-radius:12px;background:#eef6fb;color:#385468;line-height:1.5}
+ .ax .myth{max-width:900px;margin:0 auto}.ax .myth-card{padding:24px;border-radius:18px;background:#fff;border:1px solid #dce8f1;box-shadow:0 12px 32px rgba(15,60,102,.08)}.ax .myth-layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:20px;align-items:center}.ax .myth-visual{min-height:170px;border-radius:18px;background:linear-gradient(145deg,#e8f8ff,#fff5d9);display:grid;place-items:center;border:1px solid #d5e7ef}.ax .myth-visual img{width:110px;height:110px;object-fit:contain}.ax .myth-card h3{font-size:1.35rem;line-height:1.4}.ax .tf{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.ax .tf button{min-height:70px;border:2px solid #dce8f1;border-radius:14px;background:#fff;color:#0f3c66;font-weight:900;cursor:pointer;font-size:1.05rem}.ax .tf button:hover{border-color:#155a8a;background:#eef6fb}.ax .myth-explain{margin-top:14px;padding:14px;border-radius:12px;background:#eef6fb;color:#385468;line-height:1.5}
  .ax .safety-step{display:grid;grid-template-columns:70px 1fr;gap:14px;align-items:start;padding:18px;border-radius:16px;background:#fff;border:1px solid #dce8f1;margin-bottom:10px}.ax .safety-step .ico{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;background:#eaf4fb;font-size:2rem}.ax .safety-step h3{margin:0 0 6px}.ax .safety-step p{margin:0;color:#607286;line-height:1.5}.ax .quiz-mini{margin-top:16px}.ax .quiz-mini button{width:100%;text-align:left;padding:13px;border:1px solid #dce8f1;background:#fff;border-radius:11px;margin:5px 0;cursor:pointer}.ax .quiz-mini button:hover{border-color:#155a8a}.ax .complete{padding:22px;border-radius:18px;background:linear-gradient(135deg,#eaf7ef,#fff);border:1px solid #b8dfc7;text-align:center}.ax .complete .big{font-size:2.4rem}.ax .complete h3{margin:5px 0}.ax .complete p{color:#5d7566}
  .ax .ax-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
- @media(max-width:760px){#gameDialog.aud-exp{width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important}.ax{padding:16px;min-height:100dvh}.ax .ax-grid{grid-template-columns:1fr}.ax .drag-items{grid-template-columns:repeat(2,1fr)}.ax .drop-grid{grid-template-columns:1fr}.ax .scene-icons{grid-template-columns:repeat(2,100px);gap:14px}.ax .scene-icon{height:100px}.ax .answer-grid{grid-template-columns:1fr 1fr}.ax .tf{grid-template-columns:1fr}.ax .safety-step{grid-template-columns:50px 1fr}.ax .safety-step .ico{width:48px;height:48px;font-size:1.5rem}}
+ @media(max-width:760px){#gameDialog.aud-exp{width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important}.ax{padding:16px;min-height:100dvh}.ax .myth-layout{grid-template-columns:1fr}.ax .myth-visual{min-height:120px}.ax .myth-visual img{width:82px;height:82px}.ax .ax-grid{grid-template-columns:1fr}.ax .drag-items{grid-template-columns:repeat(2,1fr)}.ax .drop-grid{grid-template-columns:1fr}.ax .scene-icons{grid-template-columns:repeat(2,100px);gap:14px}.ax .scene-icon{height:100px}.ax .answer-grid{grid-template-columns:1fr 1fr}.ax .tf{grid-template-columns:1fr}.ax .safety-step{grid-template-columns:50px 1fr}.ax .safety-step .ico{width:48px;height:48px;font-size:1.5rem}}
  `;document.head.appendChild(s);
 }
 function addResult(score,correct,answers){
@@ -92,7 +102,7 @@ function arraste(dialog,host,onFinish){
  render();
 }
 function percepcao(dialog,host,onFinish){
- let shown=PERCEPTION_SET.slice(0,4),chosen=new Set(),time=5,score=0,timer=null;
+ let shown=[...PERCEPTION_SET].sort(()=>Math.random()-.5).slice(0,4),chosen=new Set(),time=5,score=0,timer=null;
  host.innerHTML=`<section class="ax">${head('Teste sua percepção','Você terá poucos segundos para observar. Depois, a cena desaparece e você precisa lembrar o que estava presente.',`<span class="ax-chip">👁️ Observe</span><span class="ax-chip">⏱ 5 segundos</span>`)}<div class="perception-stage"><div class="countdown" id="pTime">5</div><div class="scene-icons">${shown.map(x=>`<div class="scene-icon"><img src="${x.img}" alt=""><small>${x.label}</small></div>`).join('')}</div><div class="curtain" id="curtain" style="display:none"><div><h3>O que você viu?</h3><p>Selecione os quatro elementos que estavam na cena.</p></div></div></div><div id="answers"></div></section>`;
  SoundManager.play('open');timer=setInterval(()=>{time--;const el=host.querySelector('#pTime');if(el)el.textContent=time;if(time<=0){clearInterval(timer);const c=host.querySelector('#curtain');if(c)c.style.display='grid';setTimeout(showAnswers,650)}},1000);
  function showAnswers(){
@@ -104,12 +114,25 @@ function percepcao(dialog,host,onFinish){
  }
 }
 function mito(dialog,host,onFinish){
- let i=0,score=0,correct=0;
+ let round=[...MYTHS].sort(()=>Math.random()-.5).slice(0,6),i=0,score=0,correct=0;
  function render(explain=''){
-  const m=MYTHS[i];host.innerHTML=`<section class="ax">${head('Mito ou Verdade?','Afirmações rápidas para revisar hábitos e corrigir ideias comuns sobre segurança no trânsito.',`<span class="ax-chip">${i+1}/${MYTHS.length}</span><span class="ax-chip">⭐ ${score} pts</span>`)}<div class="myth"><div class="myth-card"><p class="eyebrow">AFIRMAÇÃO ${i+1}</p><h3>${m.q}</h3>${explain?'<div class="myth-explain">'+explain+'</div>':`<div class="tf"><button data-v="true">✓ VERDADE</button><button data-v="false">✕ MITO</button></div>`}</div></div></section>`;
+  const m=round[i];
+  host.innerHTML=`<section class="ax">${head('Mito ou Verdade?','Afirmações rápidas para revisar hábitos e corrigir ideias comuns sobre segurança no trânsito.',`<span class="ax-chip">${i+1}/${round.length}</span><span class="ax-chip">⭐ ${score} pts</span>`)}
+   <div class="myth"><div class="myth-card"><div class="myth-layout"><div class="myth-visual"><img src="${m.img}" alt=""></div><div><p class="eyebrow">AFIRMAÇÃO ${i+1}</p><h3>${m.q}</h3>${explain?'<div class="myth-explain">'+explain+'</div>':`<div class="tf"><button data-v="true">✓ VERDADE</button><button data-v="false">✕ MITO</button></div>`}</div></div></div></div></section>`;
   if(!explain)host.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>answer(b.dataset.v==='true'));
  }
- function answer(v){const m=MYTHS[i],ok=v===m.a;SoundManager.play(ok?'correct':'wrong');if(ok){score+=200;correct++}render(`<strong>${ok?'✓ Resposta correta.':'Resposta diferente da esperada.'}</strong><br>${m.why}<div class="ax-actions"><button class="btn primary" id="nextM">${i===MYTHS.length-1?'Ver resultado':'Próxima'}</button></div>`);host.querySelector('#nextM').onclick=()=>{if(i===MYTHS.length-1){addResult(score,correct,MYTHS.length);onFinish?.();host.innerHTML=`<section class="ax">${head('Mito ou Verdade?','Resultado final')}<div class="complete"><div class="big">⚖️</div><h3>${correct} de ${MYTHS.length}</h3><p>O mais importante é levar as explicações para as decisões do dia a dia.</p><strong>${score} pontos</strong><div class="ax-actions"><button class="btn primary" id="againM">Refazer</button><button class="btn ghost" id="closeM">Encerrar</button></div></div></section>`;host.querySelector('#againM').onclick=()=>mito(dialog,host,onFinish);host.querySelector('#closeM').onclick=()=>dialog.close()}else{i++;render()}};
+ function answer(v){
+  const m=round[i],ok=v===m.a;
+  SoundManager.play(ok?'correct':'wrong');
+  if(ok){score+=200;correct++}
+  render(`<strong>${ok?'✓ Resposta correta.':'Resposta diferente da esperada.'}</strong><br>${m.why}<div class="ax-actions"><button class="btn primary" id="nextM">${i===round.length-1?'Ver resultado':'Próxima'}</button></div>`);
+  host.querySelector('#nextM').onclick=()=>{
+   if(i===round.length-1){
+    addResult(score,correct,round.length);onFinish?.();SoundManager.play(correct>=5?'celebrate':'finish');
+    host.innerHTML=`<section class="ax">${head('Mito ou Verdade?','Resultado final')}<div class="complete"><div class="big">⚖️</div><h3>${correct} de ${round.length}</h3><p>O mais importante é levar as explicações para as decisões do dia a dia.</p><strong>${score} pontos</strong><div class="ax-actions"><button class="btn primary" id="againM">Nova rodada</button><button class="btn ghost" id="closeM">Encerrar</button></div></div></section>`;
+    host.querySelector('#againM').onclick=()=>mito(dialog,host,onFinish);host.querySelector('#closeM').onclick=()=>dialog.close();
+   }else{i++;SoundManager.play('next');render()}
+  };
  }
  render();
 }
