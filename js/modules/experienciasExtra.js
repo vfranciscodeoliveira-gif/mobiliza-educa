@@ -1,5 +1,6 @@
 import { SoundManager } from '../core/soundManager.js?v=1';
 import { getQuestionSet } from '../core/questionEngine.js?v=2';
+import { recordGameResult } from '../core/historyStore.js?v=1';
 
 const M='assets/memory/';
 
@@ -33,10 +34,11 @@ function ensureCss(){
 function head(title,subtitle,chips){
   return '<div class="ex2-head"><p class="eyebrow">MOBILIZA EDUCA • EXPERIÊNCIA INTERATIVA</p><h2>'+title+'</h2><p>'+subtitle+'</p>'+(chips?'<div class="ex2-chips">'+chips+'</div>':'')+'</div>';
 }
-function save(score,correct,answers){
+function save(score,correct,answers,moduleId,title,details={}){
   const r=JSON.parse(localStorage.getItem('mobiliza.results')||'{"games":0,"correct":0,"answers":0,"best":0,"streak":0}');
   r.games=(r.games||0)+1;r.correct=(r.correct||0)+correct;r.answers=(r.answers||0)+answers;r.best=Math.max(r.best||0,score);
   localStorage.setItem('mobiliza.results',JSON.stringify(r));
+  recordGameResult({kind:'experience',moduleId:'experience-'+moduleId,title,score,correct,answers,status:'concluido',...details});
 }
 function complete(host,title,icon,html,score,again,dialog){
   SoundManager.play('finish');
@@ -51,7 +53,7 @@ function desafio60(dialog,host,onFinish){
   const questions=getQuestionSet({count:14,audiences:['criancas','adolescentes','adultos'],difficulties:['facil','medio'],avoidRecent:true,markRecent:true});
   let i=0,score=0,correct=0,answers=0,left=60,locked=false,done=false,timer=null;
   function end(){
-    if(done)return;done=true;if(timer)clearInterval(timer);save(score,correct,answers);if(onFinish)onFinish();
+    if(done)return;done=true;if(timer)clearInterval(timer);save(score,correct,answers,'desafio-60','Desafio 60 segundos',{durationSec:60});if(onFinish)onFinish();
     complete(host,'Desafio 60 segundos','⏱️','<h3>'+correct+' acertos em '+answers+' respostas</h3><p>Na próxima rodada a sequência de perguntas muda.</p>',score,()=>desafio60(dialog,host,onFinish),dialog);
   }
   function render(){
@@ -96,7 +98,7 @@ function prioridade(dialog,host,onFinish){
     if(ok){score+=250;correct++;SoundManager.play('correct')}else SoundManager.play('wrong');
     host.querySelectorAll('[data-priority]').forEach((b,k)=>{b.disabled=true;if(k===s.correct)b.classList.add('ok');if(k===n&&k!==s.correct)b.classList.add('bad')});
     const f=host.querySelector('#ex2PriorityFeedback');f.className='ex2-feedback '+(ok?'ok':'bad');f.innerHTML='<strong>'+(ok?'✓ Boa decisão.':'Revise a situação.')+'</strong><br>'+s.why+'<div class="ex2-actions"><button class="btn primary" id="ex2PriorityNext">'+(i===round.length-1?'Ver resultado':'Próxima situação')+'</button></div>';
-    host.querySelector('#ex2PriorityNext').onclick=()=>{i++;locked=false;if(i>=round.length){save(score,correct,round.length);if(onFinish)onFinish();complete(host,'Quem tem prioridade?','🔀','<h3>'+correct+' de '+round.length+'</h3><p>Observe, sinalize e preserve espaço antes de decidir.</p>',score,()=>prioridade(dialog,host,onFinish),dialog)}else{SoundManager.play('next');render()}};
+    host.querySelector('#ex2PriorityNext').onclick=()=>{i++;locked=false;if(i>=round.length){save(score,correct,round.length,'prioridade','Quem tem prioridade?');if(onFinish)onFinish();complete(host,'Quem tem prioridade?','🔀','<h3>'+correct+' de '+round.length+'</h3><p>Observe, sinalize e preserve espaço antes de decidir.</p>',score,()=>prioridade(dialog,host,onFinish),dialog)}else{SoundManager.play('next');render()}};
   }
   render();SoundManager.play('open');
 }
@@ -119,7 +121,7 @@ function historia(dialog,host,onFinish){
     if(locked)return;locked=true;const s=STORY[i],ok=!!s.choices[n][1];if(ok){score+=250;correct++;SoundManager.play('correct')}else SoundManager.play('wrong');
     host.querySelectorAll('[data-story]').forEach(b=>b.disabled=true);
     const f=host.querySelector('#ex2StoryFeedback');f.className='ex2-feedback '+(ok?'ok':'bad');f.innerHTML='<strong>'+(ok?'✓ Chico gostou dessa escolha!':'Vamos pensar de novo.')+'</strong><br>'+s.why+'<div class="ex2-actions"><button class="btn primary" id="ex2StoryNext">'+(i===STORY.length-1?'Terminar história':'Continuar')+'</button></div>';
-    host.querySelector('#ex2StoryNext').onclick=()=>{i++;locked=false;if(i>=STORY.length){save(score,correct,STORY.length);if(onFinish)onFinish();SoundManager.play('celebrate');complete(host,'Histórias do Dicas do Chico','🏅','<h3>Missão concluída!</h3><p>Você ajudou Chico em '+correct+' de '+STORY.length+' decisões.</p>',score,()=>historia(dialog,host,onFinish),dialog)}else{SoundManager.play('next');render()}};
+    host.querySelector('#ex2StoryNext').onclick=()=>{i++;locked=false;if(i>=STORY.length){save(score,correct,STORY.length,'historia','Histórias do Dicas do Chico');if(onFinish)onFinish();SoundManager.play('celebrate');complete(host,'Histórias do Dicas do Chico','🏅','<h3>Missão concluída!</h3><p>Você ajudou Chico em '+correct+' de '+STORY.length+' decisões.</p>',score,()=>historia(dialog,host,onFinish),dialog)}else{SoundManager.play('next');render()}};
   }
   render();SoundManager.play('open');
 }
@@ -140,7 +142,7 @@ function familia(dialog,host,onFinish){
       '<div class="ex2-steps"><div class="ex2-step"><b>1. Cada pessoa responde</b><p>Adulto e criança falam o que pensam antes de comparar.</p></div><div class="ex2-step"><b>2. Lembrem de um exemplo</b><p>Pensem em uma situação que realmente aconteceu.</p></div><div class="ex2-step"><b>3. Façam um combinado</b><p>'+p.action+'</p></div></div>'+
       '<div class="ex2-actions"><button class="btn ghost" id="ex2FamilyOther">🔄 Outra conversa</button><button class="btn primary" id="ex2FamilyDone">✓ Fizemos o combinado</button></div></section>';
     host.querySelector('#ex2FamilyOther').onclick=()=>{SoundManager.play('next');idx=(idx+1)%FAMILY.length;render()};
-    host.querySelector('#ex2FamilyDone').onclick=()=>{done++;score+=300;SoundManager.play('correct');if(done>=3){save(score,done,done);if(onFinish)onFinish();SoundManager.play('celebrate');complete(host,'5 minutos em família','💛','<h3>3 combinados construídos juntos</h3><p>Agora observem esses combinados nos deslocamentos reais.</p>',score,()=>familia(dialog,host,onFinish),dialog)}else{idx=(idx+1)%FAMILY.length;render()}};
+    host.querySelector('#ex2FamilyDone').onclick=()=>{done++;score+=300;SoundManager.play('correct');if(done>=3){save(score,done,done,'familia-5','5 minutos em família');if(onFinish)onFinish();SoundManager.play('celebrate');complete(host,'5 minutos em família','💛','<h3>3 combinados construídos juntos</h3><p>Agora observem esses combinados nos deslocamentos reais.</p>',score,()=>familia(dialog,host,onFinish),dialog)}else{idx=(idx+1)%FAMILY.length;render()}};
   }
   render();SoundManager.play('open');
 }
