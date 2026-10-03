@@ -1,4 +1,5 @@
 import {isAdminUnlocked,ensureAdminAccess} from './auth.js';
+import {cloudConfigured,enableManagerPush,hasManagerKey,setManagerKey,syncCloudInbox} from '../cloudGateway.js?v=1';
 
 const read=k=>JSON.parse(localStorage.getItem('mobiliza.admin.'+k)||'[]');
 const today=()=>new Date().toISOString().slice(0,10);
@@ -31,5 +32,9 @@ export function renderHomeNotifications(host,authDialog,onUnlocked){
   ['⚠️','Pendências',a.atrasados.length,'evento(s) vencido(s) ainda não concluído(s).'],
   ['🔗','Sem vínculo',a.semVinculo.length,'evento(s) sem escola ou turma vinculada.']
  ];
- host.innerHTML=`<div class="home-alert-grid">${items.map(x=>`<article class="home-alert"><div class="home-alert-icon">${x[0]}</div><div><strong>${x[1]}</strong><span>${x[2]}</span><p>${x[3]}</p></div></article>`).join('')}</div>`;
+ host.innerHTML=`<div class="home-alert-grid">${items.map(x=>`<article class="home-alert"><div class="home-alert-icon">${x[0]}</div><div><strong>${x[1]}</strong><span>${x[2]}</span><p>${x[3]}</p></div></article>`).join('')}</div><article class="home-alert"><div class="home-alert-icon">📲</div><div><strong>Notificações no celular</strong><p>${cloudConfigured()?(hasManagerKey()?'Integração configurada. Você pode sincronizar e ativar o push neste aparelho.':'Informe a chave de gestão para conectar este aparelho.'):'Firebase/Cloud Functions ainda não conectado ao Mobiliza Educa.'}</p></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost" id="homeCloudKey" ${cloudConfigured()?'':'disabled'}>Chave de gestão</button><button class="btn ghost" id="homeCloudSync" ${cloudConfigured()&&hasManagerKey()?'':'disabled'}>Sincronizar</button><button class="btn primary" id="homePushEnable" ${cloudConfigured()?'':'disabled'}>Ativar push</button></div></article>`;
+ const keyBtn=host.querySelector('#homeCloudKey'),syncBtn=host.querySelector('#homeCloudSync'),pushBtn=host.querySelector('#homePushEnable');
+ if(keyBtn)keyBtn.onclick=()=>{const v=prompt('Informe a chave privada de gestão configurada no backend:')||'';if(v){setManagerKey(v);renderHomeNotifications(host,authDialog,onUnlocked);}};
+ if(syncBtn)syncBtn.onclick=async()=>{syncBtn.disabled=true;try{await syncCloudInbox();renderHomeNotifications(host,authDialog,onUnlocked);}catch(e){alert(e.message);}finally{syncBtn.disabled=false;}};
+ if(pushBtn)pushBtn.onclick=async()=>{pushBtn.disabled=true;try{await enableManagerPush();alert('Notificações ativadas neste aparelho.');}catch(e){alert(e.message);}finally{pushBtn.disabled=false;}};
 }
