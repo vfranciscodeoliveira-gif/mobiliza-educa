@@ -1,224 +1,329 @@
 import { getQuestionSet } from '../core/questionEngine.js?v=2';
 import { SoundManager } from '../core/soundManager.js?v=1';
+import { createHostSession, renderQr, makeSessionCode } from '../core/sharedSession.js?v=1';
 
 function css(){
-  if(document.getElementById('plateia-local-v3')) return;
+  if(document.getElementById('plateia-connected-v1'))return;
   const s=document.createElement('style');
-  s.id='plateia-local-v3';
+  s.id='plateia-connected-v1';
   s.textContent=[
-    '#gameDialog.plateia-v3-dialog{width:min(1180px,96vw)!important;max-width:96vw!important;max-height:94vh!important}',
-    '#gameDialog.plateia-v3-dialog>.dialog-shell{max-height:94vh!important;overflow:auto!important;background:#f2f8fb!important}',
-    '.aud3{padding:22px;min-height:560px;color:#173f60}.aud3 *{box-sizing:border-box}',
-    '.aud3-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:18px 20px;border-radius:20px;background:linear-gradient(135deg,#0f3c66,#0c6d9f 62%,#1493b7);color:#fff;box-shadow:0 12px 30px rgba(15,60,102,.18)}',
-    '.aud3-head .eyebrow{margin:0 0 4px;color:#bcecff;font-size:.68rem;font-weight:900;letter-spacing:.12em}.aud3-head h2{margin:0 0 5px;color:#fff}.aud3-head p{margin:0;color:#e7f7ff;line-height:1.45}',
-    '.aud3-badge{min-width:138px;padding:12px 14px;border:1px solid rgba(255,255,255,.24);border-radius:16px;background:rgba(255,255,255,.12);text-align:center}.aud3-badge b{display:block;font-size:1.15rem}.aud3-badge small{color:#d9f1fb}',
-    '.aud3-setup{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:14px}',
-    '.aud3-card{padding:18px;border:1px solid #d4e4ed;border-radius:18px;background:#fff;box-shadow:0 9px 24px rgba(15,60,102,.07)}.aud3-card h3{margin:0 0 7px;color:#0f3c66}.aud3-card p{margin:0;color:#607789;line-height:1.5}',
-    '.aud3-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.aud3-step{padding:13px;border-radius:14px;background:#f5fafc;border:1px solid #d9e7ee}.aud3-step b{display:block;color:#0f3c66;margin-bottom:4px}.aud3-step p{font-size:.83rem}',
-    '.aud3-counterbox{display:grid;gap:10px}.aud3-countline{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px;align-items:center}.aud3-countline button{height:44px;border:1px solid #cfe0e9;border-radius:12px;background:#eef7fb;color:#0f5d8c;font-size:1.4rem;font-weight:900;cursor:pointer}.aud3-countline input{height:44px;border:1px solid #cfe0e9;border-radius:12px;background:#fff;color:#173f60;text-align:center;font-size:1.1rem;font-weight:900}',
-    '.aud3-note{padding:11px 12px;border-radius:12px;background:#fff7db;border:1px solid #f1d77b;color:#715b13;font-size:.82rem;line-height:1.4}',
-    '.aud3-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.aud3-actions .btn{min-height:42px}',
-    '.aud3-toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;margin:12px 0}.aud3-stat{padding:9px 11px;border:1px solid #d5e5ed;border-radius:12px;background:#fff}.aud3-stat small{display:block;color:#6f8493;font-size:.69rem;font-weight:800}.aud3-stat b{display:block;color:#0f3c66;font-size:1rem;margin-top:2px}',
-    '.aud3-question{padding:18px;border:1px solid #d5e5ed;border-radius:18px;background:#fff;box-shadow:0 9px 24px rgba(15,60,102,.07)}.aud3-question h3{margin:0;color:#0f3c66;font-size:1.35rem;line-height:1.35}.aud3-question small{display:block;margin-bottom:6px;color:#6a8395;font-weight:900;letter-spacing:.06em}',
-    '.aud3-votes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.aud3-vote{min-height:92px;border:2px solid #d7e5ed;border-radius:16px;background:#fff;color:#173f60;text-align:left;padding:14px;font-weight:900;cursor:pointer;transition:.15s}.aud3-vote:hover{transform:translateY(-2px);border-color:#1689bd;background:#f1fbff}.aud3-vote b{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#0e6faa;color:#fff;margin-right:10px;font-size:1rem}.aud3-vote span{vertical-align:middle}.aud3-vote:disabled{cursor:default;opacity:.72}',
-    '.aud3-people{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;padding:10px;border:1px solid #d7e5ed;border-radius:14px;background:#fff}.aud3-person{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:#edf4f8;color:#7590a2;font-size:.62rem;font-weight:900;border:1px solid #d6e3ea}.aud3-person.done{background:#2fb36d;color:#fff;border-color:#2fb36d}.aud3-person.current{background:#f3b437;color:#173f60;border-color:#f3b437;box-shadow:0 0 0 3px rgba(243,180,55,.2)}',
-    '.aud3-privacy{position:fixed;inset:0;z-index:99998;display:grid;place-items:center;padding:18px;background:rgba(3,22,38,.78);backdrop-filter:blur(5px)}.aud3-privacy-card{width:min(520px,92vw);padding:26px;border-radius:24px;background:linear-gradient(180deg,#0f4f7c,#082f52);color:#fff;text-align:center;border:2px solid rgba(255,255,255,.2);box-shadow:0 24px 70px rgba(0,0,0,.42)}.aud3-privacy-card .big{font-size:3rem}.aud3-privacy-card h3{margin:6px 0;color:#fff}.aud3-privacy-card p{margin:0 0 14px;color:#dbeef8;line-height:1.45}.aud3-privacy-card .btn{min-width:210px}',
-    '.aud3-results{margin-top:12px;padding:18px;border:1px solid #d5e5ed;border-radius:18px;background:#fff}.aud3-results h3{margin:0 0 8px;color:#0f3c66}.aud3-row{display:grid;grid-template-columns:34px minmax(0,1fr) 60px 54px;gap:8px;align-items:center;margin:9px 0}.aud3-row>span{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#0e6faa;color:#fff;font-weight:900}.aud3-row i{height:19px;border-radius:999px;background:#e6edf2;overflow:hidden}.aud3-row i b{display:block;height:100%;background:linear-gradient(90deg,#1689bd,#2fb36d)}.aud3-row em,.aud3-row strong{font-style:normal;text-align:right}.aud3-row.correct{padding:5px 7px;border-radius:10px;background:#eef9f2}.aud3-answer{margin-top:12px;padding:13px;border-radius:13px;background:#eaf8ef;color:#17643a;line-height:1.5}',
-    '.aud3-finish{text-align:center;padding:28px;border:1px solid #c4e2cf;border-radius:18px;background:linear-gradient(145deg,#eefaf2,#fff);margin-top:14px}.aud3-finish .big{font-size:2.8rem}.aud3-finish h3{margin:6px 0;color:#0f3c66}',
-    '@media(max-width:760px){#gameDialog.plateia-v3-dialog{width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important}.aud3{padding:14px;min-height:100dvh}.aud3-head{grid-template-columns:1fr}.aud3-badge{display:none}.aud3-setup{grid-template-columns:1fr}.aud3-steps{grid-template-columns:1fr}.aud3-toolbar{grid-template-columns:1fr 1fr}.aud3-toolbar .btn{grid-column:span 2}.aud3-votes{grid-template-columns:1fr}.aud3-row{grid-template-columns:30px minmax(0,1fr) 52px 46px}.aud3-actions{display:grid;grid-template-columns:1fr 1fr}.aud3-actions .btn:only-child{grid-column:1/-1}}'
+    '#gameDialog.plateia-connected-dialog{width:min(1280px,97vw)!important;max-width:97vw!important;max-height:96vh!important}',
+    '#gameDialog.plateia-connected-dialog>.dialog-shell{max-height:96vh!important;overflow:auto!important;background:#f1f8fb!important}',
+    '.pcx{padding:22px;color:#173f60;min-height:620px}.pcx *{box-sizing:border-box}',
+    '.pcx-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:18px 20px;border-radius:20px;background:linear-gradient(135deg,#0b365d,#0e729f 58%,#12a0bd);color:#fff;box-shadow:0 13px 32px rgba(11,54,93,.2)}',
+    '.pcx-head .eyebrow{margin:0 0 4px;color:#bcecff;font-size:.68rem;font-weight:900;letter-spacing:.12em}.pcx-head h2{margin:0 0 5px;color:#fff}.pcx-head p{margin:0;color:#e7f7ff;line-height:1.45}.pcx-room{min-width:150px;padding:10px 13px;border:1px solid rgba(255,255,255,.24);border-radius:15px;background:rgba(255,255,255,.12);text-align:center}.pcx-room small{display:block;color:#cceeff;font-size:.68rem}.pcx-room strong{display:block;font-size:1.45rem;letter-spacing:.14em}',
+    '.pcx-loader{padding:70px 20px;text-align:center}.pcx-spinner{width:72px;height:72px;margin:0 auto 16px;border-radius:50%;border:7px solid #d8ebf4;border-top-color:#0f7fab;animation:pcxSpin .9s linear infinite}@keyframes pcxSpin{to{transform:rotate(360deg)}}',
+    '.pcx-wait{display:grid;grid-template-columns:330px minmax(0,1fr);gap:14px;margin-top:14px}.pcx-card{padding:18px;border:1px solid #d4e4ed;border-radius:18px;background:#fff;box-shadow:0 10px 25px rgba(15,60,102,.07)}.pcx-card h3{margin:0 0 7px;color:#0f3c66}.pcx-card p{margin:0;color:#607789;line-height:1.5}',
+    '.pcx-qrbox{display:grid;place-items:center;gap:10px}.pcx-qr{width:238px;height:238px;display:grid;place-items:center;padding:9px;border-radius:18px;background:#fff;border:1px solid #d6e5ed}.pcx-qr img,.pcx-qr canvas{max-width:220px!important;max-height:220px!important}.pcx-code-big{font-size:1.65rem;font-weight:1000;letter-spacing:.16em;color:#0f3c66}.pcx-url{width:100%;padding:9px;border-radius:10px;background:#f4f9fb;color:#537083;font-size:.72rem;word-break:break-all;text-align:center}',
+    '.pcx-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.pcx-actions .btn{min-height:42px}.pcx-actions.end{justify-content:flex-end}',
+    '.pcx-people-title{display:flex;align-items:center;justify-content:space-between;gap:10px}.pcx-count{display:inline-grid;place-items:center;min-width:42px;height:34px;padding:0 10px;border-radius:999px;background:#eaf6fb;color:#0f6b98;font-weight:1000}',
+    '.pcx-people{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;max-height:340px;overflow:auto}.pcx-person{display:grid;grid-template-columns:40px 1fr auto;gap:9px;align-items:center;padding:9px;border:1px solid #dce8ef;border-radius:13px;background:#f9fcfd}.pcx-avatar{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(145deg,#e5f6ff,#d7effa);color:#0e6d9b;font-weight:1000}.pcx-person strong{display:block;color:#173f60}.pcx-person small{display:block;color:#6b8190}.pcx-dot{width:10px;height:10px;border-radius:50%;background:#2fb36d}.pcx-empty{grid-column:1/-1;padding:24px;border:1px dashed #cbdde7;border-radius:14px;text-align:center;color:#6a8191}',
+    '.pcx-toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;margin:12px 0}.pcx-stat{padding:9px 11px;border:1px solid #d5e5ed;border-radius:12px;background:#fff}.pcx-stat small{display:block;color:#6f8493;font-size:.68rem;font-weight:900}.pcx-stat b{display:block;color:#0f3c66;margin-top:2px}',
+    '.pcx-question{padding:18px;border:1px solid #d5e5ed;border-radius:18px;background:#fff;box-shadow:0 9px 24px rgba(15,60,102,.07)}.pcx-question small{display:block;color:#698195;font-weight:900;letter-spacing:.06em;margin-bottom:6px}.pcx-question h3{margin:0;color:#0f3c66;font-size:1.4rem;line-height:1.35}.pcx-options{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.pcx-option{display:grid;grid-template-columns:36px 1fr;gap:9px;align-items:center;padding:12px;border:1px solid #d9e6ed;border-radius:14px;background:#fafdff}.pcx-option b{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#0d70a4;color:#fff}.pcx-option span{font-weight:800;color:#173f60}',
+    '.pcx-live{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px;margin-top:12px}.pcx-vote-list{display:flex;flex-wrap:wrap;gap:7px}.pcx-voter{padding:7px 9px;border-radius:10px;background:#f2f7fa;border:1px solid #dce7ed;color:#607789;font-size:.76rem;font-weight:800}.pcx-voter.voted{background:#e9f8ef;border-color:#bfe5cc;color:#17643a}.pcx-live-note{padding:14px;border-radius:14px;background:#eef7fb;border:1px solid #d2e6ef;color:#43677f;line-height:1.45;font-size:.83rem}',
+    '.pcx-results{margin-top:12px;padding:18px;border:1px solid #d5e5ed;border-radius:18px;background:#fff}.pcx-results h3{margin:0 0 10px;color:#0f3c66}.pcx-row{display:grid;grid-template-columns:34px minmax(0,1fr) 72px 56px;gap:8px;align-items:center;padding:6px;border-radius:12px}.pcx-row.correct{background:#eaf8ef}.pcx-row>span{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#0d70a4;color:#fff;font-weight:900}.pcx-row i{height:19px;border-radius:999px;background:#e4edf2;overflow:hidden}.pcx-row i b{display:block;height:100%;background:linear-gradient(90deg,#1689bd,#31b16f)}.pcx-row strong,.pcx-row em{text-align:right;font-style:normal}.pcx-explain{margin-top:12px;padding:13px;border-radius:13px;background:#eaf8ef;color:#17643a;line-height:1.5}',
+    '.pcx-finish{text-align:center;padding:28px;border:1px solid #c5e2d0;border-radius:18px;background:linear-gradient(145deg,#eefaf2,#fff);margin-top:14px}.pcx-finish .big{font-size:2.9rem}.pcx-finish h3{margin:6px 0;color:#0f3c66}',
+    '.pcx-error{padding:18px;margin-top:14px;border:1px solid #efc5c2;border-radius:16px;background:#fff0ef;color:#8b322e}.pcx-tip{margin-top:12px;padding:12px;border-radius:13px;background:#fff7da;border:1px solid #f1db8a;color:#715c18;font-size:.82rem;line-height:1.45}',
+    '@media(max-width:800px){#gameDialog.plateia-connected-dialog{width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important}.pcx{padding:13px;min-height:100dvh}.pcx-head{grid-template-columns:1fr}.pcx-room{display:none}.pcx-wait{grid-template-columns:1fr}.pcx-people{grid-template-columns:1fr}.pcx-toolbar{grid-template-columns:1fr 1fr}.pcx-toolbar .btn{grid-column:span 2}.pcx-options{grid-template-columns:1fr}.pcx-live{grid-template-columns:1fr}.pcx-row{grid-template-columns:30px minmax(0,1fr) 64px 46px}}'
   ].join('');
   document.head.appendChild(s);
 }
 
+function esc(s=''){
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 function save(score,correct,answers){
   const r=JSON.parse(localStorage.getItem('mobiliza.results')||'{"games":0,"correct":0,"answers":0,"best":0,"streak":0}');
-  r.games=(r.games||0)+1;
-  r.correct=(r.correct||0)+correct;
-  r.answers=(r.answers||0)+answers;
-  r.best=Math.max(r.best||0,score);
+  r.games=(r.games||0)+1;r.correct=(r.correct||0)+correct;r.answers=(r.answers||0)+answers;r.best=Math.max(r.best||0,score);
   localStorage.setItem('mobiliza.results',JSON.stringify(r));
 }
-
-function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function uid(){
+  return (crypto?.randomUUID?.()||('r-'+Date.now()+'-'+Math.random().toString(36).slice(2))).slice(0,80);
+}
 
 export function openPlateia(dialog,host,onFinish){
   css();
-  dialog.classList.add('plateia-v3-dialog');
-  const cleanup=()=>dialog.classList.remove('plateia-v3-dialog');
-  dialog.addEventListener('close',cleanup,{once:true});
+  dialog.classList.add('plateia-connected-dialog');
 
-  let participantTarget=10;
+  let session=null;
+  let participants=[];
   let questions=[];
   let qIndex=0;
-  let participant=1;
-  let votes=[0,0,0,0];
-  let sessionVotes=0;
-  let questionsCompleted=0;
+  let state='boot';
+  let roundId=null;
+  let votes=new Map();
+  let currentResult=null;
+  let totalVotes=0;
   let majorityCorrect=0;
   let score=0;
-  let state='setup';
+  let destroyed=false;
 
-  function loadQuestions(){
+  const header=(title,subtitle,badge='CONECTADA')=>'<div class="pcx-head"><div><p class="eyebrow">MOBILIZA EDUCA • PLATEIA CONECTADA</p><h2>'+title+'</h2><p>'+subtitle+'</p></div><div class="pcx-room"><small>SALA</small><strong>'+esc(session?.code||'------')+'</strong><small>'+badge+'</small></div></div>';
+
+  const peopleHtml=(showVote=false)=>{
+    if(!participants.length)return '<div class="pcx-empty">📱 Aguardando participantes entrarem pelo QR Code.</div>';
+    return participants.map((p,i)=>{
+      const voted=roundId&&votes.has(p.clientId);
+      return '<div class="pcx-person"><span class="pcx-avatar">'+esc((p.name||'?').slice(0,1).toUpperCase())+'</span><div><strong>'+esc(p.name||('Participante '+(i+1)))+'</strong><small>'+(showVote?(voted?'voto recebido':'aguardando voto'):'conectado à sala')+'</small></div><i class="pcx-dot"></i></div>';
+    }).join('');
+  };
+
+  const broadcastWaiting=()=>{
+    session?.broadcast({type:'waiting',message:state==='waiting'?'Você entrou. Aguarde o operador iniciar o jogo.':'Aguarde o operador liberar a próxima pergunta.'});
+  };
+
+  function currentQuestionPayload(){
+    const q=questions[qIndex];
+    if(!q||!roundId)return null;
+    return {type:'question',roundId,index:qIndex+1,total:questions.length,prompt:q.prompt,options:q.options};
+  }
+
+  function syncParticipant(clientId){
+    if(!session)return;
+    if(state==='waiting'||state==='boot'){
+      session.sendTo(clientId,{type:'waiting',message:'Você entrou. Aguarde o operador iniciar o jogo.'});
+      return;
+    }
+    if(state==='question'){
+      const payload=currentQuestionPayload();
+      if(payload)session.sendTo(clientId,payload);
+      if(votes.has(clientId))session.sendTo(clientId,{type:'already-voted',roundId,choice:votes.get(clientId)});
+      return;
+    }
+    if(state==='result'&&currentResult){
+      session.sendTo(clientId,currentResult);
+      return;
+    }
+    if(state==='finished')session.sendTo(clientId,{type:'session-finished'});
+  }
+
+  function updateWaitingPeople(){
+    if(state!=='waiting')return;
+    const count=host.querySelector('#pcxCount');
+    if(count)count.textContent=participants.length;
+    const list=host.querySelector('#pcxPeople');
+    if(list)list.innerHTML=peopleHtml(false);
+    const start=host.querySelector('#pcxStart');
+    if(start)start.disabled=participants.length<1;
+  }
+
+  function updateLive(){
+    if(state!=='question')return;
+    const vc=host.querySelector('#pcxVoteCount');
+    if(vc)vc.textContent=votes.size;
+    const online=host.querySelector('#pcxOnline');
+    if(online)online.textContent=participants.length;
+    const list=host.querySelector('#pcxVoters');
+    if(list)list.innerHTML=participants.map(p=>'<span class="pcx-voter '+(votes.has(p.clientId)?'voted':'')+'">'+(votes.has(p.clientId)?'✓ ':'○ ')+esc(p.name)+'</span>').join('');
+    const reveal=host.querySelector('#pcxReveal');
+    if(reveal)reveal.disabled=votes.size<1;
+  }
+
+  async function createSession(){
+    state='boot';
+    host.innerHTML='<section class="pcx">'+
+      '<div class="pcx-loader"><div class="pcx-spinner"></div><h2>Criando sala compartilhada...</h2><p>Preparando conexão para os celulares da plateia.</p></div>'+
+    '</section>';
+    if(!dialog.open)dialog.showModal();
+
+    let lastError=null;
+    for(let attempt=0;attempt<4&&!session;attempt++){
+      try{
+        session=await createHostSession({
+          code:makeSessionCode(),
+          onParticipants:list=>{
+            participants=list;
+            updateWaitingPeople();
+            updateLive();
+          },
+          onMessage:event=>handleMessage(event),
+          onStatus:s=>{
+            if(s.type==='error'&&state!=='finished')showConnectionWarning(s.error);
+          }
+        });
+      }catch(e){lastError=e;}
+    }
+    if(!session){showFatal(lastError||new Error('Não foi possível criar a sessão.'));return;}
+    renderWaiting();
+  }
+
+  function showConnectionWarning(error){
+    const note=host.querySelector('#pcxConnectionNote');
+    if(note)note.textContent='A conexão em tempo real apresentou instabilidade: '+(error?.message||'verifique a internet.');
+  }
+
+  function showFatal(error){
+    state='error';
+    host.innerHTML='<section class="pcx">'+header('Não foi possível abrir a Plateia Conectada','A sessão depende de internet para conectar os celulares.')+
+      '<div class="pcx-error"><strong>Falha na conexão.</strong><br>'+esc(error?.message||'Erro desconhecido')+'</div>'+
+      '<div class="pcx-tip">Confira se o computador está online e se a rede permite conexões WebRTC. Depois tente novamente.</div>'+
+      '<div class="pcx-actions"><button type="button" class="btn primary" id="pcxRetry">Tentar novamente</button></div></section>';
+    host.querySelector('#pcxRetry').onclick=()=>{try{session?.close();}catch{}session=null;createSession();};
+  }
+
+  function renderWaiting(){
+    state='waiting';
+    host.innerHTML='<section class="pcx">'+header('Sala de espera','Os participantes apontam a câmera para o QR Code, informam o nome e entram na mesma sessão.')+
+      '<div class="pcx-wait">'+
+        '<div class="pcx-card pcx-qrbox"><h3>Entrar pelo celular</h3><div id="pcxQr" class="pcx-qr"><span>Gerando QR...</span></div><div class="pcx-code-big">'+esc(session.code)+'</div><div class="pcx-url">'+esc(session.joinUrl)+'</div>'+
+          '<div class="pcx-actions"><button type="button" class="btn ghost" id="pcxCopy">📋 Copiar link</button><button type="button" class="btn ghost" id="pcxFull">⛶ Telão</button></div>'+
+          '<div id="pcxConnectionNote" class="pcx-tip">Internet necessária durante a sessão. Cada celular recebe uma identidade e só pode votar uma vez por pergunta.</div>'+
+        '</div>'+
+        '<div class="pcx-card"><div class="pcx-people-title"><div><h3>Participantes conectados</h3><p>Os nomes aparecem automaticamente ao entrar.</p></div><span class="pcx-count" id="pcxCount">'+participants.length+'</span></div><div class="pcx-people" id="pcxPeople">'+peopleHtml(false)+'</div>'+
+          '<div class="pcx-actions end"><button type="button" class="btn primary big" id="pcxStart" '+(participants.length?'':'disabled')+'>▶ INICIAR JOGO COMPARTILHADO</button></div>'+
+        '</div>'+
+      '</div>'+
+    '</section>';
+
+    renderQr(host.querySelector('#pcxQr'),session.joinUrl,220).catch(()=>{const q=host.querySelector('#pcxQr');if(q)q.innerHTML='<strong>Use o código<br>'+esc(session.code)+'</strong>';});
+    host.querySelector('#pcxCopy').onclick=async()=>{try{await navigator.clipboard.writeText(session.joinUrl);SoundManager.play('click');host.querySelector('#pcxCopy').textContent='✓ Link copiado';}catch{}};
+    host.querySelector('#pcxFull').onclick=()=>{if(!document.fullscreenElement)dialog.requestFullscreen?.();else document.exitFullscreen?.();};
+    host.querySelector('#pcxStart').onclick=()=>startGame();
+    broadcastWaiting();
+  }
+
+  function startGame(){
+    if(participants.length<1)return;
     questions=getQuestionSet({
-      count:6,
+      count:8,
       audiences:['criancas','adolescentes','adultos'],
       avoidRecent:true,
       markRecent:true,
-      recentScope:'game:plateia',
-      recentLimit:24
+      recentScope:'game:plateia-connected',
+      recentLimit:28
     });
+    qIndex=0;totalVotes=0;majorityCorrect=0;score=0;
+    openQuestion();
   }
 
-  function header(title,subtitle,badge='MODO LOCAL'){
-    return '<div class="aud3-head"><div><p class="eyebrow">MOBILIZA EDUCA • PLATEIA INTERATIVA</p><h2>'+title+'</h2><p>'+subtitle+'</p></div><div class="aud3-badge"><b>'+badge+'</b><small>um aparelho compartilhado</small></div></div>';
-  }
+  function openQuestion(){
+    state='question';
+    roundId=uid();
+    votes=new Map();
+    currentResult=null;
+    session.resetVotes();
 
-  function setup(){
-    state='setup';
-    host.innerHTML='<section class="aud3">'+
-      header('Como a plateia participa?','Nesta versão, o mesmo aparelho circula entre os participantes. Cada pessoa registra um único voto por pergunta.')+
-      '<div class="aud3-setup">'+
-        '<div class="aud3-card"><h3>Fluxo da atividade</h3><p>O sistema controla a vez de cada participante para evitar votos repetidos acidentais.</p>'+
-          '<div class="aud3-steps">'+
-            '<div class="aud3-step"><b>1. Vote</b><p>Uma pessoa escolhe A, B, C ou D.</p></div>'+
-            '<div class="aud3-step"><b>2. Tela bloqueia</b><p>A resposta some e aparece apenas “voto registrado”.</p></div>'+
-            '<div class="aud3-step"><b>3. Próxima pessoa</b><p>O operador libera o próximo participante. O resultado só aparece no fim.</p></div>'+
-          '</div>'+
-        '</div>'+
-        '<div class="aud3-card aud3-counterbox"><h3>Quantas pessoas vão votar?</h3>'+
-          '<div class="aud3-countline"><button type="button" id="aud3Minus" aria-label="Diminuir participantes">−</button><input id="aud3Target" type="number" min="2" max="60" value="'+participantTarget+'"><button type="button" id="aud3Plus" aria-label="Aumentar participantes">+</button></div>'+
-          '<div class="aud3-note"><strong>Importante:</strong> este modo não conecta celulares diferentes. Para cada pessoa votar no próprio telefone, será necessário ativar uma sessão online sincronizada.</div>'+
-          '<button type="button" class="btn primary big" id="aud3Start">▶ INICIAR SESSÃO LOCAL</button>'+
-        '</div>'+
-      '</div>'+
-    '</section>';
-
-    const input=host.querySelector('#aud3Target');
-    const sync=()=>{participantTarget=clamp(parseInt(input.value||'10',10)||10,2,60);input.value=participantTarget;};
-    host.querySelector('#aud3Minus').onclick=()=>{participantTarget=clamp(participantTarget-1,2,60);input.value=participantTarget;SoundManager.play('click');};
-    host.querySelector('#aud3Plus').onclick=()=>{participantTarget=clamp(participantTarget+1,2,60);input.value=participantTarget;SoundManager.play('click');};
-    input.onchange=sync;
-    host.querySelector('#aud3Start').onclick=()=>{
-      sync();
-      loadQuestions();
-      qIndex=0;participant=1;votes=[0,0,0,0];sessionVotes=0;questionsCompleted=0;majorityCorrect=0;score=0;
-      SoundManager.play('open');
-      renderQuestion();
-    };
-  }
-
-  function peopleHtml(){
-    const max=Math.min(participantTarget,60);
-    return Array.from({length:max},(_,i)=>{
-      const n=i+1;
-      return '<span class="aud3-person '+(n<participant?'done':n===participant?'current':'')+'" title="Participante '+n+'">'+n+'</span>';
-    }).join('');
-  }
-
-  function renderQuestion(){
-    state='voting';
     const q=questions[qIndex];
-    host.innerHTML='<section class="aud3">'+
-      header('Votação em andamento','Passe o aparelho para uma pessoa por vez. O resultado fica oculto até todos votarem.','PERGUNTA '+(qIndex+1)+'/'+questions.length)+
-      '<div class="aud3-toolbar">'+
-        '<div class="aud3-stat"><small>PARTICIPANTE</small><b>'+participant+' de '+participantTarget+'</b></div>'+
-        '<div class="aud3-stat"><small>VOTOS NESTA PERGUNTA</small><b>'+votes.reduce((a,b)=>a+b,0)+'/'+participantTarget+'</b></div>'+
-        '<div class="aud3-stat"><small>PERGUNTA</small><b>'+(qIndex+1)+'/'+questions.length+'</b></div>'+
-        '<div class="aud3-stat"><small>RESULTADO</small><b>Oculto</b></div>'+
-        '<button type="button" class="btn ghost" id="aud3Sound">'+(SoundManager.isEnabled()?'🔊 Som':'🔇 Som')+'</button>'+
+    const payload=currentQuestionPayload();
+    session.broadcast(payload);
+
+    host.innerHTML='<section class="pcx">'+header('Jogo compartilhado','A pergunta está aberta nos celulares. Os percentuais só aparecem quando você encerrar a votação.','PERGUNTA '+(qIndex+1)+'/'+questions.length)+
+      '<div class="pcx-toolbar">'+
+        '<div class="pcx-stat"><small>PERGUNTA</small><b>'+(qIndex+1)+'/'+questions.length+'</b></div>'+
+        '<div class="pcx-stat"><small>ONLINE</small><b id="pcxOnline">'+participants.length+'</b></div>'+
+        '<div class="pcx-stat"><small>VOTOS RECEBIDOS</small><b id="pcxVoteCount">0</b></div>'+
+        '<div class="pcx-stat"><small>DISTRIBUIÇÃO</small><b>Oculta</b></div>'+
+        '<button type="button" class="btn ghost" id="pcxFull">⛶ Telão</button>'+
       '</div>'+
-      '<div class="aud3-question"><small>ESCOLHA UMA ALTERNATIVA</small><h3>'+q.prompt+'</h3></div>'+
-      '<div class="aud3-votes">'+q.options.map((x,n)=>'<button type="button" class="aud3-vote" data-vote="'+n+'"><b>'+String.fromCharCode(65+n)+'</b><span>'+x+'</span></button>').join('')+'</div>'+
-      '<div class="aud3-people">'+peopleHtml()+'</div>'+
-      '<div class="aud3-actions"><button type="button" class="btn ghost" id="aud3AbortQuestion">Encerrar votação agora</button></div>'+
+      '<div class="pcx-question"><small>VOTAÇÃO ABERTA</small><h3>'+esc(q.prompt)+'</h3><div class="pcx-options">'+q.options.map((x,n)=>'<div class="pcx-option"><b>'+String.fromCharCode(65+n)+'</b><span>'+esc(x)+'</span></div>').join('')+'</div></div>'+
+      '<div class="pcx-live"><div class="pcx-card"><h3>Quem já votou?</h3><div id="pcxVoters" class="pcx-vote-list">'+participants.map(p=>'<span class="pcx-voter">○ '+esc(p.name)+'</span>').join('')+'</div></div><div class="pcx-live-note">🔒 Cada aparelho aceita <strong>um voto nesta rodada</strong>. O operador não vê qual alternativa cada pessoa escolheu antes de revelar o resultado.</div></div>'+
+      '<div class="pcx-actions end"><button type="button" class="btn primary big" id="pcxReveal" disabled>📊 ENCERRAR VOTAÇÃO E REVELAR</button></div>'+
     '</section>';
 
-    host.querySelectorAll('[data-vote]').forEach(b=>b.onclick=()=>registerVote(Number(b.dataset.vote)));
-    host.querySelector('#aud3Sound').onclick=()=>{SoundManager.toggle();renderQuestion();};
-    host.querySelector('#aud3AbortQuestion').onclick=()=>{
-      if(votes.reduce((a,b)=>a+b,0)===0){SoundManager.play('warning');return;}
-      reveal();
-    };
+    host.querySelector('#pcxFull').onclick=()=>{if(!document.fullscreenElement)dialog.requestFullscreen?.();else document.exitFullscreen?.();};
+    host.querySelector('#pcxReveal').onclick=()=>reveal();
+    SoundManager.play('open');
   }
 
-  function registerVote(choice){
-    if(state!=='voting')return;
-    state='locked';
-    votes[choice]++;
-    sessionVotes++;
-    SoundManager.play('click');
+  function handleMessage({data,clientId}){
+    if(!data)return;
 
-    host.querySelectorAll('[data-vote]').forEach(b=>b.disabled=true);
+    if(data.type==='participant-ready'||data.type==='ready'){
+      syncParticipant(clientId);
+      return;
+    }
 
-    const allDone=participant>=participantTarget;
-    const layer=document.createElement('div');
-    layer.className='aud3-privacy';
-    layer.id='aud3Privacy';
-    layer.innerHTML='<div class="aud3-privacy-card"><div class="big">✅</div><h3>Voto registrado!</h3>'+
-      '<p>A alternativa escolhida foi ocultada. '+(allDone?'Todos os participantes já votaram nesta pergunta.':'Entregue o aparelho ao próximo participante.')+'</p>'+
-      '<button type="button" class="btn primary big" id="aud3Continue">'+(allDone?'📊 MOSTRAR RESULTADO':'👤 LIBERAR PARTICIPANTE '+(participant+1))+'</button></div>';
-    document.body.appendChild(layer);
+    if(data.type==='vote'){
+      if(state!=='question'||data.roundId!==roundId)return;
+      const choice=Number(data.choice);
+      if(!Number.isInteger(choice)||choice<0||choice>3)return;
 
-    layer.querySelector('#aud3Continue').onclick=()=>{
-      SoundManager.play(allDone?'next':'open');
-      layer.remove();
-      if(allDone) reveal();
-      else{participant++;renderQuestion();}
-    };
+      if(votes.has(clientId)){
+        session.sendTo(clientId,{type:'already-voted',roundId,choice:votes.get(clientId)});
+        return;
+      }
+
+      votes.set(clientId,choice);
+      totalVotes++;
+      session.markVoted(clientId,roundId);
+      session.sendTo(clientId,{type:'vote-ack',roundId,choice});
+      updateLive();
+      SoundManager.play('click');
+      return;
+    }
+
+    if(data.type==='participant-left'){
+      updateLive();
+      updateWaitingPeople();
+    }
   }
 
   function reveal(){
-    const total=votes.reduce((a,b)=>a+b,0);
-    if(!total)return;
+    if(state!=='question'||votes.size<1)return;
     state='result';
-    const q=questions[qIndex];
-    const max=Math.max(...votes);
-    const top=votes.map((v,i)=>v===max?i:-1).filter(i=>i>=0);
-    const majorityIsCorrect=top.length===1&&top[0]===q.correct;
-    if(majorityIsCorrect){majorityCorrect++;score+=250;SoundManager.play('correct');}
-    else SoundManager.play('next');
-    questionsCompleted++;
 
-    host.innerHTML='<section class="aud3">'+
-      header('Resultado da plateia','Agora os percentuais aparecem para discussão coletiva.','RESULTADO '+(qIndex+1)+'/'+questions.length)+
-      '<div class="aud3-results"><h3>'+q.prompt+'</h3>'+
-      q.options.map((x,n)=>{
-        const p=Math.round(votes[n]/total*100);
-        return '<div class="aud3-row '+(n===q.correct?'correct':'')+'"><span>'+String.fromCharCode(65+n)+'</span><i><b style="width:'+p+'%"></b></i><strong>'+votes[n]+' voto'+(votes[n]===1?'':'s')+'</strong><em>'+p+'%</em></div>';
-      }).join('')+
-      '<div class="aud3-answer"><strong>✅ Resposta de referência: '+String.fromCharCode(65+q.correct)+'. '+q.options[q.correct]+'</strong><br>'+q.why+'</div>'+
-      '<div class="aud3-actions"><button type="button" class="btn primary" id="aud3Next">'+(qIndex===questions.length-1?'Encerrar sessão':'Próxima pergunta')+'</button></div>'+
+    const q=questions[qIndex];
+    const counts=[0,0,0,0];
+    votes.forEach(v=>{if(v>=0&&v<4)counts[v]++;});
+    const total=counts.reduce((a,b)=>a+b,0);
+    const results=counts.map(v=>({count:v,percent:total?Math.round(v/total*100):0}));
+    const max=Math.max(...counts);
+    const leaders=counts.map((v,i)=>v===max?i:-1).filter(i=>i>=0);
+    const majorityOk=leaders.length===1&&leaders[0]===q.correct;
+    if(majorityOk){majorityCorrect++;score+=250;SoundManager.play('correct');}
+    else SoundManager.play('next');
+
+    currentResult={
+      type:'result',
+      roundId,
+      prompt:q.prompt,
+      options:q.options,
+      correct:q.correct,
+      why:q.why,
+      votes:total,
+      results
+    };
+    session.broadcast(currentResult);
+
+    host.innerHTML='<section class="pcx">'+header('Resultado da plateia','O resultado foi enviado simultaneamente para todos os celulares.','RESULTADO '+(qIndex+1)+'/'+questions.length)+
+      '<div class="pcx-results"><h3>'+esc(q.prompt)+'</h3>'+
+      results.map((r,n)=>'<div class="pcx-row '+(n===q.correct?'correct':'')+'"><span>'+String.fromCharCode(65+n)+'</span><i><b style="width:'+r.percent+'%"></b></i><strong>'+r.count+' voto'+(r.count===1?'':'s')+'</strong><em>'+r.percent+'%</em></div>').join('')+
+      '<div class="pcx-explain"><strong>✅ Resposta de referência: '+String.fromCharCode(65+q.correct)+'. '+esc(q.options[q.correct])+'</strong><br>'+esc(q.why||'')+'</div>'+
+      '<div class="pcx-actions end"><button type="button" class="btn primary big" id="pcxNext">'+(qIndex===questions.length-1?'🏁 ENCERRAR JOGO':'PRÓXIMA PERGUNTA ▶')+'</button></div>'+
       '</div></section>';
 
-    host.querySelector('#aud3Next').onclick=()=>{
-      if(qIndex===questions.length-1) finish();
-      else{
-        qIndex++;
-        participant=1;
-        votes=[0,0,0,0];
-        SoundManager.play('next');
-        renderQuestion();
-      }
+    host.querySelector('#pcxNext').onclick=()=>{
+      if(qIndex===questions.length-1)finish();
+      else{qIndex++;openQuestion();}
     };
   }
 
   function finish(){
-    state='finish';
-    save(score,majorityCorrect,questionsCompleted);
+    state='finished';
+    session.broadcast({type:'session-finished'});
+    save(score,majorityCorrect,questions.length);
     if(onFinish)onFinish();
     SoundManager.play('finish');
-    host.innerHTML='<section class="aud3">'+
-      header('Sessão concluída','Resumo da atividade realizada com a plateia.','FINAL')+
-      '<div class="aud3-finish"><div class="big">📱</div><h3>'+sessionVotes+' votos registrados</h3>'+
-      '<p><strong>'+questionsCompleted+'</strong> pergunta(s) realizadas com até <strong>'+participantTarget+'</strong> participantes por rodada.</p>'+
-      '<p>Em <strong>'+majorityCorrect+'</strong> pergunta(s), a alternativa mais votada coincidiu com a resposta de referência.</p>'+
-      '<p><strong>'+score+' pontos</strong></p>'+
-      '<div class="aud3-actions"><button type="button" class="btn primary" id="aud3Again">Nova sessão</button><button type="button" class="btn ghost" id="aud3Close">Encerrar</button></div>'+
+
+    host.innerHTML='<section class="pcx">'+header('Jogo encerrado','A sessão permanece aberta até você fechar esta tela.','FINAL')+
+      '<div class="pcx-finish"><div class="big">🏁</div><h3>'+participants.length+' participante'+(participants.length===1?'':'s')+' conectado'+(participants.length===1?'':'s')+'</h3>'+
+      '<p><strong>'+totalVotes+'</strong> votos recebidos em <strong>'+questions.length+'</strong> perguntas.</p>'+
+      '<p>Em <strong>'+majorityCorrect+'</strong> rodada(s), a alternativa mais votada coincidiu com a resposta de referência.</p>'+
+      '<p><strong>'+score+' pontos coletivos</strong></p>'+
+      '<div class="pcx-actions" style="justify-content:center"><button type="button" class="btn primary" id="pcxAgain">Novo jogo com esta plateia</button><button type="button" class="btn ghost" id="pcxFinishClose">Encerrar sessão</button></div>'+
       '</div></section>';
-    host.querySelector('#aud3Again').onclick=()=>setup();
-    host.querySelector('#aud3Close').onclick=()=>dialog.close();
+
+    host.querySelector('#pcxAgain').onclick=()=>{broadcastWaiting();renderWaiting();};
+    host.querySelector('#pcxFinishClose').onclick=()=>dialog.close();
   }
 
-  setup();
-  if(!dialog.open)dialog.showModal();
+  const onClose=()=>{
+    if(destroyed)return;
+    destroyed=true;
+    try{session?.close();}catch{}
+    dialog.classList.remove('plateia-connected-dialog');
+  };
+  dialog.addEventListener('close',onClose,{once:true});
+
+  createSession();
 }
