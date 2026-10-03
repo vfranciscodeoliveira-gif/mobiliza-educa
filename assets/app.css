@@ -2868,3 +2868,8 @@ filter:drop-shadow(0 0 24px rgba(44,146,255,.55));pointer-events:none}
 @media(max-width:1100px){.audience-track-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:780px){.experience-grid{grid-template-columns:1fr}.audience-profile{grid-template-columns:64px 1fr;padding:20px}.profile-icon{width:60px;height:60px;border-radius:18px;font-size:1.9rem}.experience-card{grid-template-columns:48px 1fr}.experience-status{grid-column:2}}
 @media(max-width:620px){.audience-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px}.audience-tab{padding:10px 8px;font-size:.82rem}.audience-track-grid{grid-template-columns:1fr}.audience-profile{grid-template-columns:1fr;gap:12px}.profile-highlights{gap:5px}.profile-highlights span{font-size:.68rem}.audience-track-card{min-height:0}.experience-card{padding:14px}}
+
+/* v0.19.1 • experiências ativas */
+.experience-card.available{border-color:#b8d8e9;background:linear-gradient(180deg,#fff,#f8fcfe)}
+.experience-open{margin-top:12px}
+.experience-status.active{background:#e9f8ef;color:#17633b;border-color:#a9d9b9}
