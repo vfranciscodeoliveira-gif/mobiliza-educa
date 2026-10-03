@@ -1,25 +1,5 @@
-const questions=[
-{q:'Ao se aproximar de uma faixa de pedestres ocupada, o condutor deve:',a:['Acelerar para passar primeiro','Reduzir e dar passagem com segurança','Buzinar para o pedestre sair','Desviar pela contramão'],correct:1,why:'A travessia deve ser protegida com velocidade compatível e prioridade ao pedestre.'},
-{q:'Usar o celular ao dirigir aumenta o risco porque:',a:['Divide a atenção entre a via e outra tarefa','Melhora o tempo de reação','Só atrapalha em rodovias','Reduz a velocidade automaticamente'],correct:0,why:'A distração visual, manual e cognitiva reduz percepção e tempo disponível para reagir.'},
-{q:'O cinto de segurança deve ser usado:',a:['Só pelo motorista','Só nos bancos dianteiros','Por todos os ocupantes','Somente em rodovias'],correct:2,why:'Todos os ocupantes precisam estar protegidos, inclusive no banco traseiro.'},
-{q:'Em área escolar, a atitude mais segura é:',a:['Acelerar para liberar a via','Adequar a velocidade e redobrar atenção','Parar sobre a faixa','Usar a buzina continuamente'],correct:1,why:'Áreas escolares exigem atenção reforçada, velocidade adequada e respeito às travessias.'},
-{q:'Ao ultrapassar um ciclista, é correto:',a:['Passar muito perto','Manter distância lateral segura e só ultrapassar com visibilidade','Buzinar até ele sair','Ultrapassar em curva'],correct:1,why:'Distância lateral e visibilidade reduzem conflitos e protegem usuários vulneráveis.'},
-{q:'No semáforo amarelo, o condutor deve:',a:['Acelerar sempre','Reduzir e parar com segurança quando possível','Ignorar a sinalização','Parar no meio do cruzamento'],correct:1,why:'O amarelo indica atenção e transição. A decisão deve priorizar uma parada segura.'},
-{q:'Ao atravessar a rua, o pedestre deve:',a:['Usar a faixa e observar os dois sentidos','Correr entre veículos','Olhar apenas para um lado','Usar o celular durante a travessia'],correct:0,why:'A faixa organiza a travessia, mas a observação e a atenção continuam indispensáveis.'},
-{q:'Uma criança no veículo deve ser transportada:',a:['De qualquer forma se o trajeto for curto','Conforme as regras de retenção e segurança aplicáveis','No colo de um adulto','Sem cinto no banco traseiro'],correct:1,why:'Dispositivos e formas corretas de retenção reduzem o risco de lesões em colisões e frenagens.'},
-{q:'Dirigir acima da velocidade adequada:',a:['Reduz a distância de parada','Aumenta tempo para reagir','Aumenta distância de parada e gravidade dos impactos','Não muda o risco'],correct:2,why:'Quanto maior a velocidade, maior a distância percorrida durante percepção, reação e frenagem.'},
-{q:'Convivência segura no trânsito significa:',a:['Cada um defender seu espaço','Agir com previsibilidade, respeito e atenção aos mais vulneráveis','Priorizar apenas os veículos','Ignorar quem circula mais devagar'],correct:1,why:'Segurança viária depende de cooperação, previsibilidade, respeito e proteção dos usuários vulneráveis.'},
-{q:'Antes de mudar de faixa, o condutor deve:',a:['Mudar rapidamente sem sinalizar','Sinalizar e verificar espelhos e ponto cego','Apenas buzinar','Olhar somente para frente'],correct:1,why:'Sinalização prévia e verificação do entorno tornam a manobra previsível e reduzem conflitos.'},
-{q:'Em pista molhada, a condução mais segura exige:',a:['Aumentar a velocidade','Reduzir a distância do veículo da frente','Reduzir a velocidade e aumentar a distância de segurança','Frear bruscamente nas curvas'],correct:2,why:'A aderência diminui na chuva, aumentando a distância necessária para parar com segurança.'},
-{q:'Ao perceber um veículo de emergência em atendimento, com sinais regulamentares acionados, o condutor deve:',a:['Disputar espaço','Facilitar sua passagem com segurança','Acelerar para segui-lo','Parar no meio do cruzamento'],correct:1,why:'A prioridade deve ser facilitada de modo seguro, sem criar novos riscos para os demais usuários.'},
-{q:'Para o motociclista, o capacete deve:',a:['Ser usado apenas em rodovias','Estar corretamente colocado e afivelado','Ser levado no braço em trajetos curtos','Ser dispensado em baixa velocidade'],correct:1,why:'O capacete corretamente utilizado é equipamento essencial de proteção.'},
-{q:'Ao se aproximar de um cruzamento com visibilidade reduzida, o mais seguro é:',a:['Acelerar para passar logo','Reduzir a velocidade e aumentar a atenção','Usar somente a buzina e seguir','Invadir a faixa contrária'],correct:1,why:'Menor velocidade amplia o tempo disponível para perceber riscos e reagir.'},
-{q:'Manter distância segura do veículo da frente ajuda a:',a:['Diminuir o tempo de reação','Evitar qualquer necessidade de atenção','Criar espaço para reagir e frear','Aumentar a velocidade média'],correct:2,why:'A distância de segurança fornece espaço para percepção, reação e frenagem.'},
-{q:'Se o motorista estiver cansado ou sonolento, a atitude segura é:',a:['Abrir a janela e seguir normalmente','Aumentar a velocidade para chegar logo','Interromper a condução e descansar em local seguro','Usar o celular para se manter acordado'],correct:2,why:'Sonolência compromete atenção e tempo de reação; continuar dirigindo aumenta o risco.'},
-{q:'Ao estacionar, o condutor deve evitar:',a:['Observar a sinalização','Bloquear faixa de pedestres ou acesso de pedestres','Verificar se o local é permitido','Deixar espaço para circulação segura'],correct:1,why:'Áreas de travessia e circulação de pedestres precisam permanecer desobstruídas.'},
-{q:'A seta deve ser usada:',a:['Somente em rodovias','Antes de conversões e mudanças de faixa','Apenas quando houver fiscalização','Depois que a manobra já começou'],correct:1,why:'A sinalização deve anteceder a manobra para que os demais usuários possam prever sua intenção.'},
-{q:'Ao dirigir, a atenção deve estar:',a:['Principalmente no celular','Dividida com mensagens e vídeos','Voltada ao ambiente viário e aos demais usuários','Somente no veículo da frente'],correct:2,why:'A condução segura depende de atenção contínua ao conjunto do ambiente viário.'}
-];
+import { getGameQuestions } from '../core/questionEngine.js?v=1';
+let questions=[];
 
 const ladder=[100,200,300,500,1000,2000,5000,10000,20000,50000,100000,200000,300000,500000,1000000];
 const letters=['A','B','C','D'];
@@ -109,6 +89,7 @@ export function openMilhao(dialog,host,onFinish){
   await sleep(700);
  };
  const resetGame=()=>{
+  questions=getGameQuestions('milhao',24).map(x=>({q:x.prompt,a:x.options,correct:x.correct,why:x.why,id:x.id,image:x.image}));
   level=0;score=0;pulos=INITIAL_JUMPS;cartas=1;plateia=1;time=INITIAL_TIME;locked=false;selected=null;correctCount=0;bestStreak=0;streak=0;answers=0;questionCursor=0;finished=false;
   order=shuffle(questions.map((_,idx)=>idx));
  };
