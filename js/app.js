@@ -27,7 +27,7 @@ const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image
 
 const audienceTrackCard=item=>`<article class="audience-track-card"><div class="track-icon">${item.icon}</div><div><span class="track-format">${item.format}</span><h4>${item.title}</h4><p>${item.text}</p></div></article>`;
 
-const experienceCard=item=>`<article class="experience-card"><div class="experience-icon">${item.icon}</div><div class="experience-copy"><span class="track-format">${item.format}</span><h4>${item.title}</h4><p>${item.description}</p><div class="module-meta">${item.audiences.map(a=>`<span class="chip">${audienceProfiles[a]?.title||a}</span>`).join('')}</div></div><span class="experience-status">Em planejamento</span></article>`;
+const experienceCard=item=>`<article class="experience-card ${item.ready?'available':''}"><div class="experience-icon">${item.icon}</div><div class="experience-copy"><span class="track-format">${item.format}</span><h4>${item.title}</h4><p>${item.description}</p><div class="module-meta">${item.audiences.map(a=>`<span class="chip">${audienceProfiles[a]?.title||a}</span>`).join('')}</div>${item.ready?`<button type="button" class="btn primary experience-open" data-experience="${item.id}">Experimentar agora</button>`:''}</div><span class="experience-status ${item.ready?'active':''}">${item.ready?'Disponível':'Em planejamento'}</span></article>`;
 
 function renderAudienceProfile(id){
  currentAudience=id in audienceProfiles?id:'criancas';
@@ -113,5 +113,5 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.19.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.19.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
