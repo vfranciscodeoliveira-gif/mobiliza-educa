@@ -1,5 +1,6 @@
 import { getQuestionSet } from '../core/questionEngine.js?v=2';
 import { SoundManager } from '../core/soundManager.js?v=1';
+import { recordGameResult } from '../core/historyStore.js?v=1';
 
 const AUD={
   criancas:['🧒','Crianças','5–12 anos',['criancas']],
@@ -146,6 +147,11 @@ export function openQuiz(dialog,host,onFinish){
     </section>`;
     const s=JSON.parse(localStorage.getItem('mobiliza.results')||'{"games":0,"correct":0,"answers":0,"best":0,"streak":0}');
     s.games=(s.games||0)+1;s.correct=(s.correct||0)+correct;s.answers=(s.answers||0)+qs.length;s.best=Math.max(s.best||0,score);s.streak=Math.max(s.streak||0,best);localStorage.setItem('mobiliza.results',JSON.stringify(s));
+    recordGameResult({
+      kind:'game',moduleId:'quiz',title:'Quiz Relâmpago',score,correct,answers:qs.length,durationSec:secs,
+      audience:AUD[cfg.aud][1],difficulty:DIF[cfg.dif][1],status:'concluido',
+      meta:{count:qs.length,timePerQuestion:cfg.time,bestStreak:best}
+    });
     SoundManager.play(pct>=75?'celebrate':'finish');onFinish?.();
     host.querySelector('#playAgain').onclick=start;
     host.querySelector('#changeLightning').onclick=setup;
