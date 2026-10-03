@@ -10,7 +10,7 @@ export const games=[
 {id:'trilha',icon:'🎲',cover:'assets/games/trilha_do_transito_agentes_mirins.svg',title:'Trilha do Trânsito',description:'Tabuleiro, dado animado, peões, casas especiais e desafios educativos.',tags:['jogar agora','multijogador'],ready:true},
 {id:'memoria',icon:'🧠',cover:'assets/games/jogo_da_memoria_mobiliza_educa.svg',title:'Jogo da Memória',description:'Cartas animadas, pares de sinais e situações seguras, tempo e pontuação.',tags:['jogar agora','atenção'],ready:true},
 {id:'cruzadas',icon:'✏️',cover:'assets/games/palavras_cruzadas_do_transito.svg',title:'Palavras Cruzadas do Trânsito',description:'Pistas educativas, validação das respostas, tentativas e pontuação.',tags:['jogar agora','vocabulário'],ready:true},
-{id:'e-agora',icon:'🎬',cover:'assets/games/cidade_mirim_realista_ai_v35.webp',title:'E Agora? Você Decide!',description:'Cenas em movimento, pausa crítica, decisão, consequência, câmera lenta e percepção de riscos. Piloto com 3 situações.',tags:['cinematográfico','interativo'],ready:true},
+{id:'central-transito',icon:'🚦',cover:'assets/games/trilha_do_transito_agentes_mirins.svg',title:'Central de Trânsito — Você no Controle',description:'Controle uma interseção em tempo real: semáforos, veículos, pedestres, emergência e missões que reagem às suas decisões.',tags:['simulação','tempo real'],ready:true},
 {id:'plateia',icon:'📱',title:'Plateia Interativa',description:'QR Code, respostas pelo celular, percentuais ao vivo e telão sincronizado.',tags:['coletivo','telão'],ready:false}
 ];
 
