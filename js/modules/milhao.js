@@ -1,4 +1,5 @@
 import { getGameQuestions } from '../core/questionEngine.js?v=2';
+import { recordGameResult } from '../core/historyStore.js?v=1';
 let questions=[];
 
 const ladder=[100,200,300,500,1000,2000,5000,10000,20000,50000,100000,200000,300000,500000,1000000];
@@ -44,6 +45,7 @@ export function openMilhao(dialog,host,onFinish){
  let order=[];
  let questionCursor=0;
  let finished=false;
+ let startedAt=Date.now();
 
  const stopTimer=()=>{if(timer){clearInterval(timer);timer=null;}};
  const currentQuestion=()=>questions[order[questionCursor]];
@@ -90,7 +92,7 @@ export function openMilhao(dialog,host,onFinish){
  };
  const resetGame=()=>{
   questions=getGameQuestions('milhao',24).map(x=>({q:x.prompt,a:x.options,correct:x.correct,why:x.why,id:x.id,image:x.image}));
-  level=0;score=0;pulos=INITIAL_JUMPS;cartas=1;plateia=1;time=INITIAL_TIME;locked=false;selected=null;correctCount=0;bestStreak=0;streak=0;answers=0;questionCursor=0;finished=false;
+  level=0;score=0;pulos=INITIAL_JUMPS;cartas=1;plateia=1;time=INITIAL_TIME;locked=false;selected=null;correctCount=0;bestStreak=0;streak=0;answers=0;questionCursor=0;finished=false;startedAt=Date.now();
   order=shuffle(questions.map((_,idx)=>idx));
  };
  const openStart=()=>{
@@ -277,6 +279,12 @@ export function openMilhao(dialog,host,onFinish){
   if(finished)return;
   finished=true;stopTimer();
   const rank=ranking(name,finalScore);stats(correctCount,answers,finalScore,bestStreak);
+  recordGameResult({
+    kind:'game',moduleId:'milhao',title:'Show do Milhão do Trânsito',
+    score:finalScore,correct:correctCount,answers,durationSec:Math.round((Date.now()-startedAt)/1000),
+    status:reason,level:String(level+1),
+    meta:{player:name,bestStreak,pulosRestantes:pulos,cartasRestantes:cartas,plateiaRestante:plateia}
+  });
   const reasonText={win:'Você concluiu as 15 perguntas!',wrong:'Resposta incorreta: a rodada foi encerrada.',timeout:'Tempo esgotado: a rodada foi encerrada.',stop:'Você decidiu parar e levou 100% do acumulado.',questions:'Banco de perguntas insuficiente para continuar.'}[reason]||'Rodada encerrada.';
   host.innerHTML=`<section class="game milhao milhao-result"><div class="result-trophy">${reason==='win'?'🏆':'🚦'}</div><p class="eyebrow">RESULTADO FINAL</p><h2>${reason==='timeout'?'⏱ TEMPO ACABOU!':reason==='win'?'PARABÉNS!':'FIM DE JOGO'}</h2><p>${reasonText}</p><h2>${name}, você fez ${finalScore.toLocaleString('pt-BR')} pontos</h2><p>${correctCount} acerto(s) em ${answers} resposta(s). Melhor sequência: ${bestStreak}.</p><div class="ranking-box"><h3>Ranking local</h3>${rank.slice(0,5).map((r,n)=>`<div><span>#${n+1} ${r.name}</span><strong>${r.score.toLocaleString('pt-BR')}</strong></div>`).join('')}</div><div class="hero-actions"><button type="button" class="btn primary" id="milhaoAgain">Jogar novamente</button><button type="button" class="btn ghost" id="milhaoClose">Encerrar</button></div></section>`;
   onFinish?.();
