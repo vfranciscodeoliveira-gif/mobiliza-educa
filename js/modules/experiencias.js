@@ -1,4 +1,5 @@
 import { SoundManager } from '../core/soundManager.js?v=1';
+import { openExtraExperience } from './experienciasExtra.js?v=1';
 const MEMORY_BASE='assets/memory/';
 const ARR_ITEMS=[
  {id:'capacete',label:'Capacete',img:MEMORY_BASE+'capacete.svg',target:'moto'},
@@ -127,6 +128,7 @@ export function openExperience(dialog,host,id,onFinish){
  else if(id==='percepcao')percepcao(dialog,host,onFinish);
  else if(id==='mito-verdade')mito(dialog,host,onFinish);
  else if(id==='empresa-rapido')empresa(dialog,host,onFinish);
+ else if(openExtraExperience(dialog,host,id,onFinish)){}
  else host.innerHTML=`<section class="ax">${head('Em preparação','Esta experiência ainda está em planejamento.')}</section>`;
  if(!dialog.open)dialog.showModal();
 }
