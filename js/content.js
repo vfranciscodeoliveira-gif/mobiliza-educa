@@ -75,12 +75,12 @@ adultos:{
 
 export const experiences=[
 {id:'mito-verdade',icon:'⚖️',visual:'exp-mito',title:'Mito ou Verdade?',description:'Afirmações rápidas para provocar discussão e corrigir percepções equivocadas.',audiences:['adolescentes','adultos','educadores-empresas'],format:'60–90 s',status:'ativo',ready:true},
-{id:'desafio-60',icon:'⏱️',title:'Desafio 60 segundos',description:'Uma situação, uma pergunta e uma explicação curta. Ideal para celular, telão e ações rápidas.',audiences:['criancas','adolescentes','adultos'],format:'1 min',status:'ativo',ready:true},
-{id:'prioridade',icon:'🔀',title:'Quem tem prioridade?',description:'Situações interativas para raciocinar sobre convivência, atenção, previsibilidade e tomada de decisão.',audiences:['adolescentes','adultos'],format:'interativo',status:'ativo',ready:true},
+{id:'desafio-60',icon:'⏱️',cover:'assets/ai/hero_area_escolar.webp',title:'Desafio 60 segundos',description:'Uma situação, uma pergunta e uma explicação curta. Ideal para celular, telão e ações rápidas.',audiences:['criancas','adolescentes','adultos'],format:'1 min',status:'ativo',ready:true},
+{id:'prioridade',icon:'🔀',cover:'assets/games/cidade_mirim_realista_ai_v35.webp',title:'Quem tem prioridade?',description:'Situações interativas para raciocinar sobre convivência, atenção, previsibilidade e tomada de decisão.',audiences:['adolescentes','adultos'],format:'interativo',status:'ativo',ready:true},
 {id:'percepcao',icon:'👁️',visual:'exp-percepcao',title:'Teste sua percepção',description:'Mostra elementos de uma cena por poucos segundos e depois testa o que ficou na memória visual.',audiences:['adolescentes','adultos'],format:'visual',status:'ativo',ready:true},
-{id:'historia',icon:'📖',title:'Histórias do Dicas do Chico',description:'Narrativas curtas com escolhas, feedback e pontuação para crianças.',audiences:['criancas'],format:'história',status:'ativo',ready:true},
+{id:'historia',icon:'📖',cover:'assets/brand-cover.webp',title:'Histórias do Dicas do Chico',description:'Narrativas curtas com escolhas, feedback e pontuação para crianças.',audiences:['criancas'],format:'história',status:'ativo',ready:true},
 {id:'arraste',icon:'🧩',visual:'exp-arraste',title:'Arraste para o lugar certo',description:'Associe capacete, cinto, faixa e bicicleta às situações correspondentes, com feedback imediato.',audiences:['criancas'],format:'atividade',status:'ativo',ready:true},
-{id:'familia-5',icon:'🏠',title:'5 minutos em família',description:'Perguntas, conversas guiadas e combinados práticos para responsáveis e crianças.',audiences:['criancas','adultos'],format:'família',status:'ativo',ready:true},
+{id:'familia-5',icon:'🏠',cover:'assets/hero-ai.webp',title:'5 minutos em família',description:'Perguntas, conversas guiadas e combinados práticos para responsáveis e crianças.',audiences:['criancas','adultos'],format:'família',status:'ativo',ready:true},
 {id:'empresa-rapido',icon:'💼',visual:'exp-pausa',title:'Pausa de Segurança',description:'Microtreinamento para colaboradores com conteúdo, checagem final e registro local de conclusão.',audiences:['adultos','educadores-empresas'],format:'empresa',status:'ativo',ready:true}
 ];
 
