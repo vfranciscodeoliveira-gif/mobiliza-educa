@@ -1,5 +1,5 @@
 import { SoundManager } from '../core/soundManager.js?v=1';
-import { openExtraExperience } from './experienciasExtra.js?v=1';
+import { openExtraExperience } from './experienciasExtra.js?v=2';
 const MEMORY_BASE='assets/memory/';
 const ARR_ITEMS=[
  {id:'capacete',label:'Capacete',img:MEMORY_BASE+'capacete.svg',target:'moto'},
