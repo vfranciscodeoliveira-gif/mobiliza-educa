@@ -4,6 +4,7 @@ import { openMilhao } from './modules/milhao.js?v=18';
 import { openTrilha } from './modules/trilha.js?v=35';
 import { openMemoria } from './modules/memoria.js?v=28';
 import { openCruzadas } from './modules/cruzadas.js?v=31';
+import { openEAgora } from './modules/eAgora.js?v=38';
 import { openPlateia } from './modules/plateia.js?v=6';
 import { openLearning } from './modules/learning.js?v=3';
 import { openParticipantMode } from './modules/participant.js?v=3';
@@ -89,6 +90,7 @@ function bindModuleButtons(){
   else if(id==='trilha')openTrilha(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='memoria')openMemoria(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='cruzadas')openCruzadas(qs('#gameDialog'),qs('#gameHost'),updateResults);
+  else if(id==='eagora')openEAgora(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='plateia')openPlateia(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(educatorModules.some(x=>x.id===id))openEducatorModule(id,qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(learning.some(x=>x.id===id))openLearning(qs('#gameDialog'),qs('#gameHost'),id,updateResults);
