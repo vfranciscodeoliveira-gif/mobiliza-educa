@@ -3080,3 +3080,34 @@ dialog::backdrop{background:rgba(4,24,38,.68);backdrop-filter:blur(4px)}
   .view::before{left:-.5rem;right:-.5rem;height:130px}
   .main-nav{box-shadow:0 5px 14px rgba(7,45,70,.12)}
 }
+
+/* v0.21.0 • Banco Visual IA */
+.hero-brand{
+  min-height:310px;
+  position:relative;
+  background:#d8e9f1;
+}
+.hero-brand img{
+  width:100%;
+  height:100%;
+  min-height:310px;
+  object-fit:cover;
+  object-position:center;
+}
+.hero-brand::after{
+  content:"CENA EDUCATIVA • IA";
+  position:absolute;
+  right:12px;
+  bottom:12px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(7,39,61,.78);
+  color:#fff;
+  font-size:.63rem;
+  font-weight:1000;
+  letter-spacing:.06em;
+  backdrop-filter:blur(4px);
+}
+@media(max-width:760px){
+  .hero-brand,.hero-brand img{min-height:220px}
+}
