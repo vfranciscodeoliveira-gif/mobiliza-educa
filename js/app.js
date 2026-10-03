@@ -1,11 +1,11 @@
 import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=42';
-import { openQuiz } from './modules/quiz.js?v=25';
+import { openQuiz } from './modules/quiz.js?v=26';
 import { openMilhao } from './modules/milhao.js?v=15';
 import { openTrilha } from './modules/trilha.js?v=32';
 import { openMemoria } from './modules/memoria.js?v=27';
 import { openCruzadas } from './modules/cruzadas.js?v=30';
 import { openPlateia } from './modules/plateia.js';
-import { openExperience } from './modules/experiencias.js?v=42';
+import { openExperience } from './modules/experiencias.js?v=43';
 import { SoundManager } from './core/soundManager.js?v=1';
 import { openAdminModule } from './modules/admin.js';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
@@ -121,5 +121,5 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.20.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.20.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
