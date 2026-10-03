@@ -1,10 +1,9 @@
-import { games, audiences, learning, educatorModules, adminModules, tips } from './content.js?v=39';
+import { games, audiences, learning, educatorModules, adminModules, tips } from './content.js?v=40';
 import { openQuiz } from './modules/quiz.js?v=24';
 import { openMilhao } from './modules/milhao.js?v=14';
 import { openTrilha } from './modules/trilha.js?v=31';
 import { openMemoria } from './modules/memoria.js?v=27';
 import { openCruzadas } from './modules/cruzadas.js?v=30';
-import { openCentralTransito } from './modules/centralTransito.js?v=39';
 import { openPlateia } from './modules/plateia.js';
 import { openAdminModule } from './modules/admin.js';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
@@ -52,7 +51,6 @@ function bindModuleButtons(){
   else if(id==='trilha')openTrilha(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='memoria')openMemoria(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='cruzadas')openCruzadas(qs('#gameDialog'),qs('#gameHost'),updateResults);
-  else if(id==='central-transito')openCentralTransito(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='plateia')openPlateia(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(adminModules.some(x=>x.id===id)){
    if(await ensureAdminAccess(qs('#authDialog'))){updateAuthUI();openAdminModule(id,qs('#adminDialog'),qs('#adminHost'),qs('#authDialog'));}
@@ -88,5 +86,5 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.17.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.17.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
