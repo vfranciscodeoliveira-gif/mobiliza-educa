@@ -1,5 +1,6 @@
 import { getGameQuestions } from '../core/questionEngine.js?v=2';
 import { recordGameResult } from '../core/historyStore.js?v=1';
+import { createHostSession, renderQr, makeSessionCode } from '../core/sharedSession.js?v=1';
 let questions=[];
 
 const ladder=[100,200,300,500,1000,2000,5000,10000,20000,50000,100000,200000,300000,500000,1000000];
@@ -46,8 +47,139 @@ export function openMilhao(dialog,host,onFinish){
  let questionCursor=0;
  let finished=false;
  let startedAt=Date.now();
+ let audienceSession=null;
+ let audienceParticipants=[];
+ let audienceVotes=new Map();
+ let audienceRoundId=null;
+ let audienceState='off';
+ let audienceCurrentResult=null;
+ let audienceMaxParticipants=0;
+ let audienceConnectBusy=false;
 
  const stopTimer=()=>{if(timer){clearInterval(timer);timer=null;}};
+ const milhaoEsc=(v='')=>String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const audienceUid=()=>('m-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9));
+ const audienceQuestionPayload=()=>{
+  const q=currentQuestion();
+  if(!q||!audienceRoundId)return null;
+  return {
+   type:'question',
+   roundId:audienceRoundId,
+   index:level+1,
+   total:MAX_LEVELS,
+   prompt:q.q,
+   options:q.a,
+   image:q.image||null,
+   category:q.category||'',
+   difficulty:q.difficulty||''
+  };
+ };
+ const updateAudienceIndicators=()=>{
+  audienceMaxParticipants=Math.max(audienceMaxParticipants,audienceParticipants.length);
+  const count=host.querySelector('#milhaoAudienceCount');
+  if(count)count.textContent=String(audienceParticipants.length);
+  const aid=host.querySelector('#audience');
+  if(aid&&plateia)aid.innerHTML='👥 Plateia <b>'+plateia+'</b>'+(audienceSession?'<small> • '+audienceParticipants.length+' online</small>':'');
+  const voters=host.querySelector('#milhaoAudienceVoters');
+  if(voters&&audienceState==='voting'){
+   voters.innerHTML=audienceParticipants.map(p=>'<span class="'+(audienceVotes.has(p.clientId)?'voted':'')+'">'+(audienceVotes.has(p.clientId)?'✓ ':'○ ')+milhaoEsc(p.name||'Participante')+'</span>').join('');
+  }
+  const vc=host.querySelector('#milhaoAudienceVoteCount');
+  if(vc)vc.textContent=String(audienceVotes.size);
+  const reveal=host.querySelector('#milhaoAudienceReveal');
+  if(reveal)reveal.disabled=audienceVotes.size<1;
+ };
+ const syncAudienceParticipant=clientId=>{
+  if(!audienceSession)return;
+  if(audienceState==='voting'){
+   const payload=audienceQuestionPayload();
+   if(payload)audienceSession.sendTo(clientId,payload);
+   if(audienceVotes.has(clientId))audienceSession.sendTo(clientId,{type:'already-voted',roundId:audienceRoundId,choice:audienceVotes.get(clientId)});
+   return;
+  }
+  if(audienceState==='result'&&audienceCurrentResult){
+   audienceSession.sendTo(clientId,audienceCurrentResult);
+   return;
+  }
+  audienceSession.sendTo(clientId,{type:'waiting',message:'Você está conectado ao Show do Milhão. Aguarde o jogador pedir a ajuda da plateia.'});
+ };
+ const handleAudienceMessage=({data,clientId})=>{
+  if(!data)return;
+  if(data.type==='participant-ready'||data.type==='ready'){
+   syncAudienceParticipant(clientId);
+   return;
+  }
+  if(data.type==='vote'){
+   if(audienceState!=='voting'||data.roundId!==audienceRoundId)return;
+   const choice=Number(data.choice);
+   if(!Number.isInteger(choice)||choice<0||choice>3)return;
+   if(audienceVotes.has(clientId)){
+    audienceSession?.sendTo(clientId,{type:'already-voted',roundId:audienceRoundId,choice:audienceVotes.get(clientId)});
+    return;
+   }
+   audienceVotes.set(clientId,choice);
+   audienceSession?.markVoted(clientId,audienceRoundId);
+   audienceSession?.sendTo(clientId,{type:'vote-ack',roundId:audienceRoundId,choice});
+   updateAudienceIndicators();
+   beep(520,.045);
+   return;
+  }
+  if(data.type==='participant-left')updateAudienceIndicators();
+ };
+ const paintAudienceRoom=()=>{
+  const panel=host.querySelector('#milhaoAudienceRoom');
+  const connect=host.querySelector('#milhaoConnectAudience');
+  if(!panel||!connect)return;
+  if(!audienceSession){
+   panel.hidden=true;
+   connect.disabled=audienceConnectBusy;
+   connect.textContent=audienceConnectBusy?'Conectando...':'📱 Conectar plateia';
+   return;
+  }
+  panel.hidden=false;
+  connect.disabled=true;
+  connect.textContent='✓ Sala ativa';
+  const code=panel.querySelector('#milhaoAudienceCode');
+  const link=panel.querySelector('#milhaoAudienceLink');
+  if(code)code.textContent=audienceSession.code;
+  if(link)link.textContent=audienceSession.joinUrl;
+  updateAudienceIndicators();
+  const qr=panel.querySelector('#milhaoAudienceQr');
+  if(qr&&!qr.dataset.ready){
+   qr.dataset.ready='1';
+   renderQr(qr,audienceSession.joinUrl,150).catch(()=>{qr.innerHTML='<strong>'+milhaoEsc(audienceSession.code)+'</strong>';});
+  }
+ };
+ const createAudienceRoom=async()=>{
+  if(audienceSession||audienceConnectBusy)return;
+  audienceConnectBusy=true;paintAudienceRoom();
+  let lastError=null;
+  for(let attempt=0;attempt<3&&!audienceSession;attempt++){
+   try{
+    audienceSession=await createHostSession({
+     code:makeSessionCode(),
+     onParticipants:list=>{audienceParticipants=list;updateAudienceIndicators();},
+     onMessage:handleAudienceMessage,
+     onStatus:s=>{
+      if(s.type==='error'){
+       const msg=host.querySelector('#milhaoAudienceRoomMessage');
+       if(msg)msg.textContent='A conexão da plateia apresentou instabilidade.';
+      }
+     }
+    });
+   }catch(e){lastError=e;}
+  }
+  audienceConnectBusy=false;
+  if(!audienceSession){
+   const msg=host.querySelector('#milhaoAudienceStartMessage');
+   if(msg)msg.textContent='Não foi possível abrir a sala agora. Você ainda pode jogar com a plateia simulada.'+(lastError?.message?' '+lastError.message:'');
+   paintAudienceRoom();
+   return;
+  }
+  audienceState='waiting';
+  audienceSession.broadcast({type:'waiting',message:'Você está conectado ao Show do Milhão. Aguarde o jogador pedir a ajuda da plateia.'});
+  paintAudienceRoom();
+ };
  const currentQuestion=()=>questions[order[questionCursor]];
  const safeHalf=v=>Math.floor(Math.max(0,v)/2);
  const disableQuestion=()=>{
@@ -91,14 +223,27 @@ export function openMilhao(dialog,host,onFinish){
   await sleep(700);
  };
  const resetGame=()=>{
-  questions=getGameQuestions('milhao',24).map(x=>({q:x.prompt,a:x.options,correct:x.correct,why:x.why,id:x.id,image:x.image}));
+  questions=getGameQuestions('milhao',24).map(x=>({q:x.prompt,a:x.options,correct:x.correct,why:x.why,id:x.id,image:x.image,category:x.category||'',difficulty:x.difficulty||''}));
   level=0;score=0;pulos=INITIAL_JUMPS;cartas=1;plateia=1;time=INITIAL_TIME;locked=false;selected=null;correctCount=0;bestStreak=0;streak=0;answers=0;questionCursor=0;finished=false;startedAt=Date.now();
   order=shuffle(questions.map((_,idx)=>idx));
  };
  const openStart=()=>{
   stopTimer();
-  host.innerHTML=`<section class="game milhao milhao-start windows-look"><div class="milhao-rings"></div><div class="milhao-start-stage"><div class="milhao-start-emblem"><div class="milhao-cover-frame"><img class="milhao-start-art" src="assets/games/quiz_do_milhao_do_transito.svg?v=14" alt="Show do Milhão do Trânsito"><div class="milhao-cover-badge">SHOW DO MILHÃO<br><small>DO TRÂNSITO</small></div></div></div><div class="milhao-start-copy"><p class="eyebrow">MOBILIZA EDUCA • DESAFIO PRINCIPAL</p><h2 class="milhao-title-3d">Show do Milhão do Trânsito</h2><p>Responda 15 perguntas e avance até 1.000.000. O pulo troca somente a pergunta, sem mudar o nível ou a premiação.</p><label class="player-name">Nome do jogador<input id="milhaoName" maxlength="40" value="${name==='Jogador'?'':name}" placeholder="Digite seu nome"></label><div class="milhao-rules"><span>⏱ 30 s</span><span>⏭ 3 pulos</span><span>🃏 1 cartas</span><span>👥 1 plateia</span></div><button type="button" class="btn primary big milhao-start-button" id="milhaoStart">▶ COMEÇAR DESAFIO</button></div></div></section>`;
-  host.querySelector('#milhaoStart').onclick=async()=>{const btn=host.querySelector('#milhaoStart');btn.disabled=true;name=host.querySelector('#milhaoName').value.trim()||'Jogador';resetGame();await playIntro();render();};
+  host.innerHTML=`<section class="game milhao milhao-start windows-look"><div class="milhao-rings"></div><div class="milhao-start-stage"><div class="milhao-start-emblem"><div class="milhao-cover-frame"><img class="milhao-start-art" src="assets/games/quiz_do_milhao_do_transito.svg?v=14" alt="Show do Milhão do Trânsito"><div class="milhao-cover-badge">SHOW DO MILHÃO<br><small>DO TRÂNSITO</small></div></div></div><div class="milhao-start-copy"><p class="eyebrow">MOBILIZA EDUCA • DESAFIO PRINCIPAL</p><h2 class="milhao-title-3d">Show do Milhão do Trânsito</h2><p>Responda 15 perguntas e avance até 1.000.000. O pulo troca somente a pergunta, sem mudar o nível ou a premiação.</p><label class="player-name">Nome do jogador<input id="milhaoName" maxlength="40" value="${name==='Jogador'?'':name}" placeholder="Digite seu nome"></label><div class="milhao-rules"><span>⏱ 30 s</span><span>⏭ 3 pulos</span><span>🃏 1 cartas</span><span>👥 1 plateia</span></div>
+  <div class="milhao-connected-start">
+    <div class="milhao-connected-copy"><strong>📱 Plateia Conectada</strong><small>Opcional: conecte celulares por QR Code. Se não conectar ninguém, a ajuda continua disponível em modo simulado.</small><span id="milhaoAudienceStartMessage"></span></div>
+    <button type="button" class="btn ghost" id="milhaoConnectAudience">📱 Conectar plateia</button>
+  </div>
+  <div class="milhao-connected-room" id="milhaoAudienceRoom" hidden>
+    <div id="milhaoAudienceQr" class="milhao-connected-qr"></div>
+    <div><small>SALA</small><strong id="milhaoAudienceCode">------</strong><span id="milhaoAudienceLink"></span><p><b id="milhaoAudienceCount">0</b> participante(s) conectado(s)</p><p id="milhaoAudienceRoomMessage">A sala permanece aberta durante a partida.</p></div>
+    <button type="button" class="btn ghost small" id="milhaoCopyAudience">Copiar link</button>
+  </div>
+  <button type="button" class="btn primary big milhao-start-button" id="milhaoStart">▶ COMEÇAR DESAFIO</button></div></div></section>`;
+  host.querySelector('#milhaoConnectAudience').onclick=createAudienceRoom;
+  host.querySelector('#milhaoCopyAudience')?.addEventListener('click',async()=>{if(!audienceSession)return;try{await navigator.clipboard.writeText(audienceSession.joinUrl);host.querySelector('#milhaoCopyAudience').textContent='✓ Copiado';}catch{}});
+  paintAudienceRoom();
+  host.querySelector('#milhaoStart').onclick=async()=>{const btn=host.querySelector('#milhaoStart');btn.disabled=true;name=host.querySelector('#milhaoName').value.trim()||'Jogador';resetGame();if(audienceSession){audienceState='waiting';audienceSession.broadcast({type:'waiting',message:'Show do Milhão iniciado. Aguarde o jogador pedir a ajuda da plateia.'});}await playIntro();render();};
  };
  const ladderHtml=()=>ladder.map((v,n)=>`<span class="${n<level?'done':n===level?'current':''}"><small>${n+1}</small> ${v.toLocaleString('pt-BR')}</span>`).reverse().join('');
  const resumeAfterHelp=()=>{locked=false;startTimer(false);};
@@ -106,7 +251,7 @@ export function openMilhao(dialog,host,onFinish){
   stopTimer();time=INITIAL_TIME;locked=false;selected=null;
   const q=currentQuestion();
   if(!q){end('questions',score);return;}
-  host.innerHTML=`<section class="game milhao windows-look milhao-play"><div class="milhao-rings"></div><div class="milhao-top"><div><p class="eyebrow">SHOW DO MILHÃO DO TRÂNSITO</p><h2>${name}</h2><p class="milhao-score">Pontuação acumulada: <strong>${score.toLocaleString('pt-BR')}</strong> • Valendo: <strong>${ladder[level].toLocaleString('pt-BR')}</strong></p></div><div class="milhao-timer" id="milhaoTimer">${INITIAL_TIME}</div></div><div class="milhao-layout windows-layout"><div class="milhao-stage"><div class="milhao-brand-stage"><div class="milhao-logo-disc">SHOW<br><strong>DO MILHÃO</strong><small>DO TRÂNSITO</small></div></div><div class="milhao-question-wrap"><span>Pergunta ${level+1} de ${MAX_LEVELS}</span><h2 class="milhao-question">${q.q}</h2></div><div class="quiz-options milhao-options">${q.a.map((x,n)=>`<button type="button" class="quiz-option" data-answer="${n}"><b>${letters[n]}</b><span>${x}</span></button>`).join('')}</div><div class="milhao-confirm" id="milhaoConfirm" hidden><span>Confirma a alternativa <strong id="confirmLetter"></strong>?</span><button type="button" class="btn primary" id="confirmYes">CONFIRMAR</button><button type="button" class="btn ghost" id="confirmNo">TROCAR</button></div><div class="milhao-aids"><button type="button" class="btn ghost" id="jump" ${pulos?'':'disabled'}>⏭ Pular <b>${pulos}</b></button><button type="button" class="btn ghost" id="cards" ${cartas?'':'disabled'}>🃏 Cartas <b>${cartas}</b></button><button type="button" class="btn ghost" id="audience" ${plateia?'':'disabled'}>👥 Plateia <b>${plateia}</b></button><button type="button" class="btn ghost" id="stopGame">⏹ Parar</button><button type="button" class="btn ghost" id="fullscreen">⛶ Telão</button></div><div id="feedback"></div></div><aside class="milhao-ladder">${ladderHtml()}</aside></div><div id="milhaoHelpOverlay" class="milhao-help-overlay"></div></section>`;
+  host.innerHTML=`<section class="game milhao windows-look milhao-play"><div class="milhao-rings"></div><div class="milhao-top"><div><p class="eyebrow">SHOW DO MILHÃO DO TRÂNSITO</p><h2>${name}</h2><p class="milhao-score">Pontuação acumulada: <strong>${score.toLocaleString('pt-BR')}</strong> • Valendo: <strong>${ladder[level].toLocaleString('pt-BR')}</strong></p></div><div class="milhao-timer" id="milhaoTimer">${INITIAL_TIME}</div></div><div class="milhao-layout windows-layout"><div class="milhao-stage"><div class="milhao-brand-stage"><div class="milhao-logo-disc">SHOW<br><strong>DO MILHÃO</strong><small>DO TRÂNSITO</small></div></div><div class="milhao-question-wrap"><span>Pergunta ${level+1} de ${MAX_LEVELS}</span><h2 class="milhao-question">${q.q}</h2></div><div class="quiz-options milhao-options">${q.a.map((x,n)=>`<button type="button" class="quiz-option" data-answer="${n}"><b>${letters[n]}</b><span>${x}</span></button>`).join('')}</div><div class="milhao-confirm" id="milhaoConfirm" hidden><span>Confirma a alternativa <strong id="confirmLetter"></strong>?</span><button type="button" class="btn primary" id="confirmYes">CONFIRMAR</button><button type="button" class="btn ghost" id="confirmNo">TROCAR</button></div><div class="milhao-aids"><button type="button" class="btn ghost" id="jump" ${pulos?'':'disabled'}>⏭ Pular <b>${pulos}</b></button><button type="button" class="btn ghost" id="cards" ${cartas?'':'disabled'}>🃏 Cartas <b>${cartas}</b></button><button type="button" class="btn ghost" id="audience" ${plateia?'':'disabled'}>👥 Plateia <b>${plateia}</b>${audienceSession?`<small> • ${audienceParticipants.length} online</small>`:''}</button><button type="button" class="btn ghost" id="stopGame">⏹ Parar</button><button type="button" class="btn ghost" id="fullscreen">⛶ Telão</button></div><div id="feedback"></div></div><aside class="milhao-ladder">${ladderHtml()}</aside></div><div id="milhaoHelpOverlay" class="milhao-help-overlay"></div></section>`;
   const opts=[...host.querySelectorAll('[data-answer]')];
   opts.forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();if(locked||b.disabled)return;opts.forEach(x=>x.classList.remove('selected'));b.classList.add('selected');selected=+b.dataset.answer;host.querySelector('#confirmLetter').textContent=letters[selected];host.querySelector('#milhaoConfirm').hidden=false;beep(520,.05);});
   host.querySelector('#confirmNo').onclick=e=>{e.preventDefault();e.stopPropagation();if(locked)return;selected=null;opts.forEach(x=>x.classList.remove('selected'));host.querySelector('#milhaoConfirm').hidden=true;};
@@ -199,21 +344,89 @@ export function openMilhao(dialog,host,onFinish){
    if(!plateia||locked||finished)return;
    locked=true;stopTimer();plateia--;
 
+   const o=host.querySelector('#milhaoHelpOverlay');
+   const connected=!!audienceSession&&audienceParticipants.length>0;
+
+   if(connected){
+    audienceState='voting';
+    audienceRoundId=audienceUid();
+    audienceVotes=new Map();
+    audienceCurrentResult=null;
+    audienceSession.resetVotes();
+    audienceSession.broadcast(audienceQuestionPayload());
+
+    o.className='milhao-help-overlay show audience-overlay connected-audience-overlay';
+    o.innerHTML=`<div class="help-stage audience-help audience-help-v13 milhao-live-audience">
+      <div class="milhao-live-audience-head"><div><p class="eyebrow">PLATEIA CONECTADA</p><h3>VOTAÇÃO AO VIVO</h3><p>A pergunta foi enviada para os celulares.</p></div><div class="milhao-live-count"><strong id="milhaoAudienceVoteCount">0</strong><small>votos</small></div></div>
+      <div class="milhao-live-voters" id="milhaoAudienceVoters"></div>
+      <div class="milhao-live-note">🔒 A distribuição das respostas fica oculta até encerrar a votação.</div>
+      <button type="button" class="btn primary" id="milhaoAudienceReveal" disabled>📊 ENCERRAR VOTAÇÃO</button>
+    </div>`;
+    updateAudienceIndicators();
+
+    await new Promise(resolve=>{o.querySelector('#milhaoAudienceReveal').onclick=resolve;});
+
+    const counts=[0,0,0,0];
+    audienceVotes.forEach(v=>{if(v>=0&&v<4)counts[v]++;});
+    const total=counts.reduce((a,b)=>a+b,0);
+    const percentages=counts.map(v=>total?Math.round(v/total*100):0);
+    const results=counts.map((v,n)=>({count:v,percent:percentages[n]}));
+
+    audienceCurrentResult={
+      type:'result',
+      roundId:audienceRoundId,
+      prompt:q.q,
+      options:q.a,
+      image:q.image||null,
+      category:q.category||'',
+      difficulty:q.difficulty||'',
+      correct:-1,
+      revealCorrect:false,
+      why:'',
+      votes:total,
+      results,
+      modeLabel:'AJUDA DA PLATEIA'
+    };
+    audienceState='result';
+    audienceSession.broadcast(audienceCurrentResult);
+
+    o.innerHTML=`<div class="help-stage audience-help audience-help-v13 audience-result-stage">
+      <p class="eyebrow">PLATEIA CONECTADA • ${total} VOTO${total===1?'':'S'}</p>
+      <h3>RESULTADO DA PLATEIA</h3>
+      <div class="audience-chart">
+        ${percentages.map((p,n)=>`<div class="audience-chart-row"><span>${letters[n]}</span><i><b style="width:${p}%"></b></i><strong>${p}%</strong></div>`).join('')}
+      </div>
+      <button type="button" class="btn primary audience-continue" id="audienceContinue">CONTINUAR</button>
+    </div>`;
+    host.querySelector('#feedback').innerHTML=`<div class="audience-summary"><strong>📱 Plateia conectada:</strong> ${percentages.map((p,n)=>`<span>${letters[n]} ${p}%</span>`).join('')}</div>`;
+    host.querySelector('#audience').disabled=true;
+    beep(720,.1);
+
+    o.querySelector('#audienceContinue').onclick=e=>{
+      e.preventDefault();e.stopPropagation();
+      audienceState='waiting';audienceCurrentResult=null;
+      audienceSession.broadcast({type:'waiting',message:'Ajuda concluída. Aguarde a próxima solicitação do jogador.'});
+      o.className='milhao-help-overlay';o.innerHTML='';
+      resumeAfterHelp();
+    };
+    return;
+   }
+
    const base=[12,12,12,12];
    base[q.correct]=64;
 
-   const o=host.querySelector('#milhaoHelpOverlay');
    o.className='milhao-help-overlay show audience-overlay';
    o.innerHTML=`<div class="help-stage audience-help audience-help-v13">
       <div class="audience-people" aria-hidden="true">
         <span>●</span><span>●</span><span>●</span><span>●</span><span>●</span><span>●</span><span>●</span>
       </div>
-      <h3>PLATEIA</h3>
+      <h3>PLATEIA ${audienceSession?'SIMULADA • NENHUM CELULAR CONECTADO':'SIMULADA'}</h3>
       <p>O público está votando...</p>
     </div>`;
-   await sleep(850);
+   await sleep(650);
 
    o.innerHTML=`<div class="help-stage audience-help audience-help-v13 audience-result-stage">
+      <p class="eyebrow">${audienceSession?'Nenhum participante estava conectado; foi usada a simulação.':'Modo simulado'}</p>
       <h3>RESULTADO DA PLATEIA</h3>
       <div class="audience-chart">
         ${base.map((p,n)=>`<div class="audience-chart-row"><span>${letters[n]}</span><i><b style="width:${p}%"></b></i><strong>${p}%</strong></div>`).join('')}
@@ -222,7 +435,7 @@ export function openMilhao(dialog,host,onFinish){
     </div>`;
    beep(720,.1);
 
-   host.querySelector('#feedback').innerHTML=`<div class="audience-summary"><strong>👥 Plateia:</strong> ${base.map((p,n)=>`<span>${letters[n]} ${p}%</span>`).join('')}</div>`;
+   host.querySelector('#feedback').innerHTML=`<div class="audience-summary"><strong>👥 Plateia simulada:</strong> ${base.map((p,n)=>`<span>${letters[n]} ${p}%</span>`).join('')}</div>`;
    host.querySelector('#audience').disabled=true;
 
    o.querySelector('#audienceContinue').onclick=e=>{
@@ -282,8 +495,8 @@ export function openMilhao(dialog,host,onFinish){
   recordGameResult({
     kind:'game',moduleId:'milhao',title:'Show do Milhão do Trânsito',
     score:finalScore,correct:correctCount,answers,durationSec:Math.round((Date.now()-startedAt)/1000),
-    status:reason,level:String(level+1),
-    meta:{player:name,bestStreak,pulosRestantes:pulos,cartasRestantes:cartas,plateiaRestante:plateia}
+    status:reason,level:String(level+1),participants:audienceMaxParticipants||null,
+    meta:{player:name,bestStreak,pulosRestantes:pulos,cartasRestantes:cartas,plateiaRestante:plateia,plateiaConectada:!!audienceSession}
   });
   const reasonText={win:'Você concluiu as 15 perguntas!',wrong:'Resposta incorreta: a rodada foi encerrada.',timeout:'Tempo esgotado: a rodada foi encerrada.',stop:'Você decidiu parar e levou 100% do acumulado.',questions:'Banco de perguntas insuficiente para continuar.'}[reason]||'Rodada encerrada.';
   host.innerHTML=`<section class="game milhao milhao-result"><div class="result-trophy">${reason==='win'?'🏆':'🚦'}</div><p class="eyebrow">RESULTADO FINAL</p><h2>${reason==='timeout'?'⏱ TEMPO ACABOU!':reason==='win'?'PARABÉNS!':'FIM DE JOGO'}</h2><p>${reasonText}</p><h2>${name}, você fez ${finalScore.toLocaleString('pt-BR')} pontos</h2><p>${correctCount} acerto(s) em ${answers} resposta(s). Melhor sequência: ${bestStreak}.</p><div class="ranking-box"><h3>Ranking local</h3>${rank.slice(0,5).map((r,n)=>`<div><span>#${n+1} ${r.name}</span><strong>${r.score.toLocaleString('pt-BR')}</strong></div>`).join('')}</div><div class="hero-actions"><button type="button" class="btn primary" id="milhaoAgain">Jogar novamente</button><button type="button" class="btn ghost" id="milhaoClose">Encerrar</button></div></section>`;
@@ -294,5 +507,5 @@ export function openMilhao(dialog,host,onFinish){
  host.onclick=e=>e.stopPropagation();
  openStart();
  if(!dialog.open)dialog.showModal();
- dialog.addEventListener('close',()=>{finished=true;stopTimer();},{once:true});
+ dialog.addEventListener('close',()=>{finished=true;stopTimer();try{audienceSession?.broadcast({type:'session-finished'});audienceSession?.close();}catch{}audienceSession=null;},{once:true});
 }
