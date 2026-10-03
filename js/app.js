@@ -1,4 +1,4 @@
-import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=51';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=52';
 import { openQuiz } from './modules/quiz.js?v=28';
 import { openMilhao } from './modules/milhao.js?v=16';
 import { openTrilha } from './modules/trilha.js?v=33';
@@ -10,6 +10,7 @@ import { openParticipantMode } from './modules/participant.js?v=2';
 import { openExperience } from './modules/experiencias.js?v=45';
 import { SoundManager } from './core/soundManager.js?v=1';
 import { openAdminModule } from './modules/admin.js';
+import { openEducatorModule } from './modules/educator.js?v=1';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
 import { renderHomeNotifications } from './modules/notifications.js';
 
@@ -88,6 +89,7 @@ function bindModuleButtons(){
   else if(id==='memoria')openMemoria(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='cruzadas')openCruzadas(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='plateia')openPlateia(qs('#gameDialog'),qs('#gameHost'),updateResults);
+  else if(educatorModules.some(x=>x.id===id))openEducatorModule(id,qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(learning.some(x=>x.id===id))openLearning(qs('#gameDialog'),qs('#gameHost'),id,updateResults);
   else if(audiences.some(x=>x.id===id)){currentAudience=id;navigate('publicos');renderAudienceProfile(id);}
   else if(adminModules.some(x=>x.id===id)){
@@ -124,7 +126,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.28.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.29.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
 const plateiaJoinCode=new URLSearchParams(location.search).get('plateia');
 if(plateiaJoinCode)openParticipantMode(plateiaJoinCode);
