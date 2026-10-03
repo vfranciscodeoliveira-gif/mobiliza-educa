@@ -97,7 +97,7 @@ export const educatorModules=[
 export const adminModules=[
 {id:'admin-dashboard',icon:'📊',title:'Dashboard administrativo',description:'Visão geral de escolas, participantes, eventos, partidas, presença, avaliações e pendências.',tags:['Windows → Web','prioridade'],ready:true},
 {id:'admin-cadastros',icon:'🏫',title:'Pessoas e instituições',description:'Escolas, instituições, contatos, turmas, professores e alunos em uma base única.',tags:['cadastros','solicitantes'],ready:true},
-{id:'admin-eventos',icon:'📅',title:'Agenda, solicitações e inscrições',description:'Receba demandas, transforme pedidos em agendamentos, controle vagas, inscrições, presença, equipe e materiais.',tags:['agenda','inscrições','atendimento'],ready:true},
+{id:'admin-eventos',icon:'📅',title:'Agenda, solicitações e inscrições',description:'Receba demandas, transforme pedidos em agendamentos e acompanhe calendário, conflitos, checklist, vagas, inscrições, presença, equipe e materiais.',tags:['agenda','inscrições','atendimento'],ready:true},
 {id:'admin-conteudo',icon:'📝',title:'Conteúdo pedagógico',description:'Banco de perguntas, categorias, dificuldades, revisão, auditoria e Centro Editorial.',tags:['editorial'],ready:true},
 {id:'admin-avaliacao',icon:'📈',title:'Presença e avaliações',description:'Presença, pré-teste, pós-teste, evolução, indicadores e desempenho pedagógico.',tags:['impacto'],ready:true},
 {id:'admin-passaporte',icon:'🎓',title:'Passaporte e certificados',description:'Medalhas, passaporte, certificados, validação e histórico de participação.',tags:['reconhecimento'],ready:true},
