@@ -7,7 +7,7 @@ export const audiences=[
 
 export const games=[
 {id:'quiz',icon:'⚡',cover:'assets/ai/hero_area_escolar.webp',title:'Quiz Relâmpago',description:'Escolha público, dificuldade, quantidade e tempo. Perguntas variadas, imagens, combos, sons e explicações.',tags:['níveis','cronômetro','offline'],ready:true},
-{id:'milhao',icon:'💡',visual:'game-milhao',title:'Show do Milhão do Trânsito',description:'Perguntas, cronômetro, pulos, cartas, plateia, progressão e resultado final.',tags:['jogar agora','telão'],ready:true},
+{id:'milhao',icon:'💡',visual:'game-milhao',title:'Show do Milhão do Trânsito',description:'Perguntas, cronômetro, pulos, cartas e Plateia Conectada por QR Code, com fallback simulado.',tags:['plateia ao vivo','QR Code','telão'],ready:true},
 {id:'trilha',icon:'🎲',visual:'game-trilha',title:'Trilha do Trânsito',description:'Tabuleiro, dado animado, peões, casas especiais e desafios educativos.',tags:['jogar agora','multijogador'],ready:true},
 {id:'memoria',icon:'🧠',visual:'game-memoria',title:'Jogo da Memória',description:'Cartas animadas, pares de sinais e situações seguras, tempo e pontuação.',tags:['jogar agora','atenção'],ready:true},
 {id:'cruzadas',icon:'✏️',visual:'game-cruzadas',title:'Palavras Cruzadas do Trânsito',description:'Pistas educativas, validação das respostas, tentativas e pontuação.',tags:['jogar agora','vocabulário'],ready:true},
