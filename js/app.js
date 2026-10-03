@@ -1,10 +1,10 @@
-import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=45';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=46';
 import { openQuiz } from './modules/quiz.js?v=27';
 import { openMilhao } from './modules/milhao.js?v=16';
 import { openTrilha } from './modules/trilha.js?v=33';
 import { openMemoria } from './modules/memoria.js?v=27';
 import { openCruzadas } from './modules/cruzadas.js?v=30';
-import { openPlateia } from './modules/plateia.js?v=2';
+import { openPlateia } from './modules/plateia.js?v=3';
 import { openLearning } from './modules/learning.js?v=1';
 import { openExperience } from './modules/experiencias.js?v=44';
 import { SoundManager } from './core/soundManager.js?v=1';
