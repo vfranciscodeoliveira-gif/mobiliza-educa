@@ -1,3 +1,4 @@
+import { recordGameResult } from '../core/historyStore.js?v=1';
 const MEMORY_PAIRS=[
   {key:'pare',title:'PARE',image:'assets/memory/pare.svg?v=25',detail:'A placa PARE determina parada obrigatória antes de prosseguir com segurança.'},
   {key:'semaforo',title:'SEMÁFORO',image:'assets/memory/semaforo.svg?v=25',detail:'O semáforo organiza os fluxos e suas indicações devem ser respeitadas.'},
@@ -487,6 +488,11 @@ export function openMemoria(dialog,host,onFinish){
       localStorage.setItem(bestKey(),JSON.stringify(record));
     }
     saveMemoryResult(cfg().pairs,moves,finalScore);
+    recordGameResult({
+      kind:'game',moduleId:'memoria',title:'Jogo da Memória',score:finalScore,
+      correct:cfg().pairs,answers:moves,durationSec:seconds,level:cfg().label,status:'concluido',
+      meta:{pairs:cfg().pairs,moves}
+    });
     onFinish?.();
 
     const completedPairs=MEMORY_PAIRS.slice(0,cfg().pairs);
