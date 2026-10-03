@@ -85,12 +85,12 @@ export const experiences=[
 ];
 
 export const educatorModules=[
-{id:'agenda',icon:'📅',title:'Agenda e eventos',description:'Planejamento da ação, local, público, equipe, materiais, metas e alarmes.',tags:['planejar'],ready:true},
-{id:'conteudo',icon:'✍️',title:'Centro editorial',description:'Banco de perguntas, revisão pedagógica, categorias, dificuldade e homologação.',tags:['conteúdo'],ready:true},
-{id:'avaliacao',icon:'📈',title:'Avaliação pedagógica',description:'Pré-teste, pós-teste, participação, evolução e indicadores de aprendizagem.',tags:['avaliar'],ready:true},
-{id:'evidencias',icon:'📷',title:'Evidências e impacto',description:'Registro de atividades, materiais distribuídos, fotos autorizadas e relatório final.',tags:['comprovar'],ready:true},
-{id:'certificados',icon:'🎓',title:'Certificados e passaporte',description:'Progresso, participação, certificados digitais e validação.',tags:['reconhecimento'],ready:true},
-{id:'acessibilidade',icon:'♿',title:'Acessibilidade',description:'Contraste, tamanho de texto, navegação por teclado e futura leitura assistida.',tags:['inclusão'],ready:true}
+{id:'agenda',icon:'📅',cover:'assets/ai/hero_area_escolar.webp',title:'Agenda e eventos',description:'Planejamento da ação, local, público, equipe, materiais, metas e alarmes.',tags:['planejar'],ready:true},
+{id:'conteudo',icon:'✍️',cover:'assets/brand-cover.webp',title:'Centro editorial',description:'Banco de perguntas, revisão pedagógica, categorias, dificuldade e homologação.',tags:['conteúdo'],ready:true},
+{id:'avaliacao',icon:'📈',cover:'assets/games/plateia_conectada.svg',title:'Avaliação pedagógica',description:'Pré-teste, pós-teste, participação, evolução e indicadores de aprendizagem.',tags:['avaliar'],ready:true},
+{id:'evidencias',icon:'📷',cover:'assets/games/cidade_mirim_realista_ai_v35.webp',title:'Evidências e impacto',description:'Registro de atividades, materiais distribuídos, fotos autorizadas e relatório final.',tags:['comprovar'],ready:true},
+{id:'certificados',icon:'🎓',cover:'assets/mobiliza_educa_caminhos_para_a_vida.webp',title:'Certificados e passaporte',description:'Progresso, participação, certificados digitais e validação.',tags:['reconhecimento'],ready:true},
+{id:'acessibilidade',icon:'♿',cover:'assets/ai/hero_area_escolar.webp',title:'Acessibilidade',description:'Contraste, tamanho de texto, navegação por teclado e futura leitura assistida.',tags:['inclusão'],ready:true}
 ];
 
 export const adminModules=[
