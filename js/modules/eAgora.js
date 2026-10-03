@@ -8,65 +8,103 @@ const EPISODES=[
   {
     id:'onibus',number:1,title:'O que existe atrás do ônibus?',kicker:'SAÍDA DA ESCOLA',
     image:ASSETS.school,pos:'50% 52%',zoom:'112%',
-    observe:'Você se aproxima de uma área escolar. Um ônibus está parado e sua visão da calçada está parcialmente bloqueada.',
-    freeze:'Um ônibus bloqueia parte da sua visão. Há movimento próximo à travessia.',
-    question:'E agora, qual é a decisão mais segura?',
+    observe:'Você se aproxima de uma área escolar. Um ônibus está parado e reduz parte da visão da calçada e da travessia.',
+    freeze:'O ônibus cria uma área encoberta junto à faixa. Alguém pode surgir dali a qualquer instante.',
+    question:'E agora, qual atitude preserva a maior margem de segurança?',
     choices:[
-      {id:'A',text:'Ultrapassar rapidamente antes que outro veículo venha.',safe:false},
-      {id:'B',text:'Reduzir, manter distância e esperar ter visão suficiente.',safe:true},
-      {id:'C',text:'Buzinar e continuar na mesma velocidade.',safe:false}
+      {id:'A',text:'Ultrapassar logo para sair da região do ônibus.',safe:false},
+      {id:'B',text:'Reduzir, manter distância e só avançar quando houver campo visual suficiente.',safe:true},
+      {id:'C',text:'Buzinar e manter a velocidade para alertar quem estiver atrás do ônibus.',safe:false}
     ],
-    reveal:'Uma criança pode surgir da área encoberta pelo ônibus sem que você consiga vê-la a tempo.',
-    safeText:'Você criou tempo e espaço para enxergar antes de decidir. Isso reduz drasticamente a chance de um conflito inesperado.',
-    dangerText:'Ao avançar sem visibilidade, você entra numa zona em que o pedestre pode aparecer tarde demais para uma reação segura.',
-    tool:'VISÃO 360',toolIcon:'◎',toolText:'A câmera abre o campo visual e revela a região escondida pelo ônibus.',
-    clue:'O maior perigo desta cena não é o que você vê — é o que o ônibus impede você de ver.',
+    reveal:'Uma criança pode surgir da área encoberta sem que você consiga percebê-la com antecedência.',
+    safeText:'Você criou tempo e espaço para enxergar antes de decidir. Em áreas com visão bloqueada, reduzir e ampliar a observação é essencial.',
+    dangerText:'Avançar sem visibilidade reduz drasticamente o tempo disponível para reagir a um pedestre que apareça de forma inesperada.',
+    tool:'VISÃO 360',toolIcon:'◎',toolText:'A cena destaca a região que o ônibus impede você de enxergar com clareza.',
+    clue:'O principal risco não é apenas o que está visível — é o que o veículo grande pode esconder.',
     replayLabel:'Rever o ponto cego',
     overlay:'blindspot'
   },
   {
-    id:'ponto-cego',number:2,title:'Tem alguém no seu ponto cego',kicker:'MUDANÇA DE FAIXA',
+    id:'bola',number:2,title:'A bola entrou na rua',kicker:'RUA RESIDENCIAL',
+    image:ASSETS.school,pos:'37% 56%',zoom:'128%',
+    observe:'Você circula devagar por uma rua residencial. Uma bola aparece de repente na pista, vindo da calçada.',
+    freeze:'A bola já está na rua. Ainda não há nenhuma criança visível.',
+    question:'Qual é a melhor leitura dessa situação?',
+    choices:[
+      {id:'A',text:'Reduzir imediatamente e ficar preparado para parar, pois uma criança pode vir atrás da bola.',safe:true},
+      {id:'B',text:'Desviar da bola e seguir, porque não há pessoa na pista.',safe:false},
+      {id:'C',text:'Acelerar para passar antes que alguém chegue à rua.',safe:false}
+    ],
+    reveal:'Uma bola na pista pode ser o primeiro sinal de que uma criança está prestes a correr atrás dela.',
+    safeText:'Você antecipou o que poderia acontecer, em vez de reagir apenas ao que já estava visível. Isso é percepção de risco.',
+    dangerText:'Olhar somente para a bola ignora o perigo mais importante: uma criança pode surgir logo depois, com trajetória imprevisível.',
+    tool:'ANTECIPAÇÃO',toolIcon:'⚽',toolText:'O destaque mostra a trajetória provável da bola e a zona de onde uma criança pode aparecer.',
+    clue:'No trânsito, pequenos sinais podem revelar um risco antes que ele entre totalmente no seu campo de visão.',
+    replayLabel:'Rever a sequência',
+    overlay:'ball'
+  },
+  {
+    id:'faixa',number:3,title:'Faixa à frente',kicker:'ÁREA ESCOLAR',
+    image:ASSETS.school,pos:'62% 50%',zoom:'121%',
+    observe:'Você se aproxima de uma faixa de pedestres próxima a uma escola. Há pessoas junto à calçada.',
+    freeze:'Um pedestre se aproxima da faixa enquanto você ainda está em movimento.',
+    question:'Como você deve conduzir a aproximação?',
+    choices:[
+      {id:'A',text:'Manter a velocidade e decidir somente quando o pedestre entrar na pista.',safe:false},
+      {id:'B',text:'Usar a buzina para avisar que o veículo está chegando.',safe:false},
+      {id:'C',text:'Reduzir, observar a intenção de travessia e estar preparado para parar antes da faixa.',safe:true}
+    ],
+    reveal:'A aproximação em velocidade compatível aumenta o tempo para perceber a intenção do pedestre e evita uma frenagem tardia.',
+    safeText:'Você tratou a faixa como uma zona de atenção antecipada, não apenas como um ponto de reação quando alguém já está atravessando.',
+    dangerText:'Esperar o pedestre entrar na pista para só então reagir diminui a margem de segurança e pode produzir uma frenagem brusca.',
+    tool:'FOCO NA FAIXA',toolIcon:'🚶',toolText:'A faixa e sua área de aproximação são destacadas para mostrar onde a decisão começa.',
+    clue:'Uma travessia segura começa antes da faixa: velocidade, observação e previsibilidade importam.',
+    replayLabel:'Rever a aproximação',
+    overlay:'crosswalk'
+  },
+  {
+    id:'ponto-cego',number:4,title:'Tem alguém no seu ponto cego',kicker:'MUDANÇA DE FAIXA',
     image:ASSETS.road,pos:'58% 52%',zoom:'126%',
     observe:'Você está em uma avenida e pretende mudar de faixa. O retrovisor parece livre por um instante.',
     freeze:'Você já sinalizou a manobra. Uma motocicleta se aproxima pela lateral.',
-    question:'Antes de mudar de faixa, o que você faz?',
+    question:'Antes de iniciar a mudança de faixa, o que você faz?',
     choices:[
-      {id:'A',text:'Mudo logo de faixa porque já acionei a seta.',safe:false},
-      {id:'B',text:'Confiro espelhos, ponto cego e só mudo com espaço seguro.',safe:true},
+      {id:'A',text:'Mudo logo de faixa porque a seta já foi acionada.',safe:false},
+      {id:'B',text:'Confiro espelhos, ponto cego e só mudo quando houver espaço seguro.',safe:true},
       {id:'C',text:'Acelero para entrar à frente de quem estiver vindo.',safe:false}
     ],
     reveal:'A motocicleta pode permanecer fora do campo direto do retrovisor por alguns instantes.',
-    safeText:'Você confirmou o espaço antes de ocupar a faixa. A seta comunica intenção, mas não garante prioridade.',
-    dangerText:'A mudança de faixa sem checagem completa pode fechar a trajetória de uma motocicleta que você não percebeu.',
-    tool:'RETROVISOR',toolIcon:'◫',toolText:'Uma segunda visão aparece por alguns segundos e destaca a região lateral.',
-    clue:'A seta avisa o que você pretende fazer; ela não substitui a verificação do espaço.',
+    safeText:'Você confirmou o espaço antes de ocupar a faixa. A seta comunica intenção, mas não substitui a verificação do ambiente.',
+    dangerText:'Uma mudança de faixa sem checagem completa pode fechar a trajetória de uma motocicleta que permaneceu fora do seu campo visual.',
+    tool:'RETROVISOR',toolIcon:'◫',toolText:'Uma segunda visão destaca a região lateral normalmente menos visível.',
+    clue:'Sinalizar é comunicar sua intenção. Verificar se a manobra pode ser feita com segurança é uma etapa diferente.',
     replayLabel:'Rever em câmera lenta',
     overlay:'mirror'
   },
   {
-    id:'amarelo',number:3,title:'O amarelo apareceu',kicker:'CRUZAMENTO SEMAFORIZADO',
+    id:'amarelo',number:5,title:'O amarelo apareceu',kicker:'CRUZAMENTO SEMAFORIZADO',
     image:ASSETS.life,pos:'51% 48%',zoom:'118%',
     observe:'Você se aproxima de um cruzamento semaforizado. O fluxo está normal e há usuários nas proximidades.',
-    freeze:'O semáforo muda para amarelo quando você se aproxima da linha de retenção.',
+    freeze:'O semáforo muda para amarelo enquanto você se aproxima da linha de retenção.',
     question:'Qual atitude preserva a maior margem de segurança?',
     choices:[
-      {id:'A',text:'Acelerar para garantir a passagem antes do vermelho.',safe:false},
-      {id:'B',text:'Reduzir e parar com segurança quando isso for possível.',safe:true},
-      {id:'C',text:'Manter a velocidade sem reavaliar a situação.',safe:false}
+      {id:'A',text:'Reduzir e parar com segurança quando isso for possível, sem criar uma manobra brusca.',safe:true},
+      {id:'B',text:'Acelerar para garantir a passagem antes do vermelho.',safe:false},
+      {id:'C',text:'Manter a velocidade sem reavaliar distância e condições de parada.',safe:false}
     ],
-    reveal:'O amarelo exige decisão compatível com distância, velocidade e condições para parar com segurança.',
-    safeText:'Você reavaliou a aproximação e manteve margem para parar sem criar uma manobra brusca ou imprevisível.',
-    dangerText:'Acelerar para “ganhar o sinal” reduz a margem de reação e pode aumentar o conflito com quem inicia a travessia.',
+    reveal:'A decisão precisa considerar distância, velocidade, aderência e a possibilidade real de parar de forma segura.',
+    safeText:'Você reavaliou a aproximação e manteve margem para uma parada previsível, sem transformar o amarelo em incentivo para acelerar.',
+    dangerText:'Acelerar para “ganhar o sinal” reduz a margem de reação e pode aumentar o conflito com quem inicia a travessia ou entra no cruzamento.',
     tool:'CÂMERA LENTA',toolIcon:'◉',toolText:'O movimento desacelera e permite observar a distância até a linha de retenção.',
-    clue:'A decisão não é “passar no amarelo”; é avaliar se ainda há condição segura de parada.',
+    clue:'A decisão correta depende de preservar segurança e previsibilidade, não de tentar vencer o tempo do semáforo.',
     replayLabel:'Rever a aproximação',
     overlay:'signal'
   }
 ];
 
 function ensureCss(){
- if(document.getElementById('eagora-v39-css'))return;
- const s=document.createElement('style');s.id='eagora-v39-css';
+ if(document.getElementById('eagora-v40-css'))return;
+ const s=document.createElement('style');s.id='eagora-v40-css';
  s.textContent=`
  #gameDialog.eagora-dialog{width:min(1500px,98vw)!important;max-width:98vw!important;max-height:96vh!important;overflow:hidden!important}
  #gameDialog.eagora-dialog>.dialog-shell{height:96vh!important;max-height:96vh!important;overflow:hidden!important;border-radius:22px!important;background:#07131d!important}
@@ -105,11 +143,14 @@ function ensureCss(){
  .ea .blindspot{left:20%;top:30%;width:38%;height:46%;border-radius:45% 55% 60% 40%;border:3px dashed #ffd144;background:radial-gradient(circle,rgba(255,209,68,.22),rgba(255,209,68,.03) 60%,transparent 70%)}
  .ea .mirror{right:8%;top:24%;width:25%;height:32%;border-radius:46% 46% 50% 50%;border:3px dashed #65dfff;background:radial-gradient(circle,rgba(101,223,255,.20),transparent 68%)}
  .ea .signal{left:38%;top:22%;width:24%;height:34%;border-radius:22px;border:3px dashed #ffd144;background:radial-gradient(circle,rgba(255,209,68,.23),transparent 68%)}
+ .ea .ball{left:38%;top:50%;width:36%;height:34%;border-radius:45%;border:3px dashed #ffd144;background:radial-gradient(circle,rgba(255,209,68,.22),rgba(255,209,68,.04) 55%,transparent 72%)}
+ .ea .ball:after{content:"⚽";position:absolute;left:58%;top:57%;transform:translate(-50%,-50%);font-size:3rem;filter:drop-shadow(0 5px 8px rgba(0,0,0,.45))}
+ .ea .crosswalk{left:31%;top:47%;width:42%;height:28%;border:3px dashed #7ee2ff;border-radius:18px;background:repeating-linear-gradient(100deg,rgba(255,255,255,.28) 0 18px,rgba(20,70,90,.10) 18px 34px)}
  .ea .resultPanel{position:absolute;z-index:32;left:50%;bottom:18px;transform:translateX(-50%);width:min(980px,92%);padding:15px;border-radius:20px;background:linear-gradient(180deg,rgba(4,27,44,.97),rgba(2,15,28,.97));border:1px solid rgba(255,255,255,.2);box-shadow:0 25px 70px rgba(0,0,0,.45)}
  .ea .resultPanel.safe{border-color:#60dfa0}.ea .resultPanel.danger{border-color:#ff7e79}.ea .resultTop{display:grid;grid-template-columns:48px 1fr auto;gap:9px;align-items:center}.ea .resultIcon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:1.2rem;background:#123d59}.ea .safe .resultIcon{background:#168653}.ea .danger .resultIcon{background:#b53232}.ea .resultTop h3{margin:0;font-size:.9rem;color:#fff}.ea .resultTop p{margin:3px 0 0;color:#c6dae5;font-size:.49rem}.ea .points{font-size:.8rem;color:#ffd34d;font-weight:1000}.ea .resultText{margin:9px 0 0;padding:9px;border-radius:12px;background:rgba(255,255,255,.06);font-size:.54rem;line-height:1.4;color:#e9f7fd}.ea .resultActions{display:flex;gap:7px;justify-content:flex-end;margin-top:9px}.ea .resultActions button{min-height:36px;padding:6px 11px;border-radius:9px;border:1px solid rgba(255,255,255,.18);font-weight:1000;font-size:.43rem;cursor:pointer}.ea .ghost{background:rgba(255,255,255,.07);color:#fff}.ea .primary{background:#0c78ae;color:#fff;border-color:#52d8ff!important}
  .ea .lesson{position:absolute;z-index:35;inset:0;display:grid;place-items:center;padding:20px;background:rgba(1,12,20,.82);backdrop-filter:blur(5px)}.ea .lessonCard{width:min(720px,92%);padding:18px;border-radius:20px;background:linear-gradient(180deg,#f8fcff,#eaf5fa);color:#173f60;box-shadow:0 30px 90px rgba(0,0,0,.45)}.ea .lessonCard .big{font-size:2rem}.ea .lessonCard h3{margin:5px 0;font-size:1rem}.ea .lessonCard p{font-size:.6rem;line-height:1.45;color:#5f7787}.ea .lessonCard .btn{float:right}
  .ea .episodeIntro{position:absolute;z-index:35;inset:0;display:grid;place-items:center;background:linear-gradient(90deg,rgba(2,16,27,.86),rgba(2,16,27,.48),rgba(2,16,27,.78));padding:20px}.ea .introCard{width:min(760px,90%);padding:20px;border-left:5px solid #57d9ff;background:rgba(3,24,39,.82);backdrop-filter:blur(8px);box-shadow:0 24px 80px rgba(0,0,0,.38)}.ea .introCard .k{font-size:.43rem;letter-spacing:.13em;font-weight:1000;color:#7bdfff}.ea .introCard h2{margin:5px 0;color:#fff;font-size:1.35rem}.ea .introCard p{margin:0;color:#c8dce8;font-size:.6rem;line-height:1.45}.ea .introCard .start{margin-top:12px}
- .eaSummary{height:100%;overflow:auto;padding:18px;background:linear-gradient(180deg,#07131d,#0b2130);color:#fff}.eaSummary .head{display:grid;grid-template-columns:150px 1fr 80px;gap:14px;align-items:center;padding:14px;border-radius:20px;background:linear-gradient(135deg,#063d69,#056799,#0aa1bb)}.eaSummary .cover{height:86px;border-radius:12px;background:url('${ASSETS.school}') center/cover}.eaSummary .head p{margin:0;font-size:.43rem;color:#c8ecfb;font-weight:1000}.eaSummary .head h2{margin:4px 0;font-size:1.4rem}.eaSummary .grade{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:#ffd044;color:#15364c;font-weight:1000;font-size:1.4rem}.eaSummary .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.eaSummary .metric{padding:10px;border:1px solid rgba(255,255,255,.13);border-radius:12px;background:rgba(255,255,255,.06)}.eaSummary .metric span{display:block;font-size:.43rem;color:#a9c6d4}.eaSummary .metric b{font-size:.9rem}.eaSummary .episodes{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:10px}.eaSummary .ep{padding:10px;border:1px solid rgba(255,255,255,.13);border-radius:13px;background:rgba(255,255,255,.06)}.eaSummary .ep strong{display:block;font-size:.6rem}.eaSummary .ep small{display:block;margin-top:4px;color:#adc8d6;font-size:.43rem;line-height:1.35}.eaSummary .footer{display:flex;justify-content:center;gap:9px;margin-top:12px}
+ .eaSummary{height:100%;overflow:auto;padding:18px;background:linear-gradient(180deg,#07131d,#0b2130);color:#fff}.eaSummary .head{display:grid;grid-template-columns:150px 1fr 80px;gap:14px;align-items:center;padding:14px;border-radius:20px;background:linear-gradient(135deg,#063d69,#056799,#0aa1bb)}.eaSummary .cover{height:86px;border-radius:12px;background:url('${ASSETS.school}') center/cover}.eaSummary .head p{margin:0;font-size:.43rem;color:#c8ecfb;font-weight:1000}.eaSummary .head h2{margin:4px 0;font-size:1.4rem}.eaSummary .grade{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:#ffd044;color:#15364c;font-weight:1000;font-size:1.4rem}.eaSummary .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.eaSummary .metric{padding:10px;border:1px solid rgba(255,255,255,.13);border-radius:12px;background:rgba(255,255,255,.06)}.eaSummary .metric span{display:block;font-size:.43rem;color:#a9c6d4}.eaSummary .metric b{font-size:.9rem}.eaSummary .episodes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin-top:10px}.eaSummary .ep{padding:10px;border:1px solid rgba(255,255,255,.13);border-radius:13px;background:rgba(255,255,255,.06)}.eaSummary .ep strong{display:block;font-size:.6rem}.eaSummary .ep small{display:block;margin-top:4px;color:#adc8d6;font-size:.43rem;line-height:1.35}.eaSummary .footer{display:flex;justify-content:center;gap:9px;margin-top:12px}
  @media(max-width:760px){
    #gameDialog.eagora-dialog{width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;padding:0!important;inset:0!important;border:0!important;border-radius:0!important}
    #gameDialog.eagora-dialog>.dialog-shell{height:100dvh!important;max-height:100dvh!important;border-radius:0!important}
@@ -130,7 +171,7 @@ function globalResult(score,correct,answers,streak){
 
 export function openEAgora(dialog,host,onFinish){
  ensureCss();dialog.classList.add('eagora-dialog');
- let ep=0,score=0,safety=100,correct=0,streak=0,bestStreak=0,answers=[],phaseTimer=null,decisionTimer=null,decisionLeft=10,toolUsed=false,sound=localStorage.getItem('mobiliza.eagora.sound')!=='0',ctx=null,replaying=false;
+ let ep=0,score=0,safety=100,correct=0,streak=0,bestStreak=0,answers=[],phaseTimer=null,decisionTimer=null,decisionLeft=12,toolUsed=false,sound=localStorage.getItem('mobiliza.eagora.sound')!=='0',ctx=null,replaying=false;
  const Ctx=()=>{if(!sound)return null;try{const C=window.AudioContext||window.webkitAudioContext;if(!ctx)ctx=new C();if(ctx.state==='suspended')ctx.resume();return ctx}catch{return null}};
  const tone=(f,d=.08,t=0,type='sine',g=.025)=>{const c=Ctx();if(!c)return;const o=c.createOscillator(),v=c.createGain(),st=c.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,st);v.gain.setValueAtTime(.0001,st);v.gain.exponentialRampToValueAtTime(g,st+.01);v.gain.exponentialRampToValueAtTime(.0001,st+d);o.connect(v);v.connect(c.destination);o.start(st);o.stop(st+d+.03)};
  const snd={start:()=>{tone(220,.08);tone(330,.09,.08);tone(440,.12,.17)},freeze:()=>{tone(780,.04,0,'square',.018);tone(520,.08,.05,'square',.015)},safe:()=>{tone(523,.07);tone(659,.07,.07);tone(784,.14,.14)},danger:()=>{tone(190,.1,0,'sawtooth',.025);tone(140,.18,.1,'sawtooth',.022)},tool:()=>{tone(440,.05);tone(660,.08,.07)},finish:()=>{tone(523,.07);tone(659,.07,.07);tone(784,.07,.14);tone(1046,.2,.21)}};
@@ -151,7 +192,7 @@ export function openEAgora(dialog,host,onFinish){
   snd.start();const x=e();host.innerHTML=frame(`<div class="caption"><strong>OBSERVE.</strong> ${x.observe}</div>`,'observing');hud();let t=0;const line=host.querySelector('#eaLine');phaseTimer=setInterval(()=>{t+=.1;if(line)line.style.width=Math.min(100,t/4.2*100)+'%';if(t>=4.2){clearInterval(phaseTimer);phaseTimer=null;decision()}},100);
  }
  function decision(){
-  snd.freeze();decisionLeft=10;const x=e();host.innerHTML=frame(`<div class="decision"><div class="decisionHead"><span class="freezeTag">⏸ CENA CONGELADA</span><h3>${x.freeze}</h3><div class="decisionTimer" id="eaDecisionTime">${decisionLeft}</div></div><p class="question">${x.question}</p><div class="choices">${x.choices.map(c=>`<button class="choice" data-choice="${c.id}"><b>${c.id}</b><span>${c.text}</span></button>`).join('')}</div><div class="toolrow"><button class="power" id="eaPower">${x.toolIcon} ${x.tool}</button></div></div>`,'freeze');hud();
+  snd.freeze();decisionLeft=12;const x=e();host.innerHTML=frame(`<div class="decision"><div class="decisionHead"><span class="freezeTag">⏸ CENA CONGELADA</span><h3>${x.freeze}</h3><div class="decisionTimer" id="eaDecisionTime">${decisionLeft}</div></div><p class="question">${x.question}</p><div class="choices">${x.choices.map(c=>`<button class="choice" data-choice="${c.id}"><b>${c.id}</b><span>${c.text}</span></button>`).join('')}</div><div class="toolrow"><button class="power" id="eaPower">${x.toolIcon} ${x.tool}</button></div></div>`,'freeze');hud();
   host.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>choose(b.dataset.choice));
   host.querySelector('#eaPower').onclick=useTool;
   decisionTimer=setInterval(()=>{decisionLeft--;const el=host.querySelector('#eaDecisionTime');if(el)el.textContent=decisionLeft;if(decisionLeft<=0){clearInterval(decisionTimer);decisionTimer=null;choose(null)}},1000);
@@ -161,13 +202,21 @@ export function openEAgora(dialog,host,onFinish){
  }
  function choose(id){
   if(decisionTimer){clearInterval(decisionTimer);decisionTimer=null}
-  const x=e(),choice=x.choices.find(c=>c.id===id),safe=!!choice?.safe,timeBonus=Math.max(0,decisionLeft)*30,pts=safe?700+timeBonus:0;
-  if(safe){score+=pts;correct++;streak++;bestStreak=Math.max(bestStreak,streak);snd.safe()}else{safety=Math.max(0,safety-(id?25:30));streak=0;snd.danger()}
-  answers.push({ep:ep,safe,id:id||'-',pts});
+  const x=e(),choice=x.choices.find(c=>c.id===id),safe=!!choice?.safe,timeBonus=Math.max(0,decisionLeft)*30;
+  let pts=0;
+  if(safe){
+    streak++;
+    const streakBonus=Math.max(0,streak-1)*100;
+    pts=700+timeBonus+streakBonus;
+    score+=pts;correct++;bestStreak=Math.max(bestStreak,streak);snd.safe();
+  }else{
+    safety=Math.max(0,safety-(id?20:25));streak=0;snd.danger();
+  }
+  answers.push({ep:ep,safe,id:id||'-',pts,streak});
   outcome(safe,choice,pts);
  }
  function outcome(safe,choice,pts){
-  const x=e(),klass=safe?'safeOutcome':'dangerOutcome';host.innerHTML=frame(`<div class="resultPanel ${safe?'safe':'danger'}"><div class="resultTop"><div class="resultIcon">${safe?'✓':'!'}</div><div><h3>${safe?'Boa decisão — você preservou margem de segurança.':'Atenção — essa decisão reduz sua margem de segurança.'}</h3><p>${choice?choice.text:'O tempo terminou antes de uma decisão.'}</p></div><div class="points">${safe?'+'+pts+' pts':'0 pts'}</div></div><div class="resultText">${safe?x.safeText:x.dangerText}</div><div class="resultActions"><button class="ghost" id="eaReplay">◉ ${x.replayLabel}</button><button class="ghost" id="eaReveal">◎ O que eu não percebi?</button><button class="primary" id="eaNext">${ep===EPISODES.length-1?'Ver resultado':'Próxima situação →'}</button></div></div>`,klass);hud();
+  const x=e(),klass=safe?'safeOutcome':'dangerOutcome';host.innerHTML=frame(`<div class="resultPanel ${safe?'safe':'danger'}"><div class="resultTop"><div class="resultIcon">${safe?'✓':'!'}</div><div><h3>${safe?'Boa decisão — você preservou margem de segurança.':'Atenção — essa decisão reduz sua margem de segurança.'}</h3><p>${choice?choice.text:'O tempo terminou antes de uma decisão.'}</p></div><div class="points">${safe?'+'+pts+' pts'+(streak>1?' • sequência x'+streak:''):'0 pts'}</div></div><div class="resultText">${safe?x.safeText:x.dangerText}</div><div class="resultActions"><button class="ghost" id="eaReplay">◉ ${x.replayLabel}</button><button class="ghost" id="eaReveal">◎ O que eu não percebi?</button><button class="primary" id="eaNext">${ep===EPISODES.length-1?'Ver resultado':'Próxima situação →'}</button></div></div>`,klass);hud();
   host.querySelector('#eaReplay').onclick=()=>replay(safe,choice,pts);
   host.querySelector('#eaReveal').onclick=revealLesson;
   host.querySelector('#eaNext').onclick=next;
@@ -180,7 +229,7 @@ export function openEAgora(dialog,host,onFinish){
  }
  function next(){if(ep>=EPISODES.length-1){summary();return}ep++;intro()}
  function summary(){
-  stop();snd.finish();globalResult(score,correct,EPISODES.length,bestStreak);onFinish?.();const grade=Math.max(0,Math.round((correct/EPISODES.length)*70+safety*.3));host.innerHTML=`<section class="eaSummary"><div class="head"><div class="cover"></div><div><p>E AGORA? VOCÊ DECIDE! • PILOTO</p><h2>Seu perfil de segurança</h2><small>Percepção, decisão e margem de segurança nas três situações.</small></div><div class="grade">${grade}</div></div><div class="metrics"><div class="metric"><span>DECISÕES SEGURAS</span><b>${correct}/${EPISODES.length}</b></div><div class="metric"><span>MARGEM FINAL</span><b>${safety}%</b></div><div class="metric"><span>PONTOS</span><b>${score}</b></div><div class="metric"><span>MELHOR SEQUÊNCIA</span><b>${bestStreak}</b></div></div><div class="episodes">${EPISODES.map((x,i)=>{const a=answers[i];return `<div class="ep"><strong>${a?.safe?'✅':'⚠️'} ${x.title}</strong><small>${a?.safe?x.safeText:x.dangerText}</small></div>`}).join('')}</div><div class="footer"><button class="btn primary" id="eaAgain">↻ Jogar novamente</button><button class="btn ghost" id="eaClose">Encerrar</button></div></section>`;host.querySelector('#eaAgain').onclick=()=>{ep=0;score=0;safety=100;correct=0;streak=0;bestStreak=0;answers=[];intro()};host.querySelector('#eaClose').onclick=()=>dialog.close();
+  stop();snd.finish();globalResult(score,correct,EPISODES.length,bestStreak);onFinish?.();const grade=Math.max(0,Math.round((correct/EPISODES.length)*70+safety*.3));host.innerHTML=`<section class="eaSummary"><div class="head"><div class="cover"></div><div><p>E AGORA? VOCÊ DECIDE! • 5 SITUAÇÕES</p><h2>Seu perfil de segurança</h2><small>Percepção, antecipação e tomada de decisão em cinco situações de trânsito.</small></div><div class="grade">${grade}</div></div><div class="metrics"><div class="metric"><span>DECISÕES SEGURAS</span><b>${correct}/${EPISODES.length}</b></div><div class="metric"><span>MARGEM FINAL</span><b>${safety}%</b></div><div class="metric"><span>PONTOS</span><b>${score}</b></div><div class="metric"><span>MELHOR SEQUÊNCIA</span><b>${bestStreak}</b></div></div><div class="episodes">${EPISODES.map((x,i)=>{const a=answers[i];return `<div class="ep"><strong>${a?.safe?'✅':'⚠️'} ${x.title}</strong><small>${a?.safe?x.safeText:x.dangerText}</small></div>`}).join('')}</div><div class="footer"><button class="btn primary" id="eaAgain">↻ Jogar novamente</button><button class="btn ghost" id="eaClose">Encerrar</button></div></section>`;host.querySelector('#eaAgain').onclick=()=>{ep=0;score=0;safety=100;correct=0;streak=0;bestStreak=0;answers=[];intro()};host.querySelector('#eaClose').onclick=()=>dialog.close();
  }
  const onClose=()=>{stop();dialog.classList.remove('eagora-dialog');dialog.removeEventListener('close',onClose)};dialog.addEventListener('close',onClose);intro();if(!dialog.open)dialog.showModal();
 }
