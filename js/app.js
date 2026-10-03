@@ -1,11 +1,11 @@
-import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=43';
-import { openQuiz } from './modules/quiz.js?v=26';
-import { openMilhao } from './modules/milhao.js?v=15';
-import { openTrilha } from './modules/trilha.js?v=32';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=44';
+import { openQuiz } from './modules/quiz.js?v=27';
+import { openMilhao } from './modules/milhao.js?v=16';
+import { openTrilha } from './modules/trilha.js?v=33';
 import { openMemoria } from './modules/memoria.js?v=27';
 import { openCruzadas } from './modules/cruzadas.js?v=30';
 import { openPlateia } from './modules/plateia.js';
-import { openExperience } from './modules/experiencias.js?v=43';
+import { openExperience } from './modules/experiencias.js?v=44';
 import { SoundManager } from './core/soundManager.js?v=1';
 import { openAdminModule } from './modules/admin.js';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
