@@ -3115,7 +3115,7 @@ dialog::backdrop{background:rgba(4,24,38,.68);backdrop-filter:blur(4px)}
 
 /* v0.22.0 • Banco Visual IA aplicado */
 .sprite-cover{
-  background-image:url('ai/jogos_experiencias_sprite.webp?v=1')!important;
+  background-image:url('ai/jogos_experiencias_sprite.webp?v=2')!important;
   background-repeat:no-repeat!important;
   background-size:400% 200%!important;
   background-color:#dbeaf2!important;
@@ -3127,7 +3127,7 @@ dialog::backdrop{background:rgba(4,24,38,.68);backdrop-filter:blur(4px)}
 .game-cruzadas{background-position:100% 0%!important}
 
 #audienceGrid .sprite-cover{
-  background-image:url('ai/publicos_sprite.webp?v=1')!important;
+  background-image:url('ai/publicos_sprite.webp?v=2')!important;
   background-size:400% 100%!important;
   min-height:180px!important;
 }
@@ -3141,7 +3141,7 @@ dialog::backdrop{background:rgba(4,24,38,.68);backdrop-filter:blur(4px)}
   min-height:150px;
   align-self:stretch;
   border-radius:22px;
-  background-image:url('ai/publicos_sprite.webp?v=1');
+  background-image:url('ai/publicos_sprite.webp?v=2');
   background-repeat:no-repeat;
   background-size:400% 100%;
   background-color:#dbeaf2;
@@ -3164,7 +3164,7 @@ dialog::backdrop{background:rgba(4,24,38,.68);backdrop-filter:blur(4px)}
   width:150px;
   min-height:120px;
   border-radius:16px;
-  background-image:url('ai/jogos_experiencias_sprite.webp?v=1');
+  background-image:url('ai/jogos_experiencias_sprite.webp?v=2');
   background-repeat:no-repeat;
   background-size:400% 200%;
   background-color:#dbeaf2;
