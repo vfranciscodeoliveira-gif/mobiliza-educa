@@ -1,6 +1,7 @@
 import { getQuestionSet } from '../core/questionEngine.js?v=2';
 import { SoundManager } from '../core/soundManager.js?v=1';
 import { createHostSession, renderQr, makeSessionCode } from '../core/sharedSession.js?v=1';
+import { recordGameResult } from '../core/historyStore.js?v=1';
 
 function css(){
   if(document.getElementById('plateia-connected-v1'))return;
@@ -57,6 +58,7 @@ export function openPlateia(dialog,host,onFinish){
   let majorityCorrect=0;
   let score=0;
   let destroyed=false;
+  let gameStartedAt=null;
 
   const header=(title,subtitle,badge='CONECTADA')=>'<div class="pcx-head"><div><p class="eyebrow">MOBILIZA EDUCA • PLATEIA CONECTADA</p><h2>'+title+'</h2><p>'+subtitle+'</p></div><div class="pcx-room"><small>SALA</small><strong>'+esc(session?.code||'------')+'</strong><small>'+badge+'</small></div></div>';
 
@@ -192,7 +194,7 @@ export function openPlateia(dialog,host,onFinish){
       recentScope:'game:plateia-connected',
       recentLimit:28
     });
-    qIndex=0;totalVotes=0;majorityCorrect=0;score=0;
+    qIndex=0;totalVotes=0;majorityCorrect=0;score=0;gameStartedAt=Date.now();
     openQuestion();
   }
 
@@ -305,6 +307,13 @@ export function openPlateia(dialog,host,onFinish){
     state='finished';
     session.broadcast({type:'session-finished'});
     save(score,majorityCorrect,questions.length);
+    recordGameResult({
+      kind:'game',moduleId:'plateia',title:'Plateia Conectada',
+      score,correct:majorityCorrect,answers:questions.length,
+      durationSec:gameStartedAt?Math.round((Date.now()-gameStartedAt)/1000):null,
+      status:'concluido',participants:participants.length,votes:totalVotes,
+      meta:{sessionCode:session?.code||'',questions:questions.length}
+    });
     if(onFinish)onFinish();
     SoundManager.play('finish');
 
