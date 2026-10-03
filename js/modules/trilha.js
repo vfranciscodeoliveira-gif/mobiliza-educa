@@ -358,32 +358,56 @@ export function openTrilha(dialog,host,onFinish){
 
     return await new Promise(resolve=>{
       const die=o.querySelector('#trailBigDice');
+      const dots=[...die.querySelectorAll('.trail-die-dots i')];
+      const number=die.querySelector('.trail-die-number');
+      const patterns={
+        1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]
+      };
       let rolling=false;
+
+      const paintFace=(value,frame)=>{
+        die.dataset.value=String(value);
+        if(number)number.textContent=String(value);
+        const active=new Set(patterns[value]||patterns[1]);
+        dots.forEach((dot,idx)=>dot.classList.toggle('on',active.has(idx+1)));
+        die.classList.toggle('rolling-a',frame%2===0);
+        die.classList.toggle('rolling-b',frame%2!==0);
+      };
+
+      const tickFrame=(value,frame,delay)=>new Promise(done=>{
+        requestAnimationFrame(()=>{
+          paintFace(value,frame);
+          sounds.diceTick(value);
+          setTimeout(done,delay);
+        });
+      });
+
       die.onclick=async()=>{
         if(rolling)return;
         rolling=true;
         die.disabled=true;
-        sounds.click();
+        ensureAudio();
         o.querySelector('#trailDiceText').textContent='Jogando...';
 
-        for(let k=0;k<18;k++){
-          const n=Math.floor(Math.random()*6)+1;
-          die.dataset.value=String(n);
-          die.innerHTML=dieFace(n);
-          die.classList.toggle('rolling-a',k%2===0);
-          die.classList.toggle('rolling-b',k%2!==0);
-          sounds.diceTick(n);
-          await sleep(65+k*2);
+        const cadence=[44,46,48,50,52,55,58,62,67,73,80,90];
+        let last=1;
+        for(let k=0;k<cadence.length;k++){
+          let n=Math.floor(Math.random()*6)+1;
+          if(n===last)n=(n%6)+1;
+          last=n;
+          await tickFrame(n,k,cadence[k]);
         }
 
         const value=Math.floor(Math.random()*6)+1;
-        die.dataset.value=String(value);
-        die.innerHTML=dieFace(value);
-        die.classList.remove('rolling-a','rolling-b');
-        die.classList.add('stopped');
-        sounds.diceStop(value);
-        o.querySelector('#trailDiceText').innerHTML=`Você tirou <strong>${value}</strong>! <span class="trail-dice-move-hint">Avance ${value} casa${value===1?'':'s'}.</span>`;
-        await sleep(900);
+        await new Promise(done=>requestAnimationFrame(()=>{
+          paintFace(value,cadence.length);
+          die.classList.remove('rolling-a','rolling-b');
+          die.classList.add('stopped');
+          sounds.diceStop(value);
+          o.querySelector('#trailDiceText').innerHTML=`Você tirou <strong>${value}</strong>! <span class="trail-dice-move-hint">Avance ${value} casa${value===1?'':'s'}.</span>`;
+          done();
+        }));
+        await sleep(260);
         closeOverlay();
         resolve(value);
       };
@@ -403,7 +427,7 @@ export function openTrilha(dialog,host,onFinish){
       const cell=host.querySelector(`[data-cell="${x}"]`);
       cell?.classList.add('moving');
       sounds.step();
-      await sleep(210);
+      await sleep(150);
       cell?.classList.remove('moving');
     }
 
