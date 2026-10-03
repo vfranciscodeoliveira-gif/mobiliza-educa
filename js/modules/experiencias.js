@@ -1,4 +1,5 @@
 import { SoundManager } from '../core/soundManager.js?v=1';
+import { recordGameResult } from '../core/historyStore.js?v=1';
 import { openExtraExperience } from './experienciasExtra.js?v=2';
 const MEMORY_BASE='assets/memory/';
 const ARR_ITEMS=[
@@ -73,7 +74,10 @@ function head(title,subtitle,badges=''){
  return `<div class="ax-head"><p class="eyebrow">MOBILIZA EDUCA • EXPERIÊNCIA RÁPIDA</p><h2>${title}</h2><p>${subtitle}</p>${badges?'<div class="ax-stats">'+badges+'</div>':''}</div>`;
 }
 function end(dialog,host,onFinish,title,score,text){
- SoundManager.play('finish');addResult(score,1,1);onFinish?.();host.innerHTML=`<section class="ax">${head(title,'Experiência concluída.')}<div class="complete"><div class="big">🏆</div><h3>Concluído!</h3><p>${text}</p><strong>${score} pontos</strong><div class="ax-actions"><button class="btn primary" id="axAgain">Jogar novamente</button><button class="btn ghost" id="axClose">Encerrar</button></div></div></section>`;host.querySelector('#axAgain').onclick=()=>openExperience(dialog,host,dialog.dataset.experience,onFinish);host.querySelector('#axClose').onclick=()=>dialog.close();
+ SoundManager.play('finish');addResult(score,1,1);
+ const expId=dialog.dataset.experience||'experiencia';
+ recordGameResult({kind:'experience',moduleId:'experience-'+expId,title,score,correct:1,answers:1,status:'concluido'});
+ onFinish?.();host.innerHTML=`<section class="ax">${head(title,'Experiência concluída.')}<div class="complete"><div class="big">🏆</div><h3>Concluído!</h3><p>${text}</p><strong>${score} pontos</strong><div class="ax-actions"><button class="btn primary" id="axAgain">Jogar novamente</button><button class="btn ghost" id="axClose">Encerrar</button></div></div></section>`;host.querySelector('#axAgain').onclick=()=>openExperience(dialog,host,dialog.dataset.experience,onFinish);host.querySelector('#axClose').onclick=()=>dialog.close();
 }
 function arraste(dialog,host,onFinish){
  let selected=null,done=new Set(),score=0,moves=0;
@@ -128,7 +132,9 @@ function mito(dialog,host,onFinish){
   render(`<strong>${ok?'✓ Resposta correta.':'Resposta diferente da esperada.'}</strong><br>${m.why}<div class="ax-actions"><button class="btn primary" id="nextM">${i===round.length-1?'Ver resultado':'Próxima'}</button></div>`);
   host.querySelector('#nextM').onclick=()=>{
    if(i===round.length-1){
-    addResult(score,correct,round.length);onFinish?.();SoundManager.play(correct>=5?'celebrate':'finish');
+    addResult(score,correct,round.length);
+    recordGameResult({kind:'experience',moduleId:'experience-mito-verdade',title:'Mito ou Verdade?',score,correct,answers:round.length,status:'concluido'});
+    onFinish?.();SoundManager.play(correct>=5?'celebrate':'finish');
     host.innerHTML=`<section class="ax">${head('Mito ou Verdade?','Resultado final')}<div class="complete"><div class="big">⚖️</div><h3>${correct} de ${round.length}</h3><p>O mais importante é levar as explicações para as decisões do dia a dia.</p><strong>${score} pontos</strong><div class="ax-actions"><button class="btn primary" id="againM">Nova rodada</button><button class="btn ghost" id="closeM">Encerrar</button></div></div></section>`;
     host.querySelector('#againM').onclick=()=>mito(dialog,host,onFinish);host.querySelector('#closeM').onclick=()=>dialog.close();
    }else{i++;SoundManager.play('next');render()}
