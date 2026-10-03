@@ -1,11 +1,12 @@
 import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=42';
-import { openQuiz } from './modules/quiz.js?v=24';
-import { openMilhao } from './modules/milhao.js?v=14';
-import { openTrilha } from './modules/trilha.js?v=31';
+import { openQuiz } from './modules/quiz.js?v=25';
+import { openMilhao } from './modules/milhao.js?v=15';
+import { openTrilha } from './modules/trilha.js?v=32';
 import { openMemoria } from './modules/memoria.js?v=27';
 import { openCruzadas } from './modules/cruzadas.js?v=30';
 import { openPlateia } from './modules/plateia.js';
 import { openExperience } from './modules/experiencias.js?v=42';
+import { SoundManager } from './core/soundManager.js?v=1';
 import { openAdminModule } from './modules/admin.js';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
 import { renderHomeNotifications } from './modules/notifications.js';
@@ -44,6 +45,13 @@ function renderAudienceProfile(id){
 function bindExperienceButtons(){
  qsa('[data-experience]').forEach(b=>b.addEventListener('click',()=>openExperience(qs('#gameDialog'),qs('#gameHost'),b.dataset.experience,updateResults)));
 }
+function bindGlobalSound(){
+ const b=qs('#btnSound');
+ if(!b)return;
+ const paint=()=>{const on=SoundManager.isEnabled();b.textContent=on?'🔊':'🔇';b.title=on?'Som ligado':'Som desligado';b.setAttribute('aria-label',on?'Desligar sons':'Ligar sons');b.classList.toggle('active',on)};
+ paint();
+ b.addEventListener('click',()=>{SoundManager.toggle();paint()});
+}
 function bindAudienceUI(){
  qsa('[data-audience-tab]').forEach(b=>b.addEventListener('click',()=>renderAudienceProfile(b.dataset.audienceTab)));
 }
@@ -62,7 +70,7 @@ function render(){
  qs('#educatorGrid').innerHTML=educatorModules.map(x=>moduleCard(x,'Abrir módulo')).join('');
  qs('#adminGrid').innerHTML=adminModules.map(x=>moduleCard(x,'Abrir')).join('');
  const stat=qs('#statJogos'); if(stat) stat.textContent=games.length;
- bindModuleButtons();bindAudienceUI();renderAudienceProfile(currentAudience);showTip(0);updateResults();updateAuthUI();
+ bindModuleButtons();bindAudienceUI();bindGlobalSound();renderAudienceProfile(currentAudience);showTip(0);updateResults();updateAuthUI();
 }
 function navigate(view){
  qsa('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${view}`));
@@ -113,5 +121,5 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.19.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.20.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
