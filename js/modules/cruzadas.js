@@ -1,3 +1,4 @@
+import { recordGameResult } from '../core/historyStore.js?v=1';
 
 const ALL_WORDS=[
   {key:'velocidade',word:'VELOCIDADE',image:'assets/memory/velocidade.svg?v=28',clue:'Ritmo de deslocamento que deve respeitar os limites e as condições da via.',row:7,col:2,dir:'H'},
@@ -1204,6 +1205,11 @@ export function openCruzadas(dialog,host,onFinish){
       localStorage.setItem(bestKey(),JSON.stringify(record));
     }
     saveResult(words().length,attempts,finalScore);
+    recordGameResult({
+      kind:'game',moduleId:'cruzadas',title:'Palavras Cruzadas do Trânsito',
+      score:finalScore,correct:words().length,answers:attempts,durationSec:seconds,
+      level:levelCfg().label,status:'concluido',meta:{words:words().length,attempts,hints}
+    });
     onFinish?.();
 
     host.innerHTML=`<section class="crossword-result-v28">
