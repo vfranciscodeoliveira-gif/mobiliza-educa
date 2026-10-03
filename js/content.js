@@ -6,7 +6,7 @@ export const audiences=[
 ];
 
 export const games=[
-{id:'quiz',icon:'⚡',title:'Quiz Relâmpago',description:'Perguntas rápidas, pontuação, sequência de acertos e explicações pedagógicas.',tags:['funcional','offline'],ready:true},
+{id:'quiz',icon:'⚡',cover:'assets/ai/hero_area_escolar.webp',title:'Quiz Relâmpago',description:'Escolha público, dificuldade, quantidade e tempo. Perguntas variadas, imagens, combos, sons e explicações.',tags:['níveis','cronômetro','offline'],ready:true},
 {id:'milhao',icon:'💡',visual:'game-milhao',title:'Show do Milhão do Trânsito',description:'Perguntas, cronômetro, pulos, cartas, plateia, progressão e resultado final.',tags:['jogar agora','telão'],ready:true},
 {id:'trilha',icon:'🎲',visual:'game-trilha',title:'Trilha do Trânsito',description:'Tabuleiro, dado animado, peões, casas especiais e desafios educativos.',tags:['jogar agora','multijogador'],ready:true},
 {id:'memoria',icon:'🧠',visual:'game-memoria',title:'Jogo da Memória',description:'Cartas animadas, pares de sinais e situações seguras, tempo e pontuação.',tags:['jogar agora','atenção'],ready:true},
