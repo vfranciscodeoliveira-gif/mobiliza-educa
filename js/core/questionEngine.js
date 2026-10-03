@@ -1,20 +1,24 @@
 import { QUESTION_BANK, CATEGORY_IMAGES } from '../data/questionBank.js?v=1';
 
 const RECENT_KEY='mobiliza.questions.recent';
-const MAX_RECENT=36;
+const MAX_RECENT=64;
 
 function shuffle(a){
  const b=[...a];
  for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}
  return b;
 }
-function recentIds(){
- try{return JSON.parse(localStorage.getItem(RECENT_KEY)||'[]')}catch{return[]}
+function recentKey(scope='global'){return scope==='global'?RECENT_KEY:RECENT_KEY+'.'+scope}
+function recentIds(scope='global'){
+ try{
+  const value=JSON.parse(localStorage.getItem(recentKey(scope))||'[]');
+  return Array.isArray(value)?value:[];
+ }catch{return[]}
 }
-function saveRecent(ids){
- const old=recentIds();
- const merged=[...ids,...old.filter(x=>!ids.includes(x))].slice(0,MAX_RECENT);
- localStorage.setItem(RECENT_KEY,JSON.stringify(merged));
+function saveRecent(ids,scope='global',limit=MAX_RECENT){
+ const old=recentIds(scope);
+ const merged=[...ids,...old.filter(x=>!ids.includes(x))].slice(0,Math.max(1,limit));
+ localStorage.setItem(recentKey(scope),JSON.stringify(merged));
 }
 function audiencesMatch(q,audiences){
  if(!audiences||!audiences.length)return true;
@@ -47,15 +51,17 @@ export function getQuestionSet({
  difficulties=[],
  categories=[],
  avoidRecent=true,
- markRecent=true
+ markRecent=true,
+ recentScope='global',
+ recentLimit=MAX_RECENT
 }={}){
  let pool=QUESTION_BANK.filter(q=>audiencesMatch(q,audiences)&&difficultyMatch(q,difficulties)&&categoryMatch(q,categories));
  if(!pool.length)pool=[...QUESTION_BANK];
- const recent=avoidRecent?new Set(recentIds()):new Set();
+ const recent=avoidRecent?new Set(recentIds(recentScope)):new Set();
  const fresh=pool.filter(q=>!recent.has(q.id));
  const used=fresh.length>=count?fresh:[...fresh,...pool.filter(q=>recent.has(q.id))];
  const selected=shuffle(used).slice(0,Math.min(count,used.length)).map(remapOptions);
- if(markRecent&&selected.length)saveRecent(selected.map(x=>x.id));
+ if(markRecent&&selected.length)saveRecent(selected.map(x=>x.id),recentScope,recentLimit);
  return selected;
 }
 
@@ -66,11 +72,14 @@ export function getGameQuestions(game,count){
    trilha:{audiences:['criancas','adolescentes'],difficulties:['facil','medio']},
    adulto:{audiences:['adultos'],difficulties:['facil','medio','dificil']}
  }[game]||{};
- return getQuestionSet({...config,count});
+ return getQuestionSet({...config,count,recentScope:'game:'+game,recentLimit:Math.min(MAX_RECENT,Math.max(count*3,count))});
 }
 
-export function resetRecentQuestions(){localStorage.removeItem(RECENT_KEY)}
-export function questionStats(){
- const r=recentIds();
- return {bank:QUESTION_BANK.length,recent:r.length,remaining:Math.max(0,QUESTION_BANK.length-r.length)};
+export function resetRecentQuestions(){
+ const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(RECENT_KEY))keys.push(k)}
+ keys.forEach(k=>localStorage.removeItem(k));
+}
+export function questionStats(scope='global'){
+ const r=recentIds(scope);
+ return {bank:QUESTION_BANK.length,recent:r.length,remaining:Math.max(0,QUESTION_BANK.length-r.length),scope};
 }
