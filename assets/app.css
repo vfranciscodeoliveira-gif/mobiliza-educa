@@ -3111,3 +3111,159 @@ dialog::backdrop{background:rgba(4,24,38,.68);backdrop-filter:blur(4px)}
 @media(max-width:760px){
   .hero-brand,.hero-brand img{min-height:220px}
 }
+
+
+/* v0.22.0 • Banco Visual IA aplicado */
+.sprite-cover{
+  background-image:url('ai/jogos_experiencias_sprite.webp?v=1')!important;
+  background-repeat:no-repeat!important;
+  background-size:400% 200%!important;
+  background-color:#dbeaf2!important;
+  min-height:190px!important;
+}
+.game-milhao{background-position:0% 0%!important}
+.game-trilha{background-position:33.333% 0%!important}
+.game-memoria{background-position:66.666% 0%!important}
+.game-cruzadas{background-position:100% 0%!important}
+
+#audienceGrid .sprite-cover{
+  background-image:url('ai/publicos_sprite.webp?v=1')!important;
+  background-size:400% 100%!important;
+  min-height:180px!important;
+}
+.aud-criancas{background-position:0% 0%!important}
+.aud-adolescentes{background-position:33.333% 0%!important}
+.aud-adultos{background-position:66.666% 0%!important}
+.aud-educadores-empresas{background-position:100% 0%!important}
+
+.profile-photo{
+  width:240px;
+  min-height:150px;
+  align-self:stretch;
+  border-radius:22px;
+  background-image:url('ai/publicos_sprite.webp?v=1');
+  background-repeat:no-repeat;
+  background-size:400% 100%;
+  background-color:#dbeaf2;
+  box-shadow:0 14px 32px rgba(15,60,102,.18);
+  border:1px solid rgba(255,255,255,.75);
+}
+.audience-profile{
+  grid-template-columns:240px minmax(0,1fr)!important;
+  min-height:190px;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.98),rgba(247,252,255,.96)),
+    radial-gradient(circle at 90% 10%,rgba(24,168,197,.14),transparent 32rem)!important;
+}
+
+.experience-card{
+  grid-template-columns:150px minmax(0,1fr) auto!important;
+  min-height:155px;
+}
+.experience-visual{
+  width:150px;
+  min-height:120px;
+  border-radius:16px;
+  background-image:url('ai/jogos_experiencias_sprite.webp?v=1');
+  background-repeat:no-repeat;
+  background-size:400% 200%;
+  background-color:#dbeaf2;
+  box-shadow:0 9px 24px rgba(15,60,102,.13);
+}
+.exp-arraste{background-position:0% 100%}
+.exp-percepcao{background-position:33.333% 100%}
+.exp-mito{background-position:66.666% 100%}
+.exp-pausa{background-position:100% 100%}
+
+.module-cover.sprite-cover::before,
+.experience-visual::after,
+.profile-photo::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+.module-cover.sprite-cover{
+  position:relative;
+}
+.module-cover.sprite-cover::before{
+  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,34,58,.08) 52%,rgba(0,24,42,.52));
+}
+.experience-visual,.profile-photo{position:relative;overflow:hidden}
+.experience-visual::after{background:linear-gradient(180deg,transparent 58%,rgba(7,38,59,.08))}
+.profile-photo::after{background:linear-gradient(135deg,transparent 55%,rgba(7,38,59,.12))}
+
+#audienceGrid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+#audienceGrid .module-card-body{padding:14px 15px 16px}
+#audienceGrid .module-card h3{font-size:1.15rem}
+#audienceGrid .module-card p{font-size:.88rem;min-height:62px}
+#audienceGrid .module-card .btn{width:100%}
+#audienceGrid .module-card:nth-child(1) .btn{background:linear-gradient(135deg,#f08a21,#f6a334)}
+#audienceGrid .module-card:nth-child(2) .btn{background:linear-gradient(135deg,#1674cf,#2794e9)}
+#audienceGrid .module-card:nth-child(3) .btn{background:linear-gradient(135deg,#198c55,#2fb66f)}
+#audienceGrid .module-card:nth-child(4) .btn{background:linear-gradient(135deg,#7049b5,#8f66d6)}
+
+#gameGrid .module-card.illustrated,
+#gameGrid .module-card:has(.sprite-cover){
+  background:linear-gradient(180deg,#fff,#fbfdff);
+}
+#gameGrid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+#gameGrid .module-card{min-height:390px}
+#gameGrid .module-card .module-card-body{display:flex;flex-direction:column;height:calc(100% - 190px)}
+#gameGrid .module-card .module-meta{margin-top:auto}
+#gameGrid .module-card .btn{width:100%;margin-top:12px}
+
+#view-aprender .module-card,
+#view-educador .module-card,
+#view-eventos .card,
+#view-resultados .card,
+#view-gestao .module-card{
+  border-top:4px solid rgba(13,120,173,.18);
+}
+#view-aprender .module-card:nth-child(3n+1){border-top-color:#2fa76b}
+#view-aprender .module-card:nth-child(3n+2){border-top-color:#18a8c5}
+#view-aprender .module-card:nth-child(3n){border-top-color:#f3b92f}
+#view-educador .module-card:nth-child(odd){border-top-color:#7456b3}
+#view-educador .module-card:nth-child(even){border-top-color:#0d78ad}
+
+.section-heading{
+  border-radius:16px;
+}
+.section-heading h2,.section-heading h3{
+  position:relative;
+}
+.section-heading h2::after,.section-heading h3::after{
+  content:"";
+  display:block;
+  width:52px;
+  height:4px;
+  margin-top:8px;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--me-blue),var(--me-cyan));
+}
+
+@media(max-width:1100px){
+  #audienceGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #gameGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .audience-profile{grid-template-columns:210px minmax(0,1fr)!important}
+  .profile-photo{width:210px}
+}
+@media(max-width:780px){
+  .audience-profile{grid-template-columns:1fr!important}
+  .profile-photo{width:100%;min-height:190px}
+  .experience-card{grid-template-columns:120px 1fr!important}
+  .experience-visual{width:120px;min-height:105px}
+  .experience-status{display:none}
+}
+@media(max-width:620px){
+  #audienceGrid,#gameGrid{grid-template-columns:1fr}
+  #audienceGrid .sprite-cover{min-height:200px!important}
+  #gameGrid .module-card{min-height:auto}
+  #gameGrid .module-card .module-card-body{height:auto}
+  .experience-card{grid-template-columns:1fr!important}
+  .experience-visual{width:100%;min-height:145px}
+}
