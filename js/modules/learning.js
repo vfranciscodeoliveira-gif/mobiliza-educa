@@ -1,5 +1,6 @@
 import { getQuestionSet } from '../core/questionEngine.js?v=2';
 import { SoundManager } from '../core/soundManager.js?v=1';
+import { recordGameResult } from '../core/historyStore.js?v=1';
 
 const M='assets/memory/';
 const REAL='assets/ai/hero_area_escolar.webp';
@@ -116,6 +117,7 @@ export function openLearning(dialog,host,id,onFinish){
 
   let step=0,qIndex=0,score=0,correct=0,answers=0,locked=false;
   let questions=collectQuestions(t,id);
+  let startedAt=Date.now();
   const previous=getProgress()[id]||{};
 
   function intro(){
@@ -124,7 +126,7 @@ export function openLearning(dialog,host,id,onFinish){
       status(0,'Pronto para começar')+
       '<div class="learn2-intro"><div class="learn2-card"><h3>O que você vai fazer</h3><p>São três etapas rápidas de conteúdo e cinco situações de checagem. As perguntas mudam entre as rodadas para reduzir repetição.</p><div class="learn2-actions"><button class="btn primary" id="learn2Start">▶ COMEÇAR TRILHA</button></div></div>'+
       '<div class="learn2-card"><h3>Roteiro</h3><div class="learn2-road"><div class="learn2-road-step"><b>1</b><div><strong>Aprender</strong><small>3 ideias essenciais</small></div></div><div class="learn2-road-step"><b>2</b><div><strong>Aplicar</strong><small>5 situações rápidas</small></div></div><div class="learn2-road-step"><b>3</b><div><strong>Concluir</strong><small>resultado e recorde local</small></div></div></div>'+(previous.bestPct!=null?'<div class="learn2-record" style="margin-top:12px">🏅 Melhor resultado nesta trilha: <strong>'+previous.bestPct+'%</strong></div>':'')+'</div></div></section>';
-    host.querySelector('#learn2Start').onclick=()=>{SoundManager.play('open');slide()};
+    host.querySelector('#learn2Start').onclick=()=>{startedAt=Date.now();SoundManager.play('open');slide()};
   }
 
   function slide(){
@@ -158,7 +160,13 @@ export function openLearning(dialog,host,id,onFinish){
     const pct=answers?Math.round(correct/answers*100):0;
     const prev=getProgress()[id]||{};
     setTrackProgress(id,{completed:true,bestPct:Math.max(prev.bestPct||0,pct),lastPct:pct,completions:(prev.completions||0)+1});
-    saveGlobal(score,correct,answers);onFinish?.();
+    saveGlobal(score,correct,answers);
+    recordGameResult({
+      kind:'learning',moduleId:'learning-'+id,title:t.title,score,correct,answers,
+      durationSec:Math.round((Date.now()-startedAt)/1000),audience:t.audience,status:'concluido',
+      meta:{trackId:id,bestPct:Math.max(prev.bestPct||0,pct),pct}
+    });
+    onFinish?.();
     SoundManager.play(pct>=80?'celebrate':'finish');
     host.innerHTML='<section class="learn2">'+hero(t,'Trilha concluída','RESULTADO')+status(100,'Concluída')+
       '<div class="learn2-summary"><div class="learn2-score-ring" style="--pct:'+pct+'%"><div><strong>'+pct+'%</strong><span>aproveitamento</span></div></div><div class="learn2-card"><h3>'+(pct>=80?'Excelente revisão!':pct>=60?'Bom caminho!':'Vale revisar novamente')+'</h3><p>Você concluiu <strong>'+esc(t.title)+'</strong>.</p><div class="learn2-summary-grid"><div><strong>'+correct+'/'+answers+'</strong><span>acertos</span></div><div><strong>'+score+'</strong><span>pontos</span></div><div><strong>'+Math.max(prev.bestPct||0,pct)+'%</strong><span>melhor</span></div></div><div class="learn2-record">💡 Refazer a trilha traz uma nova seleção de perguntas e reforça os pontos essenciais.</div><div class="learn2-actions"><button class="btn primary" id="learn2Again">🔁 NOVA RODADA</button><button class="btn ghost" id="learn2Close">ENCERRAR</button></div></div></div></section>';
