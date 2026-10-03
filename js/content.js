@@ -1,16 +1,16 @@
 export const audiences=[
-{id:'criancas',icon:'🧒',title:'Crianças',description:'Aprender brincando com jogos, histórias, desafios visuais e missões adequadas à idade.',tags:['5–12 anos','gamificação'],ready:true},
-{id:'adolescentes',icon:'🧑',title:'Adolescentes',description:'Situações do cotidiano, escolhas, percepção de risco, bicicleta, celular, carona e convivência segura.',tags:['13–17 anos','vida real'],ready:true},
-{id:'adultos',icon:'🚘',title:'Adultos',description:'Conteúdos objetivos para condutores, motociclistas, ciclistas, pedestres e famílias.',tags:['18+','prevenção'],ready:true},
-{id:'educadores-empresas',icon:'👩‍🏫',title:'Educadores e empresas',description:'Trilhas prontas para escola, ações públicas, SIPAT, equipes, frotas e formação continuada.',tags:['escola','empresa'],ready:true}
+{id:'criancas',icon:'🧒',visual:'aud-criancas',title:'Crianças',description:'Aprender brincando com jogos, histórias, desafios visuais e missões adequadas à idade.',tags:['5–12 anos','gamificação'],ready:true},
+{id:'adolescentes',icon:'🧑',visual:'aud-adolescentes',title:'Adolescentes',description:'Situações do cotidiano, escolhas, percepção de risco, bicicleta, celular, carona e convivência segura.',tags:['13–17 anos','vida real'],ready:true},
+{id:'adultos',icon:'🚘',visual:'aud-adultos',title:'Adultos',description:'Conteúdos objetivos para condutores, motociclistas, ciclistas, pedestres e famílias.',tags:['18+','prevenção'],ready:true},
+{id:'educadores-empresas',icon:'👩‍🏫',visual:'aud-educadores-empresas',title:'Educadores e empresas',description:'Trilhas prontas para escola, ações públicas, SIPAT, equipes, frotas e formação continuada.',tags:['escola','empresa'],ready:true}
 ];
 
 export const games=[
 {id:'quiz',icon:'⚡',title:'Quiz Relâmpago',description:'Perguntas rápidas, pontuação, sequência de acertos e explicações pedagógicas.',tags:['funcional','offline'],ready:true},
-{id:'milhao',icon:'💡',cover:'assets/games/quiz_do_milhao_do_transito.svg',title:'Show do Milhão do Trânsito',description:'Perguntas, cronômetro, pulos, cartas, plateia, progressão e resultado final.',tags:['jogar agora','telão'],ready:true},
-{id:'trilha',icon:'🎲',cover:'assets/games/trilha_do_transito_agentes_mirins.svg',title:'Trilha do Trânsito',description:'Tabuleiro, dado animado, peões, casas especiais e desafios educativos.',tags:['jogar agora','multijogador'],ready:true},
-{id:'memoria',icon:'🧠',cover:'assets/games/jogo_da_memoria_mobiliza_educa.svg',title:'Jogo da Memória',description:'Cartas animadas, pares de sinais e situações seguras, tempo e pontuação.',tags:['jogar agora','atenção'],ready:true},
-{id:'cruzadas',icon:'✏️',cover:'assets/games/palavras_cruzadas_do_transito.svg',title:'Palavras Cruzadas do Trânsito',description:'Pistas educativas, validação das respostas, tentativas e pontuação.',tags:['jogar agora','vocabulário'],ready:true},
+{id:'milhao',icon:'💡',visual:'game-milhao',title:'Show do Milhão do Trânsito',description:'Perguntas, cronômetro, pulos, cartas, plateia, progressão e resultado final.',tags:['jogar agora','telão'],ready:true},
+{id:'trilha',icon:'🎲',visual:'game-trilha',title:'Trilha do Trânsito',description:'Tabuleiro, dado animado, peões, casas especiais e desafios educativos.',tags:['jogar agora','multijogador'],ready:true},
+{id:'memoria',icon:'🧠',visual:'game-memoria',title:'Jogo da Memória',description:'Cartas animadas, pares de sinais e situações seguras, tempo e pontuação.',tags:['jogar agora','atenção'],ready:true},
+{id:'cruzadas',icon:'✏️',visual:'game-cruzadas',title:'Palavras Cruzadas do Trânsito',description:'Pistas educativas, validação das respostas, tentativas e pontuação.',tags:['jogar agora','vocabulário'],ready:true},
 {id:'plateia',icon:'📱',title:'Plateia Interativa',description:'QR Code, respostas pelo celular, percentuais ao vivo e telão sincronizado.',tags:['coletivo','telão'],ready:false}
 ];
 
@@ -74,14 +74,14 @@ adultos:{
 };
 
 export const experiences=[
-{id:'mito-verdade',icon:'⚖️',title:'Mito ou Verdade?',description:'Afirmações rápidas para provocar discussão e corrigir percepções equivocadas.',audiences:['adolescentes','adultos','educadores-empresas'],format:'60–90 s',status:'ativo',ready:true},
+{id:'mito-verdade',icon:'⚖️',visual:'exp-mito',title:'Mito ou Verdade?',description:'Afirmações rápidas para provocar discussão e corrigir percepções equivocadas.',audiences:['adolescentes','adultos','educadores-empresas'],format:'60–90 s',status:'ativo',ready:true},
 {id:'desafio-60',icon:'⏱️',title:'Desafio 60 segundos',description:'Uma situação, uma pergunta e uma explicação curta. Ideal para celular, telão e ações rápidas.',audiences:['criancas','adolescentes','adultos'],format:'1 min',status:'planejado'},
 {id:'prioridade',icon:'🔀',title:'Quem tem prioridade?',description:'Cenas esquemáticas simples para raciocinar sobre convivência, atenção e tomada de decisão.',audiences:['adolescentes','adultos'],format:'interativo',status:'planejado'},
-{id:'percepcao',icon:'👁️',title:'Teste sua percepção',description:'Mostra elementos de uma cena por poucos segundos e depois testa o que ficou na memória visual.',audiences:['adolescentes','adultos'],format:'visual',status:'ativo',ready:true},
+{id:'percepcao',icon:'👁️',visual:'exp-percepcao',title:'Teste sua percepção',description:'Mostra elementos de uma cena por poucos segundos e depois testa o que ficou na memória visual.',audiences:['adolescentes','adultos'],format:'visual',status:'ativo',ready:true},
 {id:'historia',icon:'📖',title:'Histórias do Dicas do Chico',description:'Narrativas curtas e ilustradas com escolhas simples para crianças.',audiences:['criancas'],format:'história',status:'planejado'},
-{id:'arraste',icon:'🧩',title:'Arraste para o lugar certo',description:'Associe capacete, cinto, faixa e bicicleta às situações correspondentes, com feedback imediato.',audiences:['criancas'],format:'atividade',status:'ativo',ready:true},
+{id:'arraste',icon:'🧩',visual:'exp-arraste',title:'Arraste para o lugar certo',description:'Associe capacete, cinto, faixa e bicicleta às situações correspondentes, com feedback imediato.',audiences:['criancas'],format:'atividade',status:'ativo',ready:true},
 {id:'familia-5',icon:'🏠',title:'5 minutos em família',description:'Perguntas e conversas guiadas para responsáveis e crianças aprenderem juntos.',audiences:['criancas','adultos'],format:'família',status:'planejado'},
-{id:'empresa-rapido',icon:'💼',title:'Pausa de Segurança',description:'Microtreinamento para colaboradores com conteúdo, checagem final e registro local de conclusão.',audiences:['adultos','educadores-empresas'],format:'empresa',status:'ativo',ready:true}
+{id:'empresa-rapido',icon:'💼',visual:'exp-pausa',title:'Pausa de Segurança',description:'Microtreinamento para colaboradores com conteúdo, checagem final e registro local de conclusão.',audiences:['adultos','educadores-empresas'],format:'empresa',status:'ativo',ready:true}
 ];
 
 export const educatorModules=[
