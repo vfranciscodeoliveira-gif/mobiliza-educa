@@ -1,4 +1,4 @@
-import { getGameQuestions } from '../core/questionEngine.js?v=1';
+import { getGameQuestions } from '../core/questionEngine.js?v=2';
 import { SoundManager } from '../core/soundManager.js?v=1';
 
 
