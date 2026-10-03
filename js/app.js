@@ -4,7 +4,8 @@ import { openMilhao } from './modules/milhao.js?v=16';
 import { openTrilha } from './modules/trilha.js?v=33';
 import { openMemoria } from './modules/memoria.js?v=27';
 import { openCruzadas } from './modules/cruzadas.js?v=30';
-import { openPlateia } from './modules/plateia.js';
+import { openPlateia } from './modules/plateia.js?v=2';
+import { openLearning } from './modules/learning.js?v=1';
 import { openExperience } from './modules/experiencias.js?v=44';
 import { SoundManager } from './core/soundManager.js?v=1';
 import { openAdminModule } from './modules/admin.js';
@@ -86,6 +87,7 @@ function bindModuleButtons(){
   else if(id==='memoria')openMemoria(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='cruzadas')openCruzadas(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='plateia')openPlateia(qs('#gameDialog'),qs('#gameHost'),updateResults);
+  else if(learning.some(x=>x.id===id))openLearning(qs('#gameDialog'),qs('#gameHost'),id,updateResults);
   else if(audiences.some(x=>x.id===id)){currentAudience=id;navigate('publicos');renderAudienceProfile(id);}
   else if(adminModules.some(x=>x.id===id)){
    if(await ensureAdminAccess(qs('#authDialog'))){updateAuthUI();openAdminModule(id,qs('#adminDialog'),qs('#adminHost'),qs('#authDialog'));}
