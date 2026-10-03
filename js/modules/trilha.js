@@ -1,4 +1,5 @@
 import { getGameQuestions } from '../core/questionEngine.js?v=2';
+import { recordGameResult } from '../core/historyStore.js?v=1';
 const BOARD_SIZE=24;
 const COLS=6;
 
@@ -43,6 +44,7 @@ export function openTrilha(dialog,host,onFinish){
   let audioCtx=null;
   let questionOrder=shuffle(QUESTIONS.map((_,i)=>i));
   let qCursor=0;
+  let startedAt=Date.now();
 
   const current=()=>players[turn];
 
@@ -534,7 +536,13 @@ export function openTrilha(dialog,host,onFinish){
   const finish=p=>{
     busy=true;
     sounds.win();
-    saveResult(Math.max(0,1000-rounds*10)+(correctAnswers*20));
+    const finalScore=Math.max(0,1000-rounds*10)+(correctAnswers*20);
+    saveResult(finalScore);
+    recordGameResult({
+      kind:'game',moduleId:'trilha',title:'Trilha do Trânsito',
+      score:finalScore,correct:correctAnswers,answers,durationSec:Math.round((Date.now()-startedAt)/1000),
+      status:'concluido',meta:{rounds,winner:p.name,players:players.map(x=>x.name)}
+    });
     onFinish?.();
 
     host.innerHTML=`<section class="game trail-result trail-v18">
