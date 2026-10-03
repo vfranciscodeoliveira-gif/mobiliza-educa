@@ -1,17 +1,17 @@
 import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=53';
-import { openQuiz } from './modules/quiz.js?v=28';
-import { openMilhao } from './modules/milhao.js?v=16';
-import { openTrilha } from './modules/trilha.js?v=33';
-import { openMemoria } from './modules/memoria.js?v=27';
-import { openCruzadas } from './modules/cruzadas.js?v=30';
-import { openPlateia } from './modules/plateia.js?v=5';
-import { openLearning } from './modules/learning.js?v=2';
+import { openQuiz } from './modules/quiz.js?v=29';
+import { openMilhao } from './modules/milhao.js?v=17';
+import { openTrilha } from './modules/trilha.js?v=34';
+import { openMemoria } from './modules/memoria.js?v=28';
+import { openCruzadas } from './modules/cruzadas.js?v=31';
+import { openPlateia } from './modules/plateia.js?v=6';
+import { openLearning } from './modules/learning.js?v=3';
 import { openParticipantMode } from './modules/participant.js?v=2';
-import { openExperience } from './modules/experiencias.js?v=45';
+import { openExperience } from './modules/experiencias.js?v=46';
 import { SoundManager } from './core/soundManager.js?v=1';
 import { openAdminModule } from './modules/admin.js';
 import { openEducatorModule } from './modules/educator.js?v=1';
-import { renderResultsDashboard } from './modules/results.js?v=1';
+import { renderResultsDashboard } from './modules/results.js?v=2';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
 import { renderHomeNotifications } from './modules/notifications.js';
 
@@ -114,6 +114,7 @@ window.addEventListener('mobiliza-admin-auth',updateAuthUI);
 window.addEventListener('mobiliza-data-change',()=>{renderHomeNotifications(qs('#homeNotifications'),qs('#authDialog'),updateAuthUI);updateResults();});
 window.addEventListener('mobiliza-learning-progress',updateResults);
 window.addEventListener('mobiliza-educador-change',updateResults);
+window.addEventListener('mobiliza-history-change',updateResults);
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;qs('#btnInstall').hidden=false;});
 qs('#btnInstall').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;qs('#btnInstall').hidden=true;});
 function network(){qs('#networkStatus').textContent=navigator.onLine?'● online':'● offline';}
@@ -125,7 +126,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.30.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.31.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
 const plateiaJoinCode=new URLSearchParams(location.search).get('plateia');
 if(plateiaJoinCode)openParticipantMode(plateiaJoinCode);
