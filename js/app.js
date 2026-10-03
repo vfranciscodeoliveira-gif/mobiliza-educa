@@ -1,5 +1,5 @@
-import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=48';
-import { openQuiz } from './modules/quiz.js?v=27';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=49';
+import { openQuiz } from './modules/quiz.js?v=28';
 import { openMilhao } from './modules/milhao.js?v=16';
 import { openTrilha } from './modules/trilha.js?v=33';
 import { openMemoria } from './modules/memoria.js?v=27';
@@ -124,7 +124,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.25.4',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.26.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
 const plateiaJoinCode=new URLSearchParams(location.search).get('plateia');
 if(plateiaJoinCode)openParticipantMode(plateiaJoinCode);
