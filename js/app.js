@@ -1,10 +1,11 @@
-import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=41';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=42';
 import { openQuiz } from './modules/quiz.js?v=24';
 import { openMilhao } from './modules/milhao.js?v=14';
 import { openTrilha } from './modules/trilha.js?v=31';
 import { openMemoria } from './modules/memoria.js?v=27';
 import { openCruzadas } from './modules/cruzadas.js?v=30';
 import { openPlateia } from './modules/plateia.js';
+import { openExperience } from './modules/experiencias.js?v=42';
 import { openAdminModule } from './modules/admin.js';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
 import { renderHomeNotifications } from './modules/notifications.js';
@@ -36,10 +37,13 @@ function renderAudienceProfile(id){
  const grid=qs('#audienceTrackGrid');
  if(grid)grid.innerHTML=p.tracks.map(audienceTrackCard).join('');
  const exp=qs('#experienceGrid');
- if(exp)exp.innerHTML=experiences.filter(x=>x.audiences.includes(currentAudience)).map(experienceCard).join('');
+ if(exp){exp.innerHTML=experiences.filter(x=>x.audiences.includes(currentAudience)).map(experienceCard).join('');bindExperienceButtons();}
  qsa('[data-audience-tab]').forEach(b=>b.classList.toggle('active',b.dataset.audienceTab===currentAudience));
 }
 
+function bindExperienceButtons(){
+ qsa('[data-experience]').forEach(b=>b.addEventListener('click',()=>openExperience(qs('#gameDialog'),qs('#gameHost'),b.dataset.experience,updateResults)));
+}
 function bindAudienceUI(){
  qsa('[data-audience-tab]').forEach(b=>b.addEventListener('click',()=>renderAudienceProfile(b.dataset.audienceTab)));
 }
@@ -109,5 +113,5 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.18.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.19.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 render();
