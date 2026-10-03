@@ -74,14 +74,14 @@ adultos:{
 };
 
 export const experiences=[
-{id:'mito-verdade',icon:'⚖️',title:'Mito ou Verdade?',description:'Afirmações rápidas para provocar discussão e corrigir percepções equivocadas.',audiences:['adolescentes','adultos','educadores-empresas'],format:'60–90 s',status:'planejado'},
+{id:'mito-verdade',icon:'⚖️',title:'Mito ou Verdade?',description:'Afirmações rápidas para provocar discussão e corrigir percepções equivocadas.',audiences:['adolescentes','adultos','educadores-empresas'],format:'60–90 s',status:'ativo',ready:true},
 {id:'desafio-60',icon:'⏱️',title:'Desafio 60 segundos',description:'Uma situação, uma pergunta e uma explicação curta. Ideal para celular, telão e ações rápidas.',audiences:['criancas','adolescentes','adultos'],format:'1 min',status:'planejado'},
 {id:'prioridade',icon:'🔀',title:'Quem tem prioridade?',description:'Cenas esquemáticas simples para raciocinar sobre convivência, atenção e tomada de decisão.',audiences:['adolescentes','adultos'],format:'interativo',status:'planejado'},
-{id:'percepcao',icon:'👁️',title:'Teste sua percepção',description:'Mostra uma cena por poucos segundos e depois pergunta o que o participante percebeu.',audiences:['adolescentes','adultos'],format:'visual',status:'planejado'},
+{id:'percepcao',icon:'👁️',title:'Teste sua percepção',description:'Mostra elementos de uma cena por poucos segundos e depois testa o que ficou na memória visual.',audiences:['adolescentes','adultos'],format:'visual',status:'ativo',ready:true},
 {id:'historia',icon:'📖',title:'Histórias do Dicas do Chico',description:'Narrativas curtas e ilustradas com escolhas simples para crianças.',audiences:['criancas'],format:'história',status:'planejado'},
-{id:'arraste',icon:'🧩',title:'Arraste para o lugar certo',description:'Organizar faixa, capacete, cinto, placa, bicicleta e outros elementos com feedback imediato.',audiences:['criancas'],format:'atividade',status:'planejado'},
+{id:'arraste',icon:'🧩',title:'Arraste para o lugar certo',description:'Associe capacete, cinto, faixa e bicicleta às situações correspondentes, com feedback imediato.',audiences:['criancas'],format:'atividade',status:'ativo',ready:true},
 {id:'familia-5',icon:'🏠',title:'5 minutos em família',description:'Perguntas e conversas guiadas para responsáveis e crianças aprenderem juntos.',audiences:['criancas','adultos'],format:'família',status:'planejado'},
-{id:'empresa-rapido',icon:'💼',title:'Pausa de Segurança',description:'Microtreinamento para colaboradores com conteúdo, pergunta final e registro de participação.',audiences:['adultos','educadores-empresas'],format:'empresa',status:'planejado'}
+{id:'empresa-rapido',icon:'💼',title:'Pausa de Segurança',description:'Microtreinamento para colaboradores com conteúdo, checagem final e registro local de conclusão.',audiences:['adultos','educadores-empresas'],format:'empresa',status:'ativo',ready:true}
 ];
 
 export const educatorModules=[
