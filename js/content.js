@@ -15,14 +15,14 @@ export const games=[
 ];
 
 export const learning=[
-{id:'pedestre',icon:'🚶',title:'Travessia e prioridade',description:'Visibilidade, faixa, semáforo, atenção e convivência entre os diferentes usuários da via.',tags:['universal','5 min'],ready:true},
-{id:'distracao',icon:'📱',title:'Distração no trânsito',description:'Celular, atenção dividida, tempo de reação e escolhas que aumentam o risco.',tags:['adolescentes','adultos'],ready:true},
-{id:'velocidade',icon:'🛑',title:'Velocidade e risco',description:'Como a velocidade interfere na percepção, reação, distância de parada e gravidade das consequências.',tags:['adolescentes','adultos'],ready:true},
-{id:'protecao',icon:'🛡️',title:'Proteção dos ocupantes',description:'Cinto, transporte de crianças, capacete e atitudes que reduzem consequências em uma ocorrência.',tags:['famílias','adultos'],ready:true},
-{id:'bike',icon:'🚲',title:'Bicicleta e micromobilidade',description:'Visibilidade, equipamentos, circulação, cruzamentos e convivência segura.',tags:['9+','mobilidade'],ready:true},
-{id:'moto',icon:'🏍️',title:'Motociclista seguro',description:'Visibilidade, distância, pontos cegos, cruzamentos, frenagem e comportamento preventivo.',tags:['adultos','motociclistas'],ready:true},
-{id:'familia',icon:'👨‍👩‍👧',title:'Trânsito começa em casa',description:'Conversas rápidas para pais, responsáveis e filhos sobre exemplos, hábitos e escolhas seguras.',tags:['famílias','5 min'],ready:true},
-{id:'empresa',icon:'🏢',title:'Segurança no deslocamento',description:'Conteúdo rápido para colaboradores, equipes externas, motoristas e deslocamentos a trabalho.',tags:['empresas','treinamento'],ready:true}
+{id:'pedestre',icon:'🚶',cover:'assets/ai/hero_area_escolar.webp',title:'Travessia e prioridade',description:'Visibilidade, faixa, semáforo, atenção e convivência entre os diferentes usuários da via.',tags:['universal','5 min'],ready:true},
+{id:'distracao',icon:'📱',cover:'assets/games/cidade_mirim_realista_ai_v35.webp',title:'Distração no trânsito',description:'Celular, atenção dividida, tempo de reação e escolhas que aumentam o risco.',tags:['adolescentes','adultos'],ready:true},
+{id:'velocidade',icon:'🛑',cover:'assets/games/cidade_mirim_realista_ai.webp',title:'Velocidade e risco',description:'Como a velocidade interfere na percepção, reação, distância de parada e gravidade das consequências.',tags:['adolescentes','adultos'],ready:true},
+{id:'protecao',icon:'🛡️',cover:'assets/ai/hero_area_escolar.webp',title:'Proteção dos ocupantes',description:'Cinto, transporte de crianças, capacete e atitudes que reduzem consequências em uma ocorrência.',tags:['famílias','adultos'],ready:true},
+{id:'bike',icon:'🚲',cover:'assets/games/trilha.webp',title:'Bicicleta e micromobilidade',description:'Visibilidade, equipamentos, circulação, cruzamentos e convivência segura.',tags:['9+','mobilidade'],ready:true},
+{id:'moto',icon:'🏍️',cover:'assets/games/trilha_do_transito_agentes_mirins.webp',title:'Motociclista seguro',description:'Visibilidade, distância, pontos cegos, cruzamentos, frenagem e comportamento preventivo.',tags:['adultos','motociclistas'],ready:true},
+{id:'familia',icon:'👨‍👩‍👧',cover:'assets/ai/hero_area_escolar.webp',title:'Trânsito começa em casa',description:'Conversas rápidas para pais, responsáveis e filhos sobre exemplos, hábitos e escolhas seguras.',tags:['famílias','5 min'],ready:true},
+{id:'empresa',icon:'🏢',cover:'assets/games/cidade_mirim_realista_ai_v35.webp',title:'Segurança no deslocamento',description:'Conteúdo rápido para colaboradores, equipes externas, motoristas e deslocamentos a trabalho.',tags:['empresas','treinamento'],ready:true}
 ];
 
 
