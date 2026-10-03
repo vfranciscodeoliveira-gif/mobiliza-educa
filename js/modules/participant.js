@@ -119,15 +119,16 @@ export function openParticipantMode(rawCode){
 
   const renderResult=data=>{
     const results=Array.isArray(data.results)?data.results:[];
+    const revealCorrect=data.revealCorrect!==false&&Number.isInteger(Number(data.correct))&&Number(data.correct)>=0;
     root.innerHTML=shell(
-      '<div class="ppx-question-meta"><span class="ppx-chip">RESULTADO</span><span class="ppx-chip">'+esc(data.votes)+' VOTOS</span></div>'+
+      '<div class="ppx-question-meta"><span class="ppx-chip">RESULTADO</span><span class="ppx-chip">'+esc(data.votes)+' VOTOS</span>'+(data.modeLabel?'<span class="ppx-chip">'+esc(data.modeLabel)+'</span>':'')+'</div>'+
       (data.image?'<div class="ppx-result-visual"><img src="'+esc(data.image)+'" alt="Ilustração relacionada à pergunta"></div>':'')+
       '<h2 class="ppx-question">'+esc(data.prompt)+'</h2>'+
-      '<div class="ppx-results">'+results.map((r,n)=>'<div class="ppx-row '+(n===data.correct?'correct':'')+'"><span>'+String.fromCharCode(65+n)+'</span><i><b style="width:'+Math.max(0,Math.min(100,Number(r.percent)||0))+'%"></b></i><strong>'+esc(r.percent)+'%</strong></div>').join('')+'</div>'+
-      '<div class="ppx-explain"><strong>✅ Resposta de referência: '+String.fromCharCode(65+data.correct)+'. '+esc(data.options?.[data.correct]||'')+'</strong><br>'+esc(data.why||'')+'</div>'+
-      '<p style="text-align:center;font-size:.78rem;margin-top:14px">Aguarde o operador liberar a próxima pergunta.</p>'
+      '<div class="ppx-results">'+results.map((r,n)=>'<div class="ppx-row '+(revealCorrect&&n===Number(data.correct)?'correct':'')+'"><span>'+String.fromCharCode(65+n)+'</span><i><b style="width:'+Math.max(0,Math.min(100,Number(r.percent)||0))+'%"></b></i><strong>'+esc(r.percent)+'%</strong></div>').join('')+'</div>'+
+      (revealCorrect?'<div class="ppx-explain"><strong>✅ Resposta de referência: '+String.fromCharCode(65+Number(data.correct))+'. '+esc(data.options?.[Number(data.correct)]||'')+'</strong><br>'+esc(data.why||'')+'</div>':'<div class="ppx-explain" style="background:#eef6fa;color:#315d76"><strong>👥 Resultado da votação.</strong><br>A resposta correta permanece oculta enquanto a ajuda da plateia está sendo usada.</div>')+
+      '<p style="text-align:center;font-size:.78rem;margin-top:14px">Aguarde o operador continuar a atividade.</p>'
     );
-    bindExit();SoundManager.play('correct');
+    bindExit();SoundManager.play(revealCorrect?'correct':'next');
   };
 
   const renderClosed=()=>{
