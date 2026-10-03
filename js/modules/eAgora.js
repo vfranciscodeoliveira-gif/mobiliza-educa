@@ -1,7 +1,7 @@
 const ASSETS={
-  school:'assets/games/cidade_mirim_realista_ai_v35.webp?v=38',
-  road:'assets/hero-ai.webp?v=38',
-  life:'assets/mobiliza_educa_caminhos_para_a_vida.webp?v=38'
+  school:'assets/ai/hero_area_escolar.webp?v=39',
+  road:'assets/hero-ai.webp?v=39',
+  life:'assets/mobiliza_educa_caminhos_para_a_vida.webp?v=39'
 };
 
 const EPISODES=[
@@ -65,8 +65,8 @@ const EPISODES=[
 ];
 
 function ensureCss(){
- if(document.getElementById('eagora-v38-css'))return;
- const s=document.createElement('style');s.id='eagora-v38-css';
+ if(document.getElementById('eagora-v39-css'))return;
+ const s=document.createElement('style');s.id='eagora-v39-css';
  s.textContent=`
  #gameDialog.eagora-dialog{width:min(1500px,98vw)!important;max-width:98vw!important;max-height:96vh!important;overflow:hidden!important}
  #gameDialog.eagora-dialog>.dialog-shell{height:96vh!important;max-height:96vh!important;overflow:hidden!important;border-radius:22px!important;background:#07131d!important}
