@@ -187,10 +187,9 @@ export function openPlateia(dialog,host,onFinish){
         return '<div class="aud3-row '+(n===q.correct?'correct':'')+'"><span>'+String.fromCharCode(65+n)+'</span><i><b style="width:'+p+'%"></b></i><strong>'+votes[n]+' voto'+(votes[n]===1?'':'s')+'</strong><em>'+p+'%</em></div>';
       }).join('')+
       '<div class="aud3-answer"><strong>✅ Resposta de referência: '+String.fromCharCode(65+q.correct)+'. '+q.options[q.correct]+'</strong><br>'+q.why+'</div>'+
-      '<div class="aud3-actions"><button type="button" class="btn ghost" id="aud3Discuss">🔁 Ver pergunta novamente</button><button type="button" class="btn primary" id="aud3Next">'+(qIndex===questions.length-1?'Encerrar sessão':'Próxima pergunta')+'</button></div>'+
+      '<div class="aud3-actions"><button type="button" class="btn primary" id="aud3Next">'+(qIndex===questions.length-1?'Encerrar sessão':'Próxima pergunta')+'</button></div>'+
       '</div></section>';
 
-    host.querySelector('#aud3Discuss').onclick=()=>{SoundManager.play('click');};
     host.querySelector('#aud3Next').onclick=()=>{
       if(qIndex===questions.length-1) finish();
       else{
