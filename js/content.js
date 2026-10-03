@@ -11,6 +11,7 @@ export const games=[
 {id:'trilha',icon:'🎲',visual:'game-trilha',title:'Trilha do Trânsito',description:'Tabuleiro, dado animado, peões, casas especiais e desafios educativos.',tags:['jogar agora','multijogador'],ready:true},
 {id:'memoria',icon:'🧠',visual:'game-memoria',title:'Jogo da Memória',description:'Cartas animadas, pares de sinais e situações seguras, tempo e pontuação.',tags:['jogar agora','atenção'],ready:true},
 {id:'cruzadas',icon:'✏️',visual:'game-cruzadas',title:'Palavras Cruzadas do Trânsito',description:'Pistas educativas, validação das respostas, tentativas e pontuação.',tags:['jogar agora','vocabulário'],ready:true},
+{id:'eagora',icon:'🎬',cover:'assets/ai/hero_area_escolar.webp',title:'E Agora? — Decisões no Trânsito',description:'Cenas em movimento, pausa no momento crítico, escolha da atitude e explicação imediata da consequência.',tags:['simulação','decisão','percepção de risco'],ready:true},
 {id:'plateia',icon:'📱',cover:'assets/games/plateia_conectada.svg',title:'Plateia Conectada',description:'QR Code, participantes pelo próprio celular, uma resposta por aparelho, votação e resultado sincronizados no telão.',tags:['QR Code','multijogador','telão'],ready:true}
 ];
 
