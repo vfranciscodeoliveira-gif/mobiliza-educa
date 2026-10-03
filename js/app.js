@@ -1,4 +1,4 @@
-import { games, audiences, learning, educatorModules, adminModules, tips } from './content.js?v=40';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=41';
 import { openQuiz } from './modules/quiz.js?v=24';
 import { openMilhao } from './modules/milhao.js?v=14';
 import { openTrilha } from './modules/trilha.js?v=31';
@@ -10,7 +10,7 @@ import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
 import { renderHomeNotifications } from './modules/notifications.js';
 
 const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
-let deferredPrompt=null,tipIndex=0;
+let deferredPrompt=null,tipIndex=0,currentAudience='criancas';
 
 const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image||'';const cover=image?`${image}?v=24`:'';return `
 <article class="module-card card ${image?'illustrated':''} ${item.accent?'accent-'+item.accent:''}">
@@ -23,6 +23,27 @@ const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image
   </div>
 </article>`;};
 
+
+const audienceTrackCard=item=>`<article class="audience-track-card"><div class="track-icon">${item.icon}</div><div><span class="track-format">${item.format}</span><h4>${item.title}</h4><p>${item.text}</p></div></article>`;
+
+const experienceCard=item=>`<article class="experience-card"><div class="experience-icon">${item.icon}</div><div class="experience-copy"><span class="track-format">${item.format}</span><h4>${item.title}</h4><p>${item.description}</p><div class="module-meta">${item.audiences.map(a=>`<span class="chip">${audienceProfiles[a]?.title||a}</span>`).join('')}</div></div><span class="experience-status">Em planejamento</span></article>`;
+
+function renderAudienceProfile(id){
+ currentAudience=id in audienceProfiles?id:'criancas';
+ const p=audienceProfiles[currentAudience];
+ const hero=qs('#audienceProfile');
+ if(hero)hero.innerHTML=`<div class="profile-icon">${p.icon}</div><div><p class="eyebrow">${p.eyebrow}</p><h3>${p.title}</h3><p>${p.intro}</p><div class="profile-highlights">${p.highlights.map(x=>`<span>${x}</span>`).join('')}</div></div>`;
+ const grid=qs('#audienceTrackGrid');
+ if(grid)grid.innerHTML=p.tracks.map(audienceTrackCard).join('');
+ const exp=qs('#experienceGrid');
+ if(exp)exp.innerHTML=experiences.filter(x=>x.audiences.includes(currentAudience)).map(experienceCard).join('');
+ qsa('[data-audience-tab]').forEach(b=>b.classList.toggle('active',b.dataset.audienceTab===currentAudience));
+}
+
+function bindAudienceUI(){
+ qsa('[data-audience-tab]').forEach(b=>b.addEventListener('click',()=>renderAudienceProfile(b.dataset.audienceTab)));
+}
+
 function updateAuthUI(){
  const unlocked=isAdminUnlocked(),lock=qs('#btnAdminLock'),nav=qs('[data-view="gestao"]');
  if(lock)lock.hidden=!unlocked;
@@ -31,12 +52,13 @@ function updateAuthUI(){
 }
 function render(){
  qs('#audienceGrid').innerHTML=audiences.map(x=>moduleCard(x,'Explorar')).join('');
+ const tabs=qs('#audienceTabs'); if(tabs)tabs.innerHTML=audiences.map(x=>`<button class="audience-tab ${x.id===currentAudience?'active':''}" data-audience-tab="${x.id}">${x.icon} ${x.title}</button>`).join('');
  qs('#gameGrid').innerHTML=games.map(x=>moduleCard(x,'Jogar agora')).join('');
  qs('#learningGrid').innerHTML=learning.map(x=>moduleCard(x,'Começar')).join('');
  qs('#educatorGrid').innerHTML=educatorModules.map(x=>moduleCard(x,'Abrir módulo')).join('');
  qs('#adminGrid').innerHTML=adminModules.map(x=>moduleCard(x,'Abrir')).join('');
  const stat=qs('#statJogos'); if(stat) stat.textContent=games.length;
- bindModuleButtons();showTip(0);updateResults();updateAuthUI();
+ bindModuleButtons();bindAudienceUI();renderAudienceProfile(currentAudience);showTip(0);updateResults();updateAuthUI();
 }
 function navigate(view){
  qsa('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${view}`));
@@ -52,6 +74,7 @@ function bindModuleButtons(){
   else if(id==='memoria')openMemoria(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='cruzadas')openCruzadas(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='plateia')openPlateia(qs('#gameDialog'),qs('#gameHost'),updateResults);
+  else if(audiences.some(x=>x.id===id)){currentAudience=id;navigate('publicos');renderAudienceProfile(id);}
   else if(adminModules.some(x=>x.id===id)){
    if(await ensureAdminAccess(qs('#authDialog'))){updateAuthUI();openAdminModule(id,qs('#adminDialog'),qs('#adminHost'),qs('#authDialog'));}
   }else if(!btn.disabled)alert('Este módulo está preparado para a próxima etapa funcional.');
