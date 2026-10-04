@@ -16,6 +16,7 @@ import { renderResultsDashboard } from './modules/results.js?v=3';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser } from './modules/auth.js?v=2';
 import { canAccessModule,installSecurityGuards } from './core/accessControl.js?v=1';
 import { installTenantWorkspaceBridge,activeTenant } from './core/tenantRegistry.js?v=1';
+import { adminModuleEntitlement } from './core/saasContext.js?v=2';
 import { renderHomeNotifications } from './modules/notifications.js?v=4';
 import { renderPublicService } from './modules/publicService.js?v=2';
 import { syncCloudInbox } from './cloudGateway.js?v=3';
@@ -72,7 +73,7 @@ function updateAuthUI(){
  const unlocked=isAdminUnlocked(),user=getCurrentAdminUser(),lock=qs('#btnAdminLock'),nav=qs('[data-view="gestao"]');
  if(lock){lock.hidden=!unlocked;lock.textContent=unlocked?'🔒 Sair • '+(user?.name||'Gestor'):'🔒 Sair';lock.title=unlocked?'Encerrar sessão de '+(user?.username||''):'';}
  if(nav){nav.innerHTML=unlocked?'🛠️ Gestão':'🔒 Gestão';nav.title=unlocked?'Organização: '+(activeTenant()?.name||'—'):'';}
- qsa('#adminGrid [data-module]').forEach(btn=>{const allowed=!unlocked||canAccessModule(btn.dataset.module);btn.disabled=!allowed;btn.textContent=allowed?'Abrir':'Sem permissão';btn.closest('.module-card')?.classList.toggle('permission-disabled',!allowed);});
+ qsa('#adminGrid [data-module]').forEach(btn=>{const permissionAllowed=!unlocked||canAccessModule(btn.dataset.module),plan=unlocked?adminModuleEntitlement(btn.dataset.module):{allowed:true,reason:''},allowed=permissionAllowed&&plan.allowed;btn.disabled=!allowed;btn.textContent=allowed?'Abrir':(!permissionAllowed?'Sem permissão':'Não incluído no plano');btn.title=!permissionAllowed?'Seu perfil não possui acesso.':(!plan.allowed?plan.reason:'');btn.closest('.module-card')?.classList.toggle('permission-disabled',!allowed);});
  renderHomeNotifications(qs('#homeNotifications'),qs('#authDialog'),updateAuthUI);
 }
 installTenantWorkspaceBridge();
