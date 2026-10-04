@@ -17,7 +17,7 @@ import { ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser } from 
 import { canAccessModule,installSecurityGuards } from './core/accessControl.js?v=1';
 import { installTenantWorkspaceBridge,activeTenant } from './core/tenantRegistry.js?v=1';
 import { adminModuleEntitlement } from './core/saasContext.js?v=2';
-import { renderHomeNotifications } from './modules/notifications.js?v=9';
+import { renderHomeNotifications } from './modules/notifications.js?v=10';
 import { renderPublicService } from './modules/publicService.js?v=4';
 import { syncCloudInbox,isCloudEmulatorMode } from './cloudGateway.js?v=5';
 import { openPublicCheckin } from './modules/checkinPublic.js?v=3';
@@ -153,16 +153,16 @@ function updateResults(){
  renderResultsDashboard(qs('#resultsDashboard'));
 }
 
-qsa('.nav-item').forEach(b=>b.addEventListener('click',async()=>{const view=b.dataset.view;if(view==='gestao'&&!isAdminUnlocked()){if(!(await ensureAdminAccess(qs('#authDialog'))))return;updateAuthUI();}navigate(view);}));
+qsa('.nav-item').forEach(b=>b.addEventListener('click',async()=>{const view=b.dataset.view;if(view==='gestao'){location.href='./admin.html';return;}navigate(view);}));
 qsa('[data-go]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.go)));
 qs('#nextTip').addEventListener('click',()=>showTip(tipIndex+1));
 qs('#btnContrast').addEventListener('click',()=>document.documentElement.classList.toggle('high-contrast'));
 qs('#btnFont').addEventListener('click',()=>document.documentElement.classList.toggle('large-text'));
-qs('#btnAdminOpen')?.addEventListener('click',()=>{if(isAdminUnlocked())navigate('gestao');});
+qs('#btnAdminOpen')?.addEventListener('click',()=>{location.href='./admin.html';});
 qs('#btnAdminLock').addEventListener('click',()=>{lockAdmin();navigate('inicio');updateAuthUI();});
 
-window.addEventListener('mobiliza-admin-auth',e=>{updateAuthUI();if(e.detail?.unlocked===true)setTimeout(()=>navigate('gestao'),40);if(e.detail?.unlocked===false&&qs('#view-gestao')?.classList.contains('active'))navigate('inicio');});
-window.addEventListener('mobiliza-open-gestao',()=>{if(isAdminUnlocked()){navigate('gestao');updateAuthUI();}});
+window.addEventListener('mobiliza-admin-auth',e=>{updateAuthUI();if(e.detail?.unlocked===false&&qs('#view-gestao')?.classList.contains('active'))navigate('inicio');});
+window.addEventListener('mobiliza-open-gestao',()=>{location.href='./admin.html';});
 window.addEventListener('mobiliza-plan-change',updateAuthUI);
 window.addEventListener('mobiliza-data-change',()=>{renderHomeNotifications(qs('#homeNotifications'),qs('#authDialog'),updateAuthUI);updateResults();});
 window.addEventListener('mobiliza-learning-progress',updateResults);
@@ -179,7 +179,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.50.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.51.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 const cloudRefresh=()=>syncCloudInbox().catch(()=>{});window.addEventListener('focus',cloudRefresh);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudRefresh();});
 installEmulatorBadge();
 render();

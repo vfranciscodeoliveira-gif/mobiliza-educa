@@ -36,8 +36,8 @@ export function getAdminAlerts(){
 export function renderHomeNotifications(host,authDialog,onUnlocked){
  if(!host)return;
  if(!isAdminUnlocked()){
-  host.innerHTML=`<article class="home-alert locked-alert"><div class="home-alert-icon">🔒</div><div><strong>Notificações administrativas protegidas</strong><p>Entre como administrador para visualizar agenda, alertas operacionais e pendências.</p></div><button class="btn primary" id="homeAdminLogin">Acessar gestor</button></article>`;
-  host.querySelector('#homeAdminLogin').onclick=async()=>{if(await ensureAdminAccess(authDialog)){renderHomeNotifications(host,authDialog,onUnlocked);onUnlocked?.();window.dispatchEvent(new CustomEvent('mobiliza-open-gestao'));}};
+  host.innerHTML=`<article class="home-alert locked-alert"><div class="home-alert-icon">🔒</div><div><strong>Centro de Gestão online</strong><p>A administração agora possui um ambiente próprio, separado do site público.</p></div><button class="btn primary" id="homeAdminLogin">Abrir Gestão</button></article>`;
+  host.querySelector('#homeAdminLogin').onclick=()=>{location.href='./admin.html';};
   return;
  }
  const a=getAdminAlerts();

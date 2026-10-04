@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f3c66" />
+  <meta name="description" content="Centro de Gestão online do Mobiliza Educa." />
+  <link rel="icon" type="image/webp" sizes="32x32" href="assets/icon-32.webp?v=9" />
+  <link rel="stylesheet" href="assets/app.css?v=46" />
+  <link rel="stylesheet" href="assets/admin-online.css?v=1" />
+  <title>Gestão • Mobiliza Educa</title>
+</head>
+<body class="admin-online-body">
+  <div class="admin-online-app">
+    <aside class="admin-online-sidebar">
+      <div class="admin-online-brand">
+        <img src="assets/icon-192.webp?v=9" alt="" />
+        <div><small>MOBILIZA EDUCA</small><strong>Centro de Gestão</strong></div>
+      </div>
+      <div class="admin-online-user" id="adminUserCard">
+        <span>🔐</span><div><small>Sessão</small><strong>Validando acesso...</strong></div>
+      </div>
+      <nav id="adminSidebarNav" class="admin-online-nav" aria-label="Módulos administrativos"></nav>
+      <div class="admin-online-sidebar-footer">
+        <a class="btn ghost" href="./">← Voltar ao site</a>
+        <button class="btn danger" id="adminLogout" type="button">🚪 Sair</button>
+      </div>
+    </aside>
+
+    <main class="admin-online-main">
+      <header class="admin-online-top">
+        <div>
+          <p class="eyebrow">GESTÃO ONLINE • MOBILIZA EDUCA</p>
+          <h1>Ambiente administrativo</h1>
+          <p id="adminContext">Carregando organização e permissões...</p>
+        </div>
+        <div class="admin-online-top-actions">
+          <span class="admin-online-status">● ONLINE</span>
+          <button class="btn ghost" id="adminRefresh" type="button">↻ Atualizar</button>
+        </div>
+      </header>
+
+      <section id="adminLoginState" class="admin-online-login-state" hidden>
+        <div class="admin-online-login-card">
+          <img src="assets/icon-192.webp?v=9" alt="" />
+          <p class="eyebrow">ACESSO RESTRITO</p>
+          <h2>Entre para acessar a Gestão</h2>
+          <p>O ambiente administrativo funciona diretamente no site online.</p>
+          <button class="btn primary" id="adminLoginButton" type="button">Entrar como Gestor</button>
+          <a class="btn ghost" href="./">Voltar ao Mobiliza Educa</a>
+        </div>
+      </section>
+
+      <section id="adminDashboard" hidden>
+        <div class="admin-online-kpis">
+          <article><span>Ambiente</span><strong>Online</strong><small>GitHub Pages</small></article>
+          <article><span>Perfil</span><strong id="adminProfileKpi">Gestor</strong><small>Sessão ativa</small></article>
+          <article><span>Módulos</span><strong id="adminModulesKpi">12</strong><small>gestão completa</small></article>
+          <article><span>Dados</span><strong>Navegador</strong><small>Firebase será conectado depois</small></article>
+        </div>
+
+        <section class="admin-online-welcome">
+          <div>
+            <p class="eyebrow">PAINEL CENTRAL</p>
+            <h2>O que você precisa fazer agora?</h2>
+            <p>Abra qualquer módulo para operar cadastros, agenda, avaliações, evidências, relatórios, usuários, assinatura e administração da plataforma.</p>
+          </div>
+        </section>
+
+        <div id="adminModuleGrid" class="admin-online-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="authDialog" class="auth-dialog"></dialog>
+  <dialog id="adminDialog">
+    <form method="dialog" class="dialog-shell admin-dialog-shell">
+      <button class="dialog-close" aria-label="Fechar">×</button>
+      <div id="adminHost"></div>
+    </form>
+  </dialog>
+
+  <footer class="admin-online-footer">
+    <span>Mobiliza Educa • Gestão Online • versão 0.51.0</span>
+    <span>Sem Firebase Emulator</span>
+  </footer>
+
+  <script type="module" src="js/adminApp.js?v=1"></script>
+</body>
+</html>
