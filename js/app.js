@@ -17,7 +17,7 @@ import { ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser } from 
 import { canAccessModule,installSecurityGuards } from './core/accessControl.js?v=1';
 import { installTenantWorkspaceBridge,activeTenant } from './core/tenantRegistry.js?v=1';
 import { adminModuleEntitlement } from './core/saasContext.js?v=2';
-import { renderHomeNotifications } from './modules/notifications.js?v=6';
+import { renderHomeNotifications } from './modules/notifications.js?v=7';
 import { renderPublicService } from './modules/publicService.js?v=4';
 import { syncCloudInbox,isCloudEmulatorMode } from './cloudGateway.js?v=5';
 import { openPublicCheckin } from './modules/checkinPublic.js?v=3';
@@ -91,17 +91,22 @@ function updateAuthUI(){
 installTenantWorkspaceBridge();
 installSecurityGuards();
 
+function renderAdminGrid(){
+ const grid=qs('#adminGrid');
+ if(grid)grid.innerHTML=adminModules.map(x=>moduleCard(x,'Abrir')).join('');
+}
 function render(){
  qs('#audienceGrid').innerHTML=audiences.map(x=>moduleCard(x,'Explorar')).join('');
  const tabs=qs('#audienceTabs'); if(tabs)tabs.innerHTML=audiences.map(x=>`<button class="audience-tab ${x.id===currentAudience?'active':''}" data-audience-tab="${x.id}">${x.icon} ${x.title}</button>`).join('');
  qs('#gameGrid').innerHTML=games.map(x=>moduleCard(x,'Jogar agora')).join('');
  qs('#learningGrid').innerHTML=learning.map(x=>moduleCard(x,'Começar')).join('');
  qs('#educatorGrid').innerHTML=educatorModules.map(x=>moduleCard(x,'Abrir módulo')).join('');
- qs('#adminGrid').innerHTML=adminModules.map(x=>moduleCard(x,'Abrir')).join('');
+ renderAdminGrid();
  const stat=qs('#statJogos'); if(stat) stat.textContent=games.length;
  bindModuleButtons();bindAudienceUI();bindGlobalSound();renderAudienceProfile(currentAudience);renderPublicService(qs('#publicServiceHost'));showTip(0);updateResults();updateAuthUI();
 }
 function navigate(view){
+ if(view==='gestao')renderAdminGrid();
  qsa('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${view}`));
  qsa('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
  qs('#conteudo').focus();window.scrollTo({top:0,behavior:'smooth'});
@@ -137,6 +142,7 @@ qs('#btnFont').addEventListener('click',()=>document.documentElement.classList.t
 qs('#btnAdminLock').addEventListener('click',()=>{lockAdmin();navigate('inicio');updateAuthUI();});
 
 window.addEventListener('mobiliza-admin-auth',e=>{updateAuthUI();if(e.detail?.unlocked===false&&qs('#view-gestao')?.classList.contains('active'))navigate('inicio');});
+window.addEventListener('mobiliza-open-gestao',()=>{if(isAdminUnlocked()){navigate('gestao');updateAuthUI();}});
 window.addEventListener('mobiliza-plan-change',updateAuthUI);
 window.addEventListener('mobiliza-data-change',()=>{renderHomeNotifications(qs('#homeNotifications'),qs('#authDialog'),updateAuthUI);updateResults();});
 window.addEventListener('mobiliza-learning-progress',updateResults);
@@ -153,7 +159,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.49.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.49.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 const cloudRefresh=()=>syncCloudInbox().catch(()=>{});window.addEventListener('focus',cloudRefresh);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudRefresh();});
 installEmulatorBadge();
 render();
