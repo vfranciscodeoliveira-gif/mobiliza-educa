@@ -45,6 +45,7 @@ export async function signOutCloud(){
  await sdk.signOut(auth);
  localStorage.removeItem('mobiliza.cloud.authEmail');
  localStorage.removeItem('mobiliza.cloud.tenantId');
+ localStorage.removeItem('mobiliza.cloud.me');
  window.dispatchEvent(new CustomEvent('mobiliza-cloud-auth',{detail:{signedIn:false}}));
 }
 export async function getCloudUser(){
