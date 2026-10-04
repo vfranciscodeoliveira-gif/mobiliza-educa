@@ -80,6 +80,7 @@ function appendHistory(type,row,before=null){
 }
 export function listEditorialHistory(){return safe(HISTORY,[]);}
 export function saveEditorialQuestion(input){
+ if(input?.status==='Homologado'&&currentUser()?.profileId!=='GESTOR')throw new Error('Somente Gestor pode salvar conteúdo diretamente como Homologado.');
  const rows=listEditorialQuestions(),i=rows.findIndex(x=>x.id===input.id),before=i>=0?rows[i]:null;
  const row=normalizeRow({...before,...input,revision:before?before.revision+1:1,source:before?.source||'editorial',createdAt:before?.createdAt||now(),updatedAt:now()});
  if(row.options.length<2)throw new Error('Informe pelo menos duas alternativas.');
