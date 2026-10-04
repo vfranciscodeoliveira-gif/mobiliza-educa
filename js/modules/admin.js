@@ -1,13 +1,13 @@
 import {changeAdminPassword,lockAdmin} from './auth.js?v=2';
 import {canAccessModule,recordAudit,auditDataWrite} from '../core/accessControl.js?v=1';
 import {adminModuleEntitlement} from '../core/saasContext.js?v=2';
-import {publishEvent,updateCloudRequestStatus,updateCloudRegistrationStatus} from '../cloudGateway.js?v=3';
-import {renderPassaporteCertificados} from './passaporteCertificados.js?v=1';
+import {publishEvent,updateCloudRequestStatus,updateCloudRegistrationStatus} from '../cloudGateway.js?v=4';
+import {renderPassaporteCertificados} from './passaporteCertificados.js?v=2';
 import {renderAvaliacaoPedagogica} from './avaliacaoPedagogica.js?v=2';
 import {renderEvidenciasImpacto} from './evidenciasImpacto.js?v=3';
 import {renderRelatorios360} from './relatorios360.js?v=1';
 import {renderUsuariosAuditoria} from './usuariosAuditoria.js?v=1';
-import {renderSistemaContinuity} from './sistemaContinuity.js?v=2';
+import {renderSistemaContinuity} from './sistemaContinuity.js?v=3';
 import {renderCentroEditorial} from './centroEditorial.js?v=1';
 import {renderAssinaturaSaas} from './assinaturaSaas.js?v=2';
 import {renderPlataformaComercial} from './plataformaComercial.js?v=1';
@@ -41,7 +41,7 @@ const parseLines=(txt,kind)=>String(txt||'').split(/\r?\n/).map(x=>x.trim()).fil
 const csvEscape=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
 const download=(name,text,type='text/csv;charset=utf-8')=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
 
-function shell(m,inner){return `<section class="admin-module"><p class="eyebrow">CENTRO DE GESTÃO WEB • v1.6</p><h2>${m.title}</h2><p class="admin-intro">${m.intro}</p>${inner}</section>`;}
+function shell(m,inner){return `<section class="admin-module"><p class="eyebrow">CENTRO DE GESTÃO WEB • v1.7</p><h2>${m.title}</h2><p class="admin-intro">${m.intro}</p>${inner}</section>`;}
 function byId(entity,id){return read(entity).find(x=>x.id===id);}
 function label(entity,id){const r=byId(entity,id);return r?.nome||'—';}
 function uniqueName(entity,name,exclude){return !read(entity).some(x=>x.id!==exclude&&String(x.nome||'').trim().toLowerCase()===String(name||'').trim().toLowerCase());}
