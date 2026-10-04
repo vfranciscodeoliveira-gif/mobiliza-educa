@@ -1,4 +1,4 @@
-import {cloudConfigured,submitSolicitacao,submitInscricao,consultarProtocolo,listPublicEvents} from '../cloudGateway.js?v=2';
+import {cloudConfigured,submitSolicitacao,submitInscricao,consultarProtocolo,listPublicEvents} from '../cloudGateway.js?v=3';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const phone=v=>String(v||'').replace(/\D/g,'').replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d{4}).*/,'$1-$2');
