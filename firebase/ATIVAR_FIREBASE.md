@@ -1,13 +1,6 @@
 # Mobiliza Educa — Backend Firebase SaaS
 
-A partir da versão **0.48.0**, o backend do Mobiliza Educa deixa de usar uma chave única de gestor e passa a usar:
-
-- Firebase Authentication;
-- Cloud Firestore multitenant;
-- Cloud Functions;
-- Firebase Cloud Messaging;
-- Cloud Storage opcional para evidências;
-- planos e assinaturas validados no servidor.
+A partir da versão **0.48.0**, o backend do Mobiliza Educa usa Firebase Authentication, Cloud Firestore multitenant, Cloud Functions, Firebase Cloud Messaging e Cloud Storage opcional. Planos, tenants e assinaturas são validados no servidor.
 
 ## Arquitetura
 
@@ -33,91 +26,57 @@ Cloud Functions
         +-- platformOwners/{uid}
 ```
 
-O navegador nunca decide sozinho a qual cliente o usuário pertence. O backend valida o **Firebase ID token** e a membership do usuário antes de acessar um tenant.
+O navegador nunca decide sozinho a qual cliente o usuário pertence. O backend valida o Firebase ID token e a membership do usuário antes de acessar um tenant.
 
-## 1. Criar o projeto Firebase
+## 1. Preparação sem faturamento de Functions
 
-Crie um projeto exclusivo para o Mobiliza Educa no Console Firebase.
-
-Exemplo de Project ID:
-
-`mobiliza-educa`
-
-### Firestore
-
-Crie o **Cloud Firestore** em modo Produção.
-
-Use uma localização compatível com a região escolhida para as Functions. O projeto está preparado para Functions em:
-
-`southamerica-east1`
-
-### Authentication
-
-Abra:
-
-**Authentication > Sign-in method**
-
-Habilite:
-
-**Email/Password**
-
-Depois abra:
-
-**Authentication > Users**
-
-e crie manualmente o primeiro usuário proprietário.
-
-Use um e-mail seu e uma senha forte. Esse usuário ainda não será proprietário da plataforma até executarmos o bootstrap.
-
-## 2. Preparar e publicar o backend
-
-Na raiz do repositório, abra PowerShell:
+Na raiz do repositório:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\firebase\setup-mobiliza.ps1
+powershell -ExecutionPolicy Bypass -File .\firebase\setup-mobiliza.ps1 -ProjectId mobiliza-educa
 ```
 
-O assistente:
+No Windows, os scripts usam explicitamente `npm.cmd` e `firebase.cmd`, evitando bloqueios de `npm.ps1` pela Execution Policy.
 
-1. confere Node/npm;
-2. instala Firebase CLI se necessário;
-3. faz login no Firebase;
-4. grava `.firebaserc` local;
-5. instala dependências;
-6. gera `PLATFORM_BOOTSTRAP_KEY`;
-7. publica regras/índices do Firestore;
-8. publica Cloud Functions.
+Esse primeiro script apenas:
 
-Guarde a chave de bootstrap exibida.
+1. valida Node/npm/Firebase CLI;
+2. autentica no Firebase;
+3. grava `.firebaserc` local;
+4. instala dependências;
+5. valida sintaxe e carregamento do backend;
+6. publica regras e índices do Firestore.
 
-**Não coloque essa chave no GitHub.**
+Ele **não publica Cloud Functions e não cria segredo**.
 
-### Observação sobre faturamento
+## 2. Authentication e App Web
 
-O Firebase pode exigir uma conta de faturamento habilitada para publicar Cloud Functions. Isso não significa contratar um servidor dedicado ou SQL Server. O custo passa a ser baseado em uso.
+No Console Firebase habilite **Authentication > Email/Password** e crie o primeiro usuário proprietário.
 
-Nesta primeira fase, **Cloud Storage pode ficar desativado**. Ele será necessário quando migrarmos fotos/documentos de evidências.
+Crie também o App Web do Mobiliza Educa em **Configurações do projeto > Geral > Seus apps > Web**.
 
-## 3. Criar o App Web Firebase
+## 3. Cloud Functions
 
-No Console Firebase:
+Cloud Functions pode exigir plano Blaze/faturamento habilitado. O projeto não altera o plano automaticamente.
 
-**Configurações do projeto > Geral > Seus apps > Web**
+Somente depois de decidir conscientemente pelo faturamento, execute:
 
-Crie o App Web do Mobiliza Educa.
+```powershell
+powershell -ExecutionPolicy Bypass -File .\firebase\deploy-functions.ps1 -ProjectId mobiliza-educa
+```
 
-Copie:
+Esse script:
 
-- apiKey;
-- authDomain;
-- projectId;
-- storageBucket;
-- messagingSenderId;
-- appId.
+1. reinstala dependências a partir do `package-lock.json`;
+2. valida o backend;
+3. cria ou reutiliza uma chave de bootstrap local;
+4. salva essa chave em `firebase/bootstrap-key.local.txt`, ignorado pelo Git;
+5. envia a chave como Secret `PLATFORM_BOOTSTRAP_KEY`;
+6. publica as Cloud Functions.
 
-Se já quiser push, gere também a VAPID key em:
+O valor da chave não é exibido na tela e não deve ser colocado no GitHub.
 
-**Cloud Messaging > Certificados de push da Web**
+## 4. Configuração Web
 
 Execute:
 
@@ -125,15 +84,11 @@ Execute:
 powershell -ExecutionPolicy Bypass -File .\firebase\configurar-web-push.ps1
 ```
 
-Esse script atualiza:
+Informe o `firebaseConfig` do App Web. A VAPID key pode ficar em branco nesta primeira etapa.
 
-`js/cloudConfig.js`
+O script atualiza `js/cloudConfig.js` e grava `firebase/web-config.local.json`, que é ignorado pelo Git.
 
-e cria um auxiliar local ignorado pelo Git:
-
-`firebase/web-config.local.json`
-
-## 4. Transformar o primeiro usuário em proprietário
+## 5. Bootstrap do proprietário
 
 Execute:
 
@@ -141,82 +96,45 @@ Execute:
 powershell -ExecutionPolicy Bypass -File .\firebase\bootstrap-owner.ps1
 ```
 
-Informe:
+O script lê automaticamente a chave de `firebase/bootstrap-key.local.txt` quando o arquivo existe, sem mostrá-la.
 
-- e-mail do usuário criado no Firebase Authentication;
-- senha;
-- chave de bootstrap;
-- nome da organização, se solicitado.
+Ele autentica o primeiro usuário, cria o tenant proprietário, membership Gestor, assinatura Institucional, registro de proprietário e tenant público padrão.
 
-O script:
+## 6. Publicar configuração Web
 
-1. autentica o usuário diretamente no Firebase Authentication;
-2. obtém um ID token;
-3. chama `bootstrapPlatformOwner`;
-4. cria o primeiro tenant;
-5. cria membership Gestor;
-6. cria assinatura Institucional;
-7. registra o usuário como proprietário da plataforma;
-8. define esse tenant como organização pública padrão;
-9. grava o slug em `js/cloudConfig.js`.
-
-O bootstrap só funciona enquanto ainda não existir proprietário cadastrado.
-
-## 5. Publicar a configuração Web
-
-Depois do bootstrap, faça commit de:
-
-`js/cloudConfig.js`
-
-Os valores do Firebase Web Config não são senhas privadas.
+Depois do bootstrap, faça commit apenas de `js/cloudConfig.js`.
 
 Não versione:
 
 - `.firebaserc`;
 - `firebase/web-config.local.json`;
+- `firebase/bootstrap-key.local.txt`;
 - chaves de conta de serviço;
-- a chave de bootstrap.
+- outros segredos.
 
-## 6. Login no Mobiliza Educa
+## 7. Login no Mobiliza Educa
 
 Com a configuração publicada:
 
 1. abra o Mobiliza Educa;
 2. faça o login administrativo local;
 3. na Central de Notificações, clique **Conectar Firebase**;
-4. informe o usuário do Firebase Authentication;
+4. autentique com Firebase Authentication;
 5. selecione a organização;
 6. clique **Sincronizar**.
 
-As operações administrativas online passam a enviar:
+As operações administrativas online usam `Authorization: Bearer <Firebase ID token>`.
 
-`Authorization: Bearer <Firebase ID token>`
+## Segurança
 
-A antiga `GESTOR_PUSH_KEY` não é mais utilizada pelo PWA.
-
-## 7. Teste multitenant recomendado
-
-Como proprietário:
-
-1. crie um segundo tenant pelo Console do Proprietário;
-2. associe um usuário ao tenant quando implementarmos convites/memberships;
-3. confirme que o usuário do tenant A não lê dados do tenant B;
-4. envie solicitação pública;
-5. confirme armazenamento em:
-   `tenants/{tenantId}/requests`;
-6. sincronize no PWA;
-7. altere o status;
-8. consulte o protocolo publicamente.
-
-## Segurança adotada
-
-- Firestore direto é leitura restrita por membership.
-- Escritas de negócio são feitas pelas Cloud Functions.
-- O tenant é validado no servidor.
-- Plano/assinatura são validados no servidor.
-- Certificados, solicitações, inscrições e push são isolados por tenant.
-- O proprietário da plataforma é separado dos membros comuns.
-- O backend mantém trilha de auditoria por tenant.
+- Firestore direto com leitura restrita por membership;
+- escritas de negócio pelas Cloud Functions;
+- tenant validado no servidor;
+- plano/assinatura validados no servidor;
+- dados isolados por tenant;
+- proprietário da plataforma separado dos membros;
+- trilha de auditoria por tenant;
+- segredo de bootstrap fora do Git.
 
 ## Próximas fases
 

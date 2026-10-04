@@ -8,7 +8,7 @@ Set-Location $Root
 
 Write-Host ""
 Write-Host "====================================================" -ForegroundColor Cyan
-Write-Host " MOBILIZA EDUCA - BACKEND FIREBASE SAAS" -ForegroundColor Cyan
+Write-Host " MOBILIZA EDUCA - PREPARACAO FIREBASE SAAS" -ForegroundColor Cyan
 Write-Host "====================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -20,13 +20,18 @@ function Require-Command($name, $hint) {
   }
 }
 
-Require-Command "node" "Instale o Node.js LTS: https://nodejs.org/"
-Require-Command "npm"  "O npm e instalado junto com o Node.js."
+$IsWindowsHost = ($env:OS -eq "Windows_NT")
+$NpmCmd = if ($IsWindowsHost) { "npm.cmd" } else { "npm" }
+$FirebaseCmd = if ($IsWindowsHost) { "firebase.cmd" } else { "firebase" }
 
-if (-not (Get-Command "firebase" -ErrorAction SilentlyContinue)) {
+Require-Command "node" "Instale o Node.js LTS: https://nodejs.org/"
+Require-Command $NpmCmd "O npm e instalado junto com o Node.js."
+
+if (-not (Get-Command $FirebaseCmd -ErrorAction SilentlyContinue)) {
   Write-Host "Firebase CLI nao encontrado. Instalando..." -ForegroundColor Yellow
-  npm install -g firebase-tools
+  & $NpmCmd install -g firebase-tools
 }
+Require-Command $FirebaseCmd "Instale o Firebase CLI com npm install -g firebase-tools."
 
 if ([string]::IsNullOrWhiteSpace($ProjectId)) {
   $ProjectId = Read-Host "Project ID do Firebase"
@@ -34,11 +39,11 @@ if ([string]::IsNullOrWhiteSpace($ProjectId)) {
 if ([string]::IsNullOrWhiteSpace($ProjectId)) { throw "Project ID obrigatorio." }
 
 Write-Host ""
-Write-Host "1/6 - Login no Firebase" -ForegroundColor Cyan
-firebase login
+Write-Host "1/5 - Login no Firebase" -ForegroundColor Cyan
+& $FirebaseCmd login
 
 Write-Host ""
-Write-Host "2/6 - Gravando .firebaserc local" -ForegroundColor Cyan
+Write-Host "2/5 - Gravando .firebaserc local" -ForegroundColor Cyan
 @"
 {
   "projects": {
@@ -48,51 +53,31 @@ Write-Host "2/6 - Gravando .firebaserc local" -ForegroundColor Cyan
 "@ | Set-Content -Path ".firebaserc" -Encoding UTF8
 
 Write-Host ""
-Write-Host "3/6 - Instalando dependencias das Functions" -ForegroundColor Cyan
-npm install --prefix "firebase/functions"
-
-Write-Host ""
-Write-Host "4/6 - Gerando chave de bootstrap da plataforma" -ForegroundColor Cyan
-$bytes = New-Object byte[] 36
-[System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
-$BootstrapKey = [Convert]::ToBase64String($bytes).TrimEnd('=').Replace('+','-').Replace('/','_')
-$tempSecret = Join-Path $env:TEMP "mobiliza-bootstrap-key.txt"
-[System.IO.File]::WriteAllText($tempSecret, $BootstrapKey, [System.Text.Encoding]::UTF8)
-
-try {
-  firebase functions:secrets:set PLATFORM_BOOTSTRAP_KEY --project $ProjectId --data-file $tempSecret
-} finally {
-  Remove-Item $tempSecret -ErrorAction SilentlyContinue
+Write-Host "3/5 - Instalando dependencias das Functions" -ForegroundColor Cyan
+if (Test-Path "firebase/functions/package-lock.json") {
+  & $NpmCmd ci --prefix "firebase/functions"
+} else {
+  & $NpmCmd install --prefix "firebase/functions"
 }
 
 Write-Host ""
-Write-Host "5/6 - Publicando regras/indices do Firestore" -ForegroundColor Cyan
-firebase deploy --only firestore --project $ProjectId
+Write-Host "4/5 - Validando backend localmente" -ForegroundColor Cyan
+& $NpmCmd --prefix "firebase/functions" run check
+node -e "require('./firebase/functions/index.js'); console.log('BACKEND FIREBASE CARREGADO OK')"
 
 Write-Host ""
-Write-Host "6/6 - Publicando Cloud Functions" -ForegroundColor Cyan
-Write-Host "OBS.: o deploy de Functions pode exigir conta de faturamento habilitada no Firebase/Google Cloud." -ForegroundColor Yellow
-firebase deploy --only functions --project $ProjectId
-
-$baseUrl = "https://southamerica-east1-$ProjectId.cloudfunctions.net"
+Write-Host "5/5 - Publicando regras/indices do Firestore" -ForegroundColor Cyan
+& $FirebaseCmd deploy --only firestore --project $ProjectId
 
 Write-Host ""
 Write-Host "====================================================" -ForegroundColor Green
-Write-Host " BACKEND BASE PUBLICADO" -ForegroundColor Green
+Write-Host " PREPARACAO CONCLUIDA" -ForegroundColor Green
 Write-Host "====================================================" -ForegroundColor Green
 Write-Host "Project ID: $ProjectId"
-Write-Host "Functions URL: $baseUrl"
 Write-Host ""
-Write-Host "CHAVE DE BOOTSTRAP (use somente na configuracao inicial):" -ForegroundColor Yellow
-Write-Host $BootstrapKey -ForegroundColor White
+Write-Host "Nenhuma Cloud Function foi publicada por este script." -ForegroundColor Yellow
+Write-Host "Nenhuma chave secreta foi enviada ao Firebase." -ForegroundColor Yellow
 Write-Host ""
-Write-Host "NAO coloque essa chave no GitHub." -ForegroundColor Red
-Write-Host ""
-Write-Host "PROXIMOS PASSOS:" -ForegroundColor Cyan
-Write-Host "1. Console Firebase > Authentication > Sign-in method > habilitar Email/Senha."
-Write-Host "2. Authentication > Users > criar o primeiro usuario proprietario."
-Write-Host "3. Criar um App Web no Firebase."
-Write-Host "4. Executar .\firebase\configurar-web-push.ps1"
-Write-Host "5. Executar .\firebase\bootstrap-owner.ps1"
-Write-Host ""
-Write-Host "Cloud Storage pode ser ativado/deployado depois, quando formos migrar evidencias." -ForegroundColor Yellow
+Write-Host "PROXIMO PASSO:" -ForegroundColor Cyan
+Write-Host "Quando o faturamento para Cloud Functions estiver conscientemente habilitado,"
+Write-Host "execute .\firebase\deploy-functions.ps1 -ProjectId $ProjectId"

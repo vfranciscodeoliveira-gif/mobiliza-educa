@@ -21,13 +21,23 @@ Write-Host "================================================" -ForegroundColor C
 Write-Host " MOBILIZA EDUCA - BOOTSTRAP DO PROPRIETARIO" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Antes de continuar, crie o primeiro usuario em:" -ForegroundColor Yellow
-Write-Host "Firebase Console > Authentication > Users > Add user"
-Write-Host ""
 
 $email = Read-Host "E-mail do proprietario"
 $securePassword = Read-Host "Senha desse usuario" -AsSecureString
-$bootstrapKey = Read-Host "Chave de bootstrap exibida pelo setup-mobiliza.ps1"
+
+$keyFile = Join-Path $Root "firebase\bootstrap-key.local.txt"
+if (Test-Path $keyFile) {
+  $bootstrapKey = (Get-Content $keyFile -Raw).Trim()
+  Write-Host "Chave de bootstrap lida do arquivo local protegido do projeto (valor nao exibido)." -ForegroundColor Green
+} else {
+  $secureKey = Read-Host "Chave de bootstrap" -AsSecureString
+  $keyPtr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureKey)
+  try {
+    $bootstrapKey = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($keyPtr)
+  } finally {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($keyPtr)
+  }
+}
 
 if ([string]::IsNullOrWhiteSpace($email)) { throw "E-mail obrigatorio." }
 if ([string]::IsNullOrWhiteSpace($bootstrapKey)) { throw "Chave de bootstrap obrigatoria." }
@@ -71,7 +81,11 @@ $payload = @{
   slug = $Slug
 } | ConvertTo-Json
 
-$result = Invoke-RestMethod -Method Post -Uri $bootstrapUrl -Headers $headers -ContentType "application/json" -Body $payload
+try {
+  $result = Invoke-RestMethod -Method Post -Uri $bootstrapUrl -Headers $headers -ContentType "application/json" -Body $payload
+} finally {
+  $bootstrapKey = $null
+}
 
 if (-not $result.ok) { throw "Bootstrap nao concluido." }
 
