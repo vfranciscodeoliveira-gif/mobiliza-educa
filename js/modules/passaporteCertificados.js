@@ -1,5 +1,5 @@
 import {qrSvg} from '../core/qr.js?v=1';
-import {cloudConfigured,hasManagerKey,publishCertificate,revokeCertificateCloud} from '../cloudGateway.js?v=3';
+import {cloudConfigured,hasCloudSession,publishCertificate,revokeCertificateCloud} from '../cloudGateway.js?v=4';
 
 const read=k=>JSON.parse(localStorage.getItem('mobiliza.admin.'+k)||'[]');
 const write=(k,v)=>{localStorage.setItem('mobiliza.admin.'+k,JSON.stringify(v));window.dispatchEvent(new CustomEvent('mobiliza-data-change',{detail:{entity:k}}));};
@@ -41,7 +41,7 @@ function issue(e,p,mins){
  const all=certs();all.unshift(c);write('certificados',all);return c;
 }
 async function maybePublish(c){
- if(!cloudConfigured()||!hasManagerKey())return false;
+ if(!cloudConfigured()||!hasCloudSession())return false;
  try{await publishCertificate(c);const all=certs(),x=all.find(z=>z.id===c.id);if(x){x.cloudPublished=true;x.cloudPublishedAt=new Date().toISOString();write('certificados',all);}return true;}catch{return false;}
 }
 function printCertificate(c){
@@ -93,7 +93,7 @@ export function renderPassaporteCertificados(host){
   const draw=()=>{const q=body.querySelector('#passportSearch').value.toLowerCase(),rows=list.filter(x=>!q||x.name.toLowerCase().includes(q));body.querySelector('#passportList').innerHTML=rows.map(p=>'<article class="passport-card"><div><strong>'+esc(p.name)+'</strong><small>'+esc(p.institution||'')+' • '+p.actions.length+' participação(ões) • '+esc(workloadLabel(p.minutes))+'</small><div class="passport-progress"><span style="width:'+Math.min(100,p.actions.length*10)+'%"></span></div><div>'+badges(p).map(x=>'<span class="badge-pill">'+esc(x)+'</span>').join('')+'</div></div><div><button class="btn ghost small" data-pass="'+esc(p.key)+'">Imprimir passaporte</button></div></article>').join('')||'<p>Nenhum passaporte.</p>';body.querySelectorAll('[data-pass]').forEach(b=>b.onclick=()=>printPassport(list.find(x=>x.key===b.dataset.pass)));};body.querySelector('#passportSearch').oninput=draw;draw();
  }
  function renderHistory(body){
-  const all=certs();body.innerHTML='<div class="cert-panel"><div class="cert-actions" style="justify-content:flex-start"><input id="certSearch" type="search" placeholder="Código ou participante..." style="flex:1;min-width:220px"><button class="btn ghost" id="publishPending" '+(cloudConfigured()&&hasManagerKey()?'':'disabled')+'>Publicar validações pendentes</button></div><div id="certHistory" class="cert-history"></div></div>';
+  const all=certs();body.innerHTML='<div class="cert-panel"><div class="cert-actions" style="justify-content:flex-start"><input id="certSearch" type="search" placeholder="Código ou participante..." style="flex:1;min-width:220px"><button class="btn ghost" id="publishPending" '+(cloudConfigured()&&hasCloudSession()?'':'disabled')+'>Publicar validações pendentes</button></div><div id="certHistory" class="cert-history"></div></div>';
   const draw=()=>{const q=body.querySelector('#certSearch').value.toLowerCase(),rows=all.filter(c=>!q||c.code.toLowerCase().includes(q)||c.participantName.toLowerCase().includes(q));body.querySelector('#certHistory').innerHTML=rows.map(c=>'<article class="cert-row"><div><strong>'+esc(c.participantName)+'</strong><small>'+esc(c.activityName)+' • '+esc(c.eventDateLabel)+' • '+esc(c.code)+'</small><span class="cert-status '+(c.status==='Revogado'?'revogado':'')+'">'+esc(c.status)+'</span> '+(c.cloudPublished?'<span class="badge-pill green">online</span>':'<span class="badge-pill">local</span>')+'</div><div class="cert-actions"><button class="btn ghost small" data-print="'+c.id+'">Imprimir</button>'+(c.status!=='Revogado'?'<button class="btn danger small" data-revoke="'+c.id+'">Revogar</button>':'')+'</div></article>').join('')||'<p>Nenhum certificado emitido.</p>';body.querySelectorAll('[data-print]').forEach(b=>b.onclick=()=>printCertificate(all.find(c=>c.id===b.dataset.print)));body.querySelectorAll('[data-revoke]').forEach(b=>b.onclick=async()=>{if(!confirm('Revogar este certificado?'))return;const c=all.find(x=>x.id===b.dataset.revoke);c.status='Revogado';c.revokedAt=new Date().toISOString();write('certificados',all);if(c.cloudPublished)try{await revokeCertificateCloud(c.code);}catch{}shell();});};
   body.querySelector('#certSearch').oninput=draw;body.querySelector('#publishPending').onclick=async()=>{const pending=certs().filter(x=>x.status!=='Revogado'&&!x.cloudPublished);let n=0;for(const c of pending)if(await maybePublish(c))n++;alert(n+' certificado(s) publicado(s).');shell();};draw();
  }
