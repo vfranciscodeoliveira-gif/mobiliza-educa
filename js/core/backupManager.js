@@ -3,7 +3,7 @@ import {listEvidenceFiles,putEvidenceRecord,clearEvidenceFiles} from './evidence
 const APP_VERSION='0.45.0';
 const FORMAT='MOBILIZA_BACKUP';
 const SCHEMA=2;
-const SENSITIVE_PREFIXES=['mobiliza.security.','mobiliza.admin.password'];
+const SENSITIVE_PREFIXES=['mobiliza.security.','mobiliza.admin.password','mobiliza.saas.subscription'];
 const enc=s=>new TextEncoder().encode(s);
 const dec=b=>new TextDecoder().decode(b);
 const now=()=>new Date().toISOString();
