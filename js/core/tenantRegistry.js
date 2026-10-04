@@ -109,6 +109,9 @@ export function ensureTenantRegistry(){
   localStorage.setItem(MIGRATION_KEY,now());
  }
  if(!localStorage.getItem(ACTIVE_KEY)||!tenants.some(t=>t.id===localStorage.getItem(ACTIVE_KEY)))localStorage.setItem(ACTIVE_KEY,tenants[0].id);
+ const currentSubs=listSubscriptions();let repaired=false;
+ for(const t of tenants){if(!currentSubs.some(x=>x.tenantId===t.id)){const isOwner=t.type==='OWNER';currentSubs.push({tenantId:t.id,planId:isOwner?'INSTITUCIONAL':'TRIAL',status:isOwner?'active':'trialing',authority:'local-development',billingCycle:'monthly',trialStartedAt:isOwner?null:now(),trialEndsAt:isOwner?null:new Date(Date.now()+14*86400000).toISOString(),startedAt:now(),currentPeriodStart:now(),currentPeriodEnd:null,externalCustomerId:null,externalSubscriptionId:null,updatedAt:now()});repaired=true;}}
+ if(repaired)localStorage.setItem(SUBSCRIPTIONS_KEY,JSON.stringify(currentSubs));
  planSettings();
  return tenants;
 }
