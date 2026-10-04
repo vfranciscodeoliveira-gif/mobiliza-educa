@@ -125,6 +125,7 @@ qs('#btnFont').addEventListener('click',()=>document.documentElement.classList.t
 qs('#btnAdminLock').addEventListener('click',()=>{lockAdmin();navigate('inicio');updateAuthUI();});
 
 window.addEventListener('mobiliza-admin-auth',e=>{updateAuthUI();if(e.detail?.unlocked===false&&qs('#view-gestao')?.classList.contains('active'))navigate('inicio');});
+window.addEventListener('mobiliza-plan-change',updateAuthUI);
 window.addEventListener('mobiliza-data-change',()=>{renderHomeNotifications(qs('#homeNotifications'),qs('#authDialog'),updateAuthUI);updateResults();});
 window.addEventListener('mobiliza-learning-progress',updateResults);
 window.addEventListener('mobiliza-educador-change',updateResults);
