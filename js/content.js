@@ -105,7 +105,8 @@ export const adminModules=[
 {id:'admin-relatorios',icon:'📑',title:'Relatórios e indicadores',description:'Painel 360 com filtros por período, instituição, ação e público; alcance, pré/pós, materiais, certificados, parceiros, evidências, rankings e qualidade dos dados.',tags:['gestão'],ready:true},
 {id:'admin-acessos',icon:'🔐',title:'Usuários, perfis e auditoria',description:'Múltiplos usuários, perfis Gestor/Educador/Operador/Consulta, permissões por módulo, sessão por inatividade, bloqueio e trilha de auditoria.',tags:['segurança'],ready:true},
 {id:'admin-sistema',icon:'⚙️',title:'Configurações, backup e sincronização',description:'Identidade institucional, backup operacional, backup completo criptografado, restauração com integridade, diagnóstico de armazenamento e prontidão da nuvem.',tags:['sistema'],ready:true},
-{id:'admin-assinatura',icon:'💳',title:'Produto e assinatura',description:'Base SaaS com organização/tenant, catálogo de planos, recursos liberados e limites de uso — cobrança segura será autoritativa no backend.',tags:['SaaS','comercial'],ready:true}
+{id:'admin-assinatura',icon:'💳',title:'Produto e assinatura',description:'Plano, recursos liberados, limites e consumo do workspace atualmente aberto.',tags:['SaaS','cliente'],ready:true},
+{id:'admin-plataforma',icon:'🏢',title:'Console do proprietário',description:'Cadastre clientes, inicie trials, altere planos/status, configure preços, acompanhe MRR projetado e troque entre workspaces isolados.',tags:['SaaS','proprietário'],ready:true}
 ];
 
 export const tips=[
