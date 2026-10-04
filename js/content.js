@@ -103,7 +103,7 @@ export const adminModules=[
 {id:'admin-evidencias',icon:'📷',title:'Evidências e impacto',description:'Fechamento pós-evento, público alcançado, materiais distribuídos, parceiros, fotos/documentos autorizados e relatório final automático.',tags:['comprovação','pós-evento'],ready:true},
 {id:'admin-passaporte',icon:'🎓',title:'Passaporte e certificados',description:'Passaporte digital, conquistas, certificados por participante, QR de validação, revogação e histórico de emissão.',tags:['reconhecimento'],ready:true},
 {id:'admin-relatorios',icon:'📑',title:'Relatórios e indicadores',description:'Painel 360 com filtros por período, instituição, ação e público; alcance, pré/pós, materiais, certificados, parceiros, evidências, rankings e qualidade dos dados.',tags:['gestão'],ready:true},
-{id:'admin-acessos',icon:'🔐',title:'Usuários, perfis e auditoria',description:'Perfis, permissões, trilha de auditoria, segurança, acessibilidade e políticas.',tags:['segurança'],ready:true},
+{id:'admin-acessos',icon:'🔐',title:'Usuários, perfis e auditoria',description:'Múltiplos usuários, perfis Gestor/Educador/Operador/Consulta, permissões por módulo, sessão por inatividade, bloqueio e trilha de auditoria.',tags:['segurança'],ready:true},
 {id:'admin-sistema',icon:'⚙️',title:'Configurações, backup e sincronização',description:'Preferências, identidade, telão, dados locais, exportação, backup e futura sincronização em nuvem.',tags:['sistema'],ready:true}
 ];
 
