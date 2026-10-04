@@ -65,6 +65,8 @@ Somente depois de decidir conscientemente pelo faturamento, execute:
 powershell -ExecutionPolicy Bypass -File .\firebase\deploy-functions.ps1 -ProjectId mobiliza-educa
 ```
 
+O script interrompe imediatamente se qualquer comando externo retornar erro. Portanto, a mensagem **CLOUD FUNCTIONS PUBLICADAS** só aparece após um deploy realmente concluído.
+
 Esse script:
 
 1. reinstala dependências a partir do `package-lock.json`;

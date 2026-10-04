@@ -20,6 +20,17 @@ function Require-Command($name, $hint) {
   }
 }
 
+function Invoke-Native {
+  param(
+    [Parameter(Mandatory=$true)][string]$Command,
+    [Parameter(Mandatory=$true)][string[]]$Arguments
+  )
+  & $Command @Arguments
+  if ($LASTEXITCODE -ne 0) {
+    throw "Comando externo falhou (codigo $LASTEXITCODE): $Command $($Arguments -join ' ')"
+  }
+}
+
 $IsWindowsHost = ($env:OS -eq "Windows_NT")
 $NpmCmd = if ($IsWindowsHost) { "npm.cmd" } else { "npm" }
 $FirebaseCmd = if ($IsWindowsHost) { "firebase.cmd" } else { "firebase" }
@@ -29,7 +40,7 @@ Require-Command $NpmCmd "O npm e instalado junto com o Node.js."
 
 if (-not (Get-Command $FirebaseCmd -ErrorAction SilentlyContinue)) {
   Write-Host "Firebase CLI nao encontrado. Instalando..." -ForegroundColor Yellow
-  & $NpmCmd install -g firebase-tools
+  Invoke-Native $NpmCmd @("install","-g","firebase-tools")
 }
 Require-Command $FirebaseCmd "Instale o Firebase CLI com npm install -g firebase-tools."
 
@@ -40,7 +51,7 @@ if ([string]::IsNullOrWhiteSpace($ProjectId)) { throw "Project ID obrigatorio." 
 
 Write-Host ""
 Write-Host "1/5 - Login no Firebase" -ForegroundColor Cyan
-& $FirebaseCmd login
+Invoke-Native $FirebaseCmd @("login")
 
 Write-Host ""
 Write-Host "2/5 - Gravando .firebaserc local" -ForegroundColor Cyan
@@ -55,19 +66,19 @@ Write-Host "2/5 - Gravando .firebaserc local" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "3/5 - Instalando dependencias das Functions" -ForegroundColor Cyan
 if (Test-Path "firebase/functions/package-lock.json") {
-  & $NpmCmd ci --prefix "firebase/functions"
+  Invoke-Native $NpmCmd @("ci","--prefix","firebase/functions")
 } else {
-  & $NpmCmd install --prefix "firebase/functions"
+  Invoke-Native $NpmCmd @("install","--prefix","firebase/functions")
 }
 
 Write-Host ""
 Write-Host "4/5 - Validando backend localmente" -ForegroundColor Cyan
-& $NpmCmd --prefix "firebase/functions" run check
-node -e "require('./firebase/functions/index.js'); console.log('BACKEND FIREBASE CARREGADO OK')"
+Invoke-Native $NpmCmd @("--prefix","firebase/functions","run","check")
+Invoke-Native "node" @("-e","require('./firebase/functions/index.js'); console.log('BACKEND FIREBASE CARREGADO OK')")
 
 Write-Host ""
 Write-Host "5/5 - Publicando regras/indices do Firestore" -ForegroundColor Cyan
-& $FirebaseCmd deploy --only firestore --project $ProjectId
+Invoke-Native $FirebaseCmd @("deploy","--only","firestore","--project",$ProjectId)
 
 Write-Host ""
 Write-Host "====================================================" -ForegroundColor Green
