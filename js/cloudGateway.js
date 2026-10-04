@@ -38,9 +38,14 @@ export const publicCheckin=(eventToken,protocolo,contato)=>api('checkinPublic',p
 export const validateCertificate=code=>api('validateCertificate',publicPayload({code}));
 export const listPlans=()=>api('planCatalog',{});
 
+export function getCachedCloudMe(){
+ try{return JSON.parse(localStorage.getItem('mobiliza.cloud.me')||'null');}catch{return null;}
+}
 export async function cloudMe(){
  const data=await api('me',{}, {auth:true});
+ localStorage.setItem('mobiliza.cloud.me',JSON.stringify(data));
  if(!getCloudTenantId()&&data.memberships?.length)setCloudTenantId(data.memberships[0].tenantId);
+ window.dispatchEvent(new CustomEvent('mobiliza-cloud-me',{detail:{user:data.user||null}}));
  return data;
 }
 export async function cloudTenantContext(tenantId=getCloudTenantId()){
