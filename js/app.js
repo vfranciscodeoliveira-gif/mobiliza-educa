@@ -83,13 +83,20 @@ function bindAudienceUI(){
 
 function updateAuthUI(){
  const unlocked=isAdminUnlocked(),user=getCurrentAdminUser(),lock=qs('#btnAdminLock'),nav=qs('[data-view="gestao"]'),adminState=qs('#adminAccessState');
- if(lock){lock.hidden=!unlocked;lock.textContent=unlocked?'🔒 Sair • '+(user?.name||'Gestor'):'🔒 Sair';lock.title=unlocked?'Encerrar sessão de '+(user?.username||''):'';}
+ if(lock){
+  lock.hidden=!unlocked;
+  lock.style.display=unlocked?'inline-flex':'none';
+  lock.textContent=unlocked?'🚪 Sair • '+(user?.name||'Gestor'):'🚪 Sair';
+  lock.title=unlocked?'Encerrar sessão de '+(user?.username||''):'';
+ }
  if(nav){nav.innerHTML=unlocked?'🛠️ Gestão':'🔒 Gestão';nav.title=unlocked?'Organização: '+(activeTenant()?.name||'—'):'';}
  if(adminState){
   const tenantName=activeTenant()?.name||'—';
   adminState.innerHTML=unlocked
-   ?'<strong>✅ Centro de Gestão liberado</strong><p>Usuário: <b>'+(user?.name||user?.username||'Gestor')+'</b> • Organização: <b>'+tenantName+'</b> • '+adminModules.length+' módulos administrativos disponíveis.</p>'
+   ?'<div class="admin-session-line"><div><strong>✅ Centro de Gestão liberado</strong><p>Usuário: <b>'+(user?.name||user?.username||'Gestor')+'</b> • Organização: <b>'+tenantName+'</b> • '+adminModules.length+' módulos administrativos disponíveis.</p></div><button class="btn danger" id="adminLogoutInline" type="button">🚪 Sair do gestor</button></div>'
    :'<strong>🔒 Centro de Gestão protegido</strong><p>Faça login como Gestor para liberar os módulos administrativos.</p>';
+  const inlineLogout=qs('#adminLogoutInline');
+  if(inlineLogout)inlineLogout.onclick=()=>{lockAdmin();navigate('inicio');updateAuthUI();};
  }
  qsa('#adminGrid [data-module]').forEach(btn=>{const permissionAllowed=!unlocked||canAccessModule(btn.dataset.module),plan=unlocked?adminModuleEntitlement(btn.dataset.module):{allowed:true,reason:''},allowed=permissionAllowed&&plan.allowed;btn.disabled=!allowed;btn.textContent=allowed?'Abrir':(!permissionAllowed?'Sem permissão':'Não incluído no plano');btn.title=!permissionAllowed?'Seu perfil não possui acesso.':(!plan.allowed?plan.reason:'');btn.closest('.module-card')?.classList.toggle('permission-disabled',!allowed);});
  renderHomeNotifications(qs('#homeNotifications'),qs('#authDialog'),updateAuthUI);
@@ -170,7 +177,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.49.3',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.49.4',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 const cloudRefresh=()=>syncCloudInbox().catch(()=>{});window.addEventListener('focus',cloudRefresh);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudRefresh();});
 installEmulatorBadge();
 render();
