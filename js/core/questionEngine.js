@@ -1,4 +1,5 @@
-import { QUESTION_BANK, CATEGORY_IMAGES } from '../data/questionBank.js?v=1';
+import { CATEGORY_IMAGES } from '../data/questionBank.js?v=1';
+import { getPublishedQuestions } from './contentRepository.js?v=1';
 
 const RECENT_KEY='mobiliza.questions.recent';
 const MAX_RECENT=64;
@@ -55,6 +56,7 @@ export function getQuestionSet({
  recentScope='global',
  recentLimit=MAX_RECENT
 }={}){
+ const QUESTION_BANK=getPublishedQuestions();
  let pool=QUESTION_BANK.filter(q=>audiencesMatch(q,audiences)&&difficultyMatch(q,difficulties)&&categoryMatch(q,categories));
  if(!pool.length)pool=[...QUESTION_BANK];
  const recent=avoidRecent?new Set(recentIds(recentScope)):new Set();
@@ -81,5 +83,5 @@ export function resetRecentQuestions(){
 }
 export function questionStats(scope='global'){
  const r=recentIds(scope);
- return {bank:QUESTION_BANK.length,recent:r.length,remaining:Math.max(0,QUESTION_BANK.length-r.length),scope};
+ const bank=getPublishedQuestions().length;return {bank,recent:r.length,remaining:Math.max(0,bank-r.length),scope};
 }
