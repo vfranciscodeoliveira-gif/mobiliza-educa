@@ -15,6 +15,7 @@ export const submitInscricao=data=>api('submitInscricao',data);
 export const consultarProtocolo=(protocolo,contato)=>api('consultarProtocolo',{protocolo,contato});
 export const listPublicEvents=()=>api('publicEvents',{});
 export const publicCheckin=(eventToken,protocolo,contato)=>api('checkinPublic',{eventToken,protocolo,contato});
+export const validateCertificate=code=>api('validateCertificate',{code});
 const key=()=>localStorage.getItem('mobiliza.cloud.gestorKey')||'';
 export function setManagerKey(v){if(v)localStorage.setItem('mobiliza.cloud.gestorKey',v);else localStorage.removeItem('mobiliza.cloud.gestorKey');}
 export const hasManagerKey=()=>!!key();
@@ -34,6 +35,8 @@ export async function syncCloudInbox(){
 export async function updateCloudRequestStatus(id,status,extra={}){if(!cloudConfigured())return;return api('gestorAtualizarSolicitacao',{id,status,...extra},key());}
 export async function updateCloudRegistrationStatus(id,status){if(!cloudConfigured())return;return api('gestorAtualizarInscricao',{id,status},key());}
 export async function publishEvent(evento){if(!cloudConfigured())throw new Error('Nuvem não configurada.');return api('gestorPublicarEvento',{evento},key());}
+export async function publishCertificate(certificado){if(!cloudConfigured())throw new Error('Nuvem não configurada.');return api('gestorPublicarCertificado',{certificado},key());}
+export async function revokeCertificateCloud(code){if(!cloudConfigured())return;return api('gestorRevogarCertificado',{code},key());}
 
 export async function enableManagerPush(){
  if(!cloudConfigured())throw new Error('Configure o Firebase/Cloud Functions antes de ativar notificações.');
