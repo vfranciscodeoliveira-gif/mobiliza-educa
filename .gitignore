@@ -12,6 +12,8 @@ firebase/functions/node_modules/
 *.secret
 *.key.local
 firebase/bootstrap-key.local.txt
+firebase/emulator-bootstrap-key.local.txt
+firebase/functions/.secret.local
 
 # Configuracao Web auxiliar local
 firebase/web-config.local.json
