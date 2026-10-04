@@ -5,6 +5,7 @@ import {
 } from '../core/tenantRegistry.js?v=1';
 import {PLAN_CATALOG,FEATURE_CATALOG} from '../core/saasContext.js?v=2';
 import {recordAudit,currentUser} from '../core/accessControl.js?v=1';
+import {deleteTenantEvidenceFiles} from '../core/evidenceStore.js?v=3';
 
 const BILLING_EVENTS='mobiliza.platform.billingEvents';
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -52,7 +53,7 @@ export function renderPlataformaComercial(host){
   b.querySelectorAll('[data-edit]').forEach(x=>x.onclick=()=>tenantEditor(listTenants().find(t=>t.id===x.dataset.edit),editor));
   b.querySelectorAll('[data-sub]').forEach(x=>x.onclick=()=>subscriptionEditor(listTenants().find(t=>t.id===x.dataset.sub),editor));
   b.querySelectorAll('[data-switch]').forEach(x=>x.onclick=()=>{const t=listTenants().find(v=>v.id===x.dataset.switch);if(!confirm('Salvar o workspace atual e abrir '+t.name+'? A página será recarregada.'))return;switchTenant(t.id);recordAudit('TENANT_TROCADO','plataforma',t.id,t.name);location.reload();});
-  b.querySelectorAll('[data-delete]').forEach(x=>x.onclick=()=>{const t=listTenants().find(v=>v.id===x.dataset.delete);if(!confirm('Excluir a organização '+t.name+' e seu snapshot local? Esta ação não poderá ser desfeita.'))return;deleteTenant(t.id);recordBilling(t.id,'TENANT_EXCLUIDO',t.name);recordAudit('TENANT_EXCLUIDO','plataforma',t.id,t.name);shell();});
+  b.querySelectorAll('[data-delete]').forEach(x=>x.onclick=async()=>{const t=listTenants().find(v=>v.id===x.dataset.delete);if(!confirm('Excluir a organização '+t.name+', seu workspace e arquivos de evidência locais? Esta ação não poderá ser desfeita.'))return;try{const removed=await deleteTenantEvidenceFiles(t.id);deleteTenant(t.id);recordBilling(t.id,'TENANT_EXCLUIDO',t.name+' • '+removed+' evidência(s) removida(s)');recordAudit('TENANT_EXCLUIDO','plataforma',t.id,t.name+' • '+removed+' evidência(s)');shell();}catch(err){alert(err.message);}});
  }
  function tenantEditor(t,box){
   const sub=t?subscriptionFor(t.id):null;
