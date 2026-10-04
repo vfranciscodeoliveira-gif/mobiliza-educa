@@ -69,25 +69,41 @@ $payload = @{
   slug = $Slug
 } | ConvertTo-Json
 
+$alreadyConfigured = $false
+$result = $null
+
 try {
   $result = Invoke-RestMethod -Method Post -Uri "$functionsBase/bootstrapPlatformOwner" -Headers $headers -ContentType "application/json" -Body $payload
 } catch {
-  Write-Host "Nao foi possivel concluir o bootstrap local." -ForegroundColor Red
-  Write-Host "Se o proprietario ja foi criado nesta sessao, reinicie os emuladores para zerar os dados." -ForegroundColor Yellow
-  throw
+  $details = $_.ErrorDetails.Message
+  if ($details -match "propriet.rio da plataforma j. foi configurado") {
+    $alreadyConfigured = $true
+    Write-Host "O proprietario local ja estava configurado nesta sessao. Validando o contexto existente..." -ForegroundColor Yellow
+  } else {
+    Write-Host "Nao foi possivel concluir o bootstrap local." -ForegroundColor Red
+    throw
+  }
 }
 
-if (-not $result.ok) { throw "Bootstrap local nao concluido." }
+if ($result -and -not $result.ok) { throw "Bootstrap local nao concluido." }
 
 $me = Invoke-RestMethod -Method Post -Uri "$functionsBase/me" -Headers @{ Authorization = "Bearer $($auth.idToken)" } -ContentType "application/json" -Body "{}"
 
+if ($alreadyConfigured -and -not $me.user.platformOwner) {
+  throw "Ja existe um proprietario local, mas o usuario autenticado nao e o proprietario desta sessao."
+}
+
+$tenantId = if ($result) { $result.tenantId } elseif (@($me.memberships).Count -gt 0) { $me.memberships[0].tenantId } else { "" }
+$tenantSlug = if ($result) { $result.slug } elseif (@($me.memberships).Count -gt 0) { $me.memberships[0].tenant.slug } else { "" }
+$userEmail = if ($result) { $result.email } else { $me.user.email }
+
 Write-Host ""
 Write-Host "====================================================" -ForegroundColor Green
-Write-Host " BOOTSTRAP LOCAL CONCLUIDO" -ForegroundColor Green
+Write-Host $(if ($alreadyConfigured) { " PROPRIETARIO LOCAL JA CONFIGURADO" } else { " BOOTSTRAP LOCAL CONCLUIDO" }) -ForegroundColor Green
 Write-Host "====================================================" -ForegroundColor Green
-Write-Host "Tenant ID: $($result.tenantId)"
-Write-Host "Slug:      $($result.slug)"
-Write-Host "Usuario:   $($result.email)"
+Write-Host "Tenant ID: $tenantId"
+Write-Host "Slug:      $tenantSlug"
+Write-Host "Usuario:   $userEmail"
 Write-Host "Owner:     $($me.user.platformOwner)"
 Write-Host "Tenants:   $(@($me.memberships).Count)"
 Write-Host ""
