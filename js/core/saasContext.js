@@ -64,3 +64,25 @@ export function usageSnapshot(){
   questions:stats.questions
  };
 }
+
+export const ADMIN_FEATURE_MAP={
+ 'admin-eventos':'events',
+ 'admin-conteudo':'content_editor',
+ 'admin-avaliacao':'assessments',
+ 'admin-evidencias':'evidence',
+ 'admin-passaporte':'certificates',
+ 'admin-relatorios':'reports360',
+ 'admin-acessos':'users'
+};
+export function adminModuleEntitlement(moduleId){
+ const feature=ADMIN_FEATURE_MAP[moduleId];
+ if(!feature)return{allowed:true,reason:'',feature:null};
+ return entitlementState(feature);
+}
+export function usageLimitState(){
+ const p=currentPlan(),u=usageSnapshot(),items=[
+  {id:'users',label:'Usuários ativos',used:u.users,limit:p.limits.users},
+  {id:'eventsMonth',label:'Eventos no mês',used:u.eventsMonth,limit:p.limits.eventsMonth}
+ ];
+ return items.map(x=>({...x,exceeded:x.limit!=null&&x.used>x.limit,remaining:x.limit==null?null:Math.max(0,x.limit-x.used)}));
+}
