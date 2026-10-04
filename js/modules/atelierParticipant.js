@@ -38,13 +38,14 @@ function css(){
  '.atp-workspace{display:grid;grid-template-columns:290px minmax(0,1fr);gap:10px}.atp-tools{display:grid;gap:9px;align-content:start}.atp-mode{display:grid;grid-template-columns:1fr 1fr;gap:6px}.atp-mode button.active{background:#0f3c66;color:#fff}.atp-tools label{display:grid;gap:4px;font-size:.74rem;font-weight:900}.atp-color{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.atp-color button{height:38px;border:2px solid #fff;outline:1px solid #cbdbe5;border-radius:9px}.atp-color button.active{outline:3px solid #1688b7}',
  '.atp-history{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.atp-history .atp-btn{padding:7px 5px;min-height:42px;font-size:.76rem}',
  '.atp-stickers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-height:390px;overflow:auto;padding:2px}.atp-stickers button{min-height:76px;border:1px solid #d7e5ed;border-radius:11px;background:#fff;padding:5px;display:grid;place-items:center;gap:2px;color:#173f60}.atp-stickers button.active{border:3px solid #1688b7;background:#eef9fd}.atp-stickers img{width:48px;height:42px;object-fit:contain}.atp-stickers small{font-size:.61rem;line-height:1.05;font-weight:800}',
- '.atp-object-tools{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:9px;border-radius:12px;background:#f5fafc;border:1px solid #dce8ef}.atp-object-tools strong{grid-column:1/-1;font-size:.76rem}.atp-object-tools .atp-btn{min-height:40px;padding:6px;font-size:.75rem}',
+ '.atp-context-tools{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:7px;padding:8px;border-radius:12px;background:#f5fafc;border:1px solid #dce8ef}.atp-context-tools strong{grid-column:1/-1;font-size:.76rem;color:#36596d}.atp-context-tools .atp-btn{min-height:40px;padding:6px 5px;font-size:.72rem}.atp-context-tools[hidden]{display:none!important}.atp-clear-row{display:flex;gap:7px;margin-top:7px}.atp-clear-row .atp-btn{flex:1}',
  '.atp-canvas-box{border:1px solid #cfdde6;border-radius:14px;background:#fff;overflow:hidden;touch-action:none}.atp-canvas-box canvas{display:block;width:100%;height:auto;aspect-ratio:3/2;background:#fff;touch-action:none}.atp-hint{text-align:center;font-size:.74rem;color:#567181;margin:6px 0;min-height:20px}',
  '.atp-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.atp-actions button{flex:1;min-width:115px}.atp-submit{margin-top:9px;padding:12px;border:1px solid #d7e5ed;border-radius:13px;background:#fff}.atp-submit h3{margin:0 0 5px}.atp-msg{margin-top:8px;padding:9px;border-radius:10px;background:#eef6fa;color:#315d76}.atp-msg.ok{background:#e7f7ed;color:#17643a}.atp-msg.bad{background:#fff0ef;color:#8d302c}',
  '.atp-winner{text-align:center}.atp-winner img{width:min(100%,760px);max-height:58vh;object-fit:contain;border-radius:16px;border:1px solid #d8e6ee;background:#fff}.atp-winner h2{font-size:clamp(1.5rem,5vw,2.3rem);margin:10px 0 4px}.atp-score{display:inline-block;padding:7px 10px;border-radius:999px;background:#fff2cc;color:#705300;font-weight:1000}',
  '.atp-footer{text-align:center;font-size:.7rem;color:#758b99}.atp-exit{border:0;background:none;color:#456678;text-decoration:underline;cursor:pointer}',
  '@media(max-width:840px){.atp-workspace{grid-template-columns:1fr}.atp-tools{order:2}.atp-canvas-wrap{order:1}.atp-stickers{grid-template-columns:repeat(5,1fr);max-height:none}.atp-actions{position:sticky;bottom:0;background:#eef5f8;padding:6px 0}}',
- '@media(max-width:520px){.atp{padding:6px}.atp-stickers{grid-template-columns:repeat(4,1fr)}.atp-object-tools{grid-template-columns:repeat(2,1fr)}}'
+ '@media(max-width:700px){.atp-context-tools{grid-template-columns:repeat(3,minmax(0,1fr))}}',
+ '@media(max-width:520px){.atp{padding:6px}.atp-stickers{grid-template-columns:repeat(4,1fr)}.atp-context-tools{grid-template-columns:repeat(2,minmax(0,1fr))}.atp-clear-row{flex-direction:column}}'
  ].join('');
  document.head.appendChild(s);
 }
@@ -56,7 +57,7 @@ export function openAtelierParticipant(rawCode){
  const root=document.createElement('div');root.className='atp';root.id='atelierParticipant';document.body.appendChild(root);
 
  let client=null,name=localStorage.getItem('mobiliza.atelier.name')||'',team=localStorage.getItem('mobiliza.atelier.team')||'',state=null,closing=false;
- let mode='draw',color='#173f60',width=8,eraser=false,insertStickerId=null,ops=[],undoStack=[],redoStack=[],current=null,selectedId=null,draggingId=null,dragOffset=null,dragBackup=null,dragMoved=false,submitTimer=null,sending=false;
+ let mode='draw',color='#173f60',width=8,eraser=false,insertStickerId=null,ops=[],undoStack=[],redoStack=[],current=null,selectedId=null,draggingId=null,dragOffset=null,dragBackup=null,dragMoved=false,submitTimer=null,sending=false,hasSubmitted=false;
  const W=900,H=600,images=new Map();
 
  const shell=body=>'<div class="atp-shell"><div class="atp-brand"><img src="assets/icon-192.webp?v=9" alt=""><div><h1>MOBILIZA EDUCA</h1><p>Ateliê do Trânsito</p></div><span class="atp-code">'+esc(code)+'</span></div>'+body+'<div class="atp-footer">Sessão criativa ao vivo • <button class="atp-exit" id="atpExit">sair</button></div></div>';
@@ -121,16 +122,17 @@ export function openAtelierParticipant(rawCode){
  function refreshUi(){
   const u=root.querySelector('#atpUndo'),r=root.querySelector('#atpRedo');if(u)u.disabled=!undoStack.length;if(r)r.disabled=!redoStack.length;
   root.querySelectorAll('[data-sticker]').forEach(b=>b.classList.toggle('active',b.dataset.sticker===insertStickerId));
-  const obj=selectedObj(),label=root.querySelector('#atpSelectedLabel');
+  const obj=selectedObj(),label=root.querySelector('#atpSelectedLabel'),tools=root.querySelector('#atpContextTools');
   if(label)label.textContent=obj?(stickerDef(obj.stickerId)?.label||'Objeto selecionado'):'Nenhum objeto selecionado';
-  ['atpRotateLeft','atpRotateRight','atpDeleteObj','atpDuplicateObj'].forEach(id=>{const b=root.querySelector('#'+id);if(b)b.disabled=!obj;});
+  if(tools)tools.hidden=mode!=='collage';
+  ['atpRotateLeft','atpRotateRight','atpSizeDown','atpSizeUp','atpDeleteObj','atpDuplicateObj'].forEach(id=>{const b=root.querySelector('#'+id);if(b)b.disabled=!obj;});
  }
  function undo(){if(!undoStack.length)return;redoStack.push(snapshot());restore(undoStack.pop());setHint('↶ Última ação desfeita.');}
  function redo(){if(!redoStack.length)return;undoStack.push(snapshot());restore(redoStack.pop());setHint('↷ Ação refeita.');}
 
  function workspace(){
   const palette=STICKERS.map(x=>'<button type="button" data-sticker="'+x.id+'" title="'+esc(x.label)+'"><img src="'+x.src+'" alt=""><small>'+esc(x.label)+'</small></button>').join('');
-  root.innerHTML=shell('<section class="atp-challenge"><h2>'+esc(state?.challenge?.title||'Desafio criativo')+'</h2><p>'+esc(state?.challenge?.text||'Crie uma cena de trânsito segura.')+'</p><span class="atp-chip">✋ trabalho autoral</span></section><section class="atp-workspace"><aside class="atp-card atp-tools"><div class="atp-mode"><button class="atp-btn secondary '+(mode==='draw'?'active':'')+'" id="atpDrawMode">✍️ Desenho</button><button class="atp-btn secondary '+(mode==='collage'?'active':'')+'" id="atpCollageMode">🧩 Colagem</button></div><div class="atp-history"><button class="atp-btn secondary" id="atpUndo">↶ Voltar</button><button class="atp-btn secondary" id="atpRedo">↷ Refazer</button><button class="atp-btn secondary" id="atpReload">↻ Reload</button></div><div id="atpDrawTools" '+(mode==='draw'?'':'hidden')+'><label>Espessura<input id="atpWidth" type="range" min="2" max="32" value="'+width+'"></label><div class="atp-color">'+['#173f60','#e74c3c','#f39c12','#27ae60','#2980b9','#8e44ad','#111111','#ffffff','#795548','#ff69b4'].map(c=>'<button type="button" data-color="'+c+'" style="background:'+c+'" class="'+(c===color?'active':'')+'"></button>').join('')+'</div><button class="atp-btn secondary" id="atpEraser">'+(eraser?'🧽 Borracha ativa':'🧽 Borracha')+'</button></div><div id="atpCollageTools" '+(mode==='collage'?'':'hidden')+'><label>Figuras de trânsito</label><div class="atp-stickers">'+palette+'</div><div class="atp-object-tools"><strong>Objeto: <span id="atpSelectedLabel">Nenhum objeto selecionado</span></strong><button class="atp-btn secondary" id="atpRotateLeft">⟲ -15°</button><button class="atp-btn secondary" id="atpRotateRight">⟳ +15°</button><button class="atp-btn secondary" id="atpDuplicateObj">⧉ Duplicar</button><button class="atp-btn danger" id="atpDeleteObj">🗑 Excluir</button></div></div></aside><div class="atp-canvas-wrap"><div class="atp-canvas-box"><canvas id="atpCanvas" width="'+W+'" height="'+H+'"></canvas></div><div class="atp-hint" id="atpHint">'+(mode==='draw'?'Desenhe com o dedo, mouse ou caneta digital.':'Selecione uma figura para inserir. Depois, segure e arraste qualquer objeto já colado para movimentá-lo.')+'</div><div class="atp-submit"><h3>Quando terminar</h3><p>Envie para a galeria. Você poderá reenviar enquanto os envios estiverem abertos.</p><div class="atp-actions"><button class="atp-btn" id="atpSubmit">Enviar trabalho</button></div><div id="atpMsg"></div></div></div></section>');
+  root.innerHTML=shell('<section class="atp-challenge"><h2>'+esc(state?.challenge?.title||'Desafio criativo')+'</h2><p>'+esc(state?.challenge?.text||'Crie uma cena de trânsito segura.')+'</p><span class="atp-chip">✋ trabalho autoral</span></section><section class="atp-workspace"><aside class="atp-card atp-tools"><div class="atp-mode"><button class="atp-btn secondary '+(mode==='draw'?'active':'')+'" id="atpDrawMode">✍️ Desenho</button><button class="atp-btn secondary '+(mode==='collage'?'active':'')+'" id="atpCollageMode">🧩 Colagem</button></div><div class="atp-history"><button class="atp-btn secondary" id="atpUndo">↶ Voltar</button><button class="atp-btn secondary" id="atpRedo">↷ Refazer</button><button class="atp-btn secondary" id="atpReload">↻ Reload</button></div><div id="atpDrawTools" '+(mode==='draw'?'':'hidden')+'><label>Espessura<input id="atpWidth" type="range" min="2" max="32" value="'+width+'"></label><div class="atp-color">'+['#173f60','#e74c3c','#f39c12','#27ae60','#2980b9','#8e44ad','#111111','#ffffff','#795548','#ff69b4'].map(c=>'<button type="button" data-color="'+c+'" style="background:'+c+'" class="'+(c===color?'active':'')+'"></button>').join('')+'</div><button class="atp-btn secondary" id="atpEraser">'+(eraser?'🧽 Borracha ativa':'🧽 Borracha')+'</button></div><div id="atpCollageTools" '+(mode==='collage'?'':'hidden')+'><label>Figuras de trânsito</label><div class="atp-stickers">'+palette+'</div></div></aside><div class="atp-canvas-wrap"><div class="atp-canvas-box"><canvas id="atpCanvas" width="'+W+'" height="'+H+'"></canvas></div><div class="atp-context-tools" id="atpContextTools" '+(mode==='collage'?'':'hidden')+'><strong>Objeto selecionado: <span id="atpSelectedLabel">Nenhum objeto selecionado</span></strong><button class="atp-btn secondary" id="atpRotateLeft">⟲ -15°</button><button class="atp-btn secondary" id="atpRotateRight">⟳ +15°</button><button class="atp-btn secondary" id="atpSizeDown">− Menor</button><button class="atp-btn secondary" id="atpSizeUp">+ Maior</button><button class="atp-btn secondary" id="atpDuplicateObj">⧉ Duplicar</button><button class="atp-btn danger" id="atpDeleteObj">🗑 Excluir</button></div><div class="atp-hint" id="atpHint">'+(mode==='draw'?'Desenhe com o dedo, mouse ou caneta digital.':'Selecione uma figura para inserir. Depois, segure e arraste qualquer objeto já colado para movimentá-lo.')+'</div><div class="atp-clear-row"><button class="atp-btn danger" id="atpClearArtwork">🧹 Limpar desenho</button></div><div class="atp-submit"><h3>Quando terminar</h3><p>Envie para a galeria. Você poderá reenviar enquanto os envios estiverem abertos.</p><div class="atp-actions"><button class="atp-btn" id="atpSubmit">Enviar trabalho</button></div><div id="atpMsg"></div></div></div></section>');
   bindExit();bindWorkspace();drawScene();refreshUi();
  }
 
@@ -148,8 +150,11 @@ export function openAtelierParticipant(rawCode){
   root.querySelector('#atpReload').onclick=()=>{if(!ops.length||confirm('Reiniciar o quadro e apagar todas as ações?')){if(ops.length)storeUndo();ops=[];selectedId=null;insertStickerId=null;drawScene();refreshUi();setHint('Quadro reiniciado.');}};
   root.querySelector('#atpRotateLeft').onclick=()=>rotateSelected(-15);
   root.querySelector('#atpRotateRight').onclick=()=>rotateSelected(15);
+  root.querySelector('#atpSizeDown').onclick=()=>resizeSelected(.85);
+  root.querySelector('#atpSizeUp').onclick=()=>resizeSelected(1.18);
   root.querySelector('#atpDeleteObj').onclick=deleteSelected;
   root.querySelector('#atpDuplicateObj').onclick=duplicateSelected;
+  root.querySelector('#atpClearArtwork').onclick=clearArtwork;
   root.querySelector('#atpSubmit').onclick=submit;
 
   c.addEventListener('pointerdown',e=>{
@@ -186,6 +191,24 @@ export function openAtelierParticipant(rawCode){
 
  function rotateSelected(delta){
   const o=selectedObj();if(!o)return;storeUndo();o.rotation=((o.rotation||0)+delta+360)%360;drawScene();refreshUi();setHint('Objeto rotacionado para '+o.rotation+'°.');
+ }
+ function resizeSelected(factor){
+  const o=selectedObj();if(!o)return;
+  const nw=clamp(Math.round(o.w*factor),40,430),nh=clamp(Math.round(o.h*factor),35,360);
+  if(nw===o.w&&nh===o.h)return;
+  storeUndo();o.w=nw;o.h=nh;
+  o.x=clamp(o.x,o.w/2,W-o.w/2);o.y=clamp(o.y,o.h/2,H-o.h/2);
+  drawScene();refreshUi();setHint(factor>1?'Objeto ampliado.':'Objeto reduzido.');
+ }
+ function clearArtwork(){
+  if(!ops.length&&!hasSubmitted){msg('O quadro já está vazio.');return;}
+  const text=hasSubmitted?'Limpar o desenho? O trabalho que já foi enviado também será removido da galeria da plataforma.':'Limpar todo o desenho?';
+  if(!confirm(text))return;
+  if(ops.length)storeUndo();
+  ops=[];selectedId=null;insertStickerId=null;current=null;draggingId=null;drawScene();refreshUi();
+  if(hasSubmitted&&client?.conn?.open){msg('Limpando desenho e removendo o trabalho enviado...');client.send({type:'atelier-delete-submission'});}
+  else{hasSubmitted=false;msg('✅ Desenho limpo.','ok');}
+  setHint('Quadro limpo. Você pode começar um novo trabalho.');
  }
  function deleteSelected(){
   const o=selectedObj();if(!o)return;storeUndo();ops=ops.filter(x=>x.id!==o.id);selectedId=null;drawScene();refreshUi();setHint('Objeto removido.');
@@ -225,7 +248,8 @@ export function openAtelierParticipant(rawCode){
   if(data.type==='atelier-state'){state=data;state.accepting?workspace():waiting('O educador ainda não abriu os envios.');return;}
   if(data.type==='atelier-upload-ready'){msg('Preparando transmissão do desenho...');return;}
   if(data.type==='atelier-upload-progress'){const pct=Math.round((Number(data.received)||0)*100/Math.max(1,Number(data.total)||1));msg('Enviando para a galeria • '+pct+'%');return;}
-  if(data.type==='atelier-submit-ack'){clearTimeout(submitTimer);submitTimer=null;sending=false;const b=root.querySelector('#atpSubmit');if(b)b.disabled=false;msg(data.message||'Trabalho recebido.',data.ok?'ok':'bad');if(data.ok)SoundManager.play('correct');return;}
+  if(data.type==='atelier-submit-ack'){clearTimeout(submitTimer);submitTimer=null;sending=false;const b=root.querySelector('#atpSubmit');if(b)b.disabled=false;if(data.ok)hasSubmitted=true;msg(data.message||'Trabalho recebido.',data.ok?'ok':'bad');if(data.ok)SoundManager.play('correct');return;}
+  if(data.type==='atelier-delete-ack'){hasSubmitted=false;msg(data.message||'✅ Trabalho removido da galeria.',data.ok?'ok':'bad');return;}
   if(data.type==='atelier-submission-status'){msg(data.status==='approved'?'✅ Seu trabalho foi aprovado para a galeria.':'Seu trabalho voltou para moderação.',data.status==='approved'?'ok':'');return;}
   if(data.type==='atelier-winner'){winner(data);return;}
   if(data.type==='session-finished'||data.type==='session-closed'){closed();return;}

@@ -84,6 +84,13 @@ export function openAtelier(dialog,host,onFinish){
  function handle(msg){
   const data=msg.data||{},clientId=msg.clientId;
   if(data.type==='participant-ready'||data.type==='atelier-ready'){session.sendTo(clientId,{type:'atelier-state',challenge,accepting});return;}
+  if(data.type==='atelier-delete-submission'){
+   const before=works.length;
+   works=works.filter(x=>x.clientId!==clientId);
+   uploads.delete(clientId);
+   session.sendTo(clientId,{type:'atelier-delete-ack',ok:true,removed:before!==works.length,message:before!==works.length?'✅ Trabalho removido da galeria.':'Não havia trabalho enviado na galeria.'});
+   render();return;
+  }
   if(data.type==='atelier-submit'){receiveWork(clientId,data.work||{},msg.participant);return;}
   if(data.type==='atelier-submit-start'){
    if(!accepting){session.sendTo(clientId,{type:'atelier-submit-ack',ok:false,message:'Os envios estão encerrados.'});return;}
