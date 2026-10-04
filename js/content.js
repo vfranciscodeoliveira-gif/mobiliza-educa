@@ -100,7 +100,7 @@ export const adminModules=[
 {id:'admin-eventos',icon:'📅',title:'Agenda, solicitações e inscrições',description:'Receba demandas, transforme pedidos em agendamentos e acompanhe calendário, conflitos, checklist, QR Code, check-in, vagas, inscrições, presença, equipe e materiais.',tags:['agenda','inscrições','atendimento'],ready:true},
 {id:'admin-conteudo',icon:'📝',title:'Conteúdo pedagógico',description:'Banco de perguntas, categorias, dificuldades, revisão, auditoria e Centro Editorial.',tags:['editorial'],ready:true},
 {id:'admin-avaliacao',icon:'📈',title:'Presença e avaliações',description:'Presença, pré-teste, pós-teste, evolução, indicadores e desempenho pedagógico.',tags:['impacto'],ready:true},
-{id:'admin-passaporte',icon:'🎓',title:'Passaporte e certificados',description:'Medalhas, passaporte, certificados, validação e histórico de participação.',tags:['reconhecimento'],ready:true},
+{id:'admin-passaporte',icon:'🎓',title:'Passaporte e certificados',description:'Passaporte digital, conquistas, certificados por participante, QR de validação, revogação e histórico de emissão.',tags:['reconhecimento'],ready:true},
 {id:'admin-relatorios',icon:'📑',title:'Relatórios e indicadores',description:'Relatórios operacionais, pedagógicos, estatísticas, ranking e comprovação de impacto.',tags:['gestão'],ready:true},
 {id:'admin-acessos',icon:'🔐',title:'Usuários, perfis e auditoria',description:'Perfis, permissões, trilha de auditoria, segurança, acessibilidade e políticas.',tags:['segurança'],ready:true},
 {id:'admin-sistema',icon:'⚙️',title:'Configurações, backup e sincronização',description:'Preferências, identidade, telão, dados locais, exportação, backup e futura sincronização em nuvem.',tags:['sistema'],ready:true}
