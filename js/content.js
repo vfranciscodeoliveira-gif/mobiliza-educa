@@ -104,7 +104,7 @@ export const adminModules=[
 {id:'admin-passaporte',icon:'🎓',title:'Passaporte e certificados',description:'Passaporte digital, conquistas, certificados por participante, QR de validação, revogação e histórico de emissão.',tags:['reconhecimento'],ready:true},
 {id:'admin-relatorios',icon:'📑',title:'Relatórios e indicadores',description:'Painel 360 com filtros por período, instituição, ação e público; alcance, pré/pós, materiais, certificados, parceiros, evidências, rankings e qualidade dos dados.',tags:['gestão'],ready:true},
 {id:'admin-acessos',icon:'🔐',title:'Usuários, perfis e auditoria',description:'Múltiplos usuários, perfis Gestor/Educador/Operador/Consulta, permissões por módulo, sessão por inatividade, bloqueio e trilha de auditoria.',tags:['segurança'],ready:true},
-{id:'admin-sistema',icon:'⚙️',title:'Configurações, backup e sincronização',description:'Preferências, identidade, telão, dados locais, exportação, backup e futura sincronização em nuvem.',tags:['sistema'],ready:true}
+{id:'admin-sistema',icon:'⚙️',title:'Configurações, backup e sincronização',description:'Identidade institucional, backup operacional, backup completo criptografado, restauração com integridade, diagnóstico de armazenamento e prontidão da nuvem.',tags:['sistema'],ready:true}
 ];
 
 export const tips=[
