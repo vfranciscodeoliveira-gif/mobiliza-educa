@@ -5,7 +5,11 @@ const CHALLENGES=[
  {title:'Travessia segura em frente à escola',text:'Crie uma cena mostrando uma travessia segura em frente à escola.'},
  {title:'Uma rua segura para todos',text:'Mostre pedestres, ciclistas e veículos convivendo com segurança.'},
  {title:'Área escolar segura',text:'Monte ou desenhe uma área escolar com comportamentos e sinalização segura.'},
- {title:'O trânsito que eu gostaria de ver',text:'Mostre como seria um trânsito mais humano, organizado e seguro.'}
+ {title:'O trânsito que eu gostaria de ver',text:'Mostre como seria um trânsito mais humano, organizado e seguro.'},
+ {title:'Cruzamento organizado e seguro',text:'Crie um cruzamento onde sinalização, veículos, pedestres e ciclistas convivam com segurança.'},
+ {title:'Ciclovia para a cidade',text:'Monte uma cena que mostre uma ciclovia segura e integrada com pedestres e veículos.'},
+ {title:'Embarque seguro no ônibus escolar',text:'Mostre como deve ser um embarque ou desembarque seguro em ônibus escolar.'},
+ {title:'Agente de trânsito em ação',text:'Crie uma situação em que o agente de trânsito ajuda a organizar e proteger os usuários da via.'}
 ];
 const esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function nextChallenge(){
