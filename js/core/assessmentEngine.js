@@ -1,4 +1,4 @@
-import {QUESTION_BANK} from '../data/questionBank.js?v=1';
+import {getPublishedQuestions} from './contentRepository.js?v=1';
 
 const AUD_TO_CODE={criancas:'C',adolescentes:'T',adultos:'A'};
 const CODE_TO_AUD={C:'criancas',T:'adolescentes',A:'adultos'};
@@ -18,7 +18,7 @@ function shuffle(arr,seed){
  return out;
 }
 export function assessmentQuestionIds({audience='criancas',count=8,seed='MOBILIZA',phase='PRE'}={}){
- const pool=QUESTION_BANK.filter(q=>q.audience===audience);
+ const pool=getPublishedQuestions().filter(q=>q.audience===audience);
  const mixed=shuffle(pool,seed+'|BASE');
  const pre=[],post=[];
  for(let i=0;i<mixed.length;i++){(i%2===0?pre:post).push(mixed[i].id);}
@@ -27,7 +27,7 @@ export function assessmentQuestionIds({audience='criancas',count=8,seed='MOBILIZ
  return shuffle(pool.map(q=>q.id),seed+'|'+phase).slice(0,Math.min(count,pool.length));
 }
 export function resolveAssessmentQuestions(ids=[]){
- const map=new Map(QUESTION_BANK.map(q=>[q.id,q]));
+ const map=new Map(getPublishedQuestions().map(q=>[q.id,q]));
  return ids.map(id=>map.get(id)).filter(Boolean);
 }
 export function scoreAssessment(questionIds=[],answers=[]){
