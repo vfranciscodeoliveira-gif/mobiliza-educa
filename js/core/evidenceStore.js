@@ -58,3 +58,8 @@ export async function putEvidenceRecord(record){
  if(!record?.id||!record?.blob)throw new Error('Registro de evidência inválido.');
  await tx('readwrite',s=>s.put({...record,tenantId:record.tenantId||tenantId()}));return true;
 }
+
+export async function deleteTenantEvidenceFiles(targetTenantId){
+ if(!targetTenantId)return 0;
+ const all=await rawAll(),rows=all.filter(x=>x.tenantId===targetTenantId);await tx('readwrite',store=>rows.forEach(x=>store.delete(x.id)));return rows.length;
+}
