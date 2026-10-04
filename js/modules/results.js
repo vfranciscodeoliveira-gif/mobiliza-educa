@@ -52,6 +52,10 @@ function collect(){
  const agenda=json('mobiliza.educador.agenda',[]);
  const certs=json('mobiliza.educador.certificados',[]);
  const adminEvents=json('mobiliza.admin.eventos',[]);
+ const adminImpacts=json('mobiliza.admin.impactos',[]);
+ const adminEvidence=json('mobiliza.admin.evidencias',[]);
+ const adminCerts=json('mobiliza.admin.certificados',[]);
+ const adminAssess=json('mobiliza.admin.avaliacoes',[]);
  const tracks=Object.entries(TRACKS).map(([id,[icon,label]])=>{
    const p=learning[id]||{};
    return {id,icon,label,best:Number(p.bestPct||0),last:Number(p.lastPct||0),completions:Number(p.completions||0),date:p.last||null,completed:!!p.completed};
@@ -60,12 +64,14 @@ function collect(){
  const totalCompletions=tracks.reduce((s,x)=>s+x.completions,0);
  const validEvals=evals.filter(x=>Number.isFinite(Number(x.pre))&&Number.isFinite(Number(x.pos)));
  const pre=avg(validEvals.map(x=>x.pre)),post=avg(validEvals.map(x=>x.pos)),delta=post-pre;
- const people=evid.reduce((s,x)=>s+Number(x.publico||0),0);
- const materials=evid.reduce((s,x)=>s+Number(x.materiais||0),0);
- const photos=evid.reduce((s,x)=>s+Number(x.fotos||0),0);
- const actions=evid.length;
+ const people=adminImpacts.length?adminImpacts.reduce((s,x)=>s+Number(x.publicoTotal||0),0):evid.reduce((s,x)=>s+Number(x.publico||0),0);
+ const materials=adminImpacts.length?adminImpacts.reduce((s,x)=>s+(x.materiaisDistribuidos||[]).reduce((q,m)=>q+Number(m.quantidade||0),0),0):evid.reduce((s,x)=>s+Number(x.materiais||0),0);
+ const photos=adminEvidence.length||evid.reduce((s,x)=>s+Number(x.fotos||0),0);
+ const actions=adminImpacts.length||evid.length;
  const adminPresence=adminEvents.reduce((s,e)=>s+Object.values(e.presenca||{}).filter(Boolean).length,0);
- return {game,tracks,completed,totalCompletions,evals:validEvals,pre,post,delta,evid,people,materials,photos,actions,agenda,certs,adminEvents,adminPresence};
+ const adminPre=adminAssess.filter(x=>x.phase==='PRE'),adminPost=adminAssess.filter(x=>x.phase==='POS'),adminPreAvg=adminPre.length?avg(adminPre.map(x=>x.pct)):null,adminPostAvg=adminPost.length?avg(adminPost.map(x=>x.pct)):null;
+ const effectivePre=adminPreAvg==null?pre:adminPreAvg,effectivePost=adminPostAvg==null?post:adminPostAvg,effectiveDelta=effectivePost-effectivePre,effectiveCerts=adminCerts.length?adminCerts:certs;
+ return {game,tracks,completed,totalCompletions,evals:validEvals,pre:effectivePre,post:effectivePost,delta:effectiveDelta,evid,people,materials,photos,actions,agenda,certs:effectiveCerts,adminEvents,adminPresence};
 }
 function activity(data){
  const rows=[];
@@ -119,7 +125,7 @@ export function renderResultsDashboard(host){
  const hist=getHistorySummary();
  const gameGroups=hist.byModule.filter(x=>x.kind==='game');
  const recentSessions=hist.recent.slice(0,12);
- const deltaPct=Math.max(0,Math.min(100,Math.round((d.post||0)*10)));
+ const deltaPct=Math.max(0,Math.min(100,Math.round(Number(d.post||0))));
  host.innerHTML='<div class="res2">'+
   '<section class="res2-hero"><div class="res2-hero-copy"><p class="eyebrow">PAINEL DE IMPACTO • DADOS LOCAIS</p><h3>Resultados que mostram aprendizagem e alcance</h3><p>O painel combina desempenho dos jogos, trilhas concluídas e registros da Central do Educador neste dispositivo.</p></div><div class="res2-hero-score"><div><strong>'+acc+'%</strong><span>acertos nos jogos</span></div><div><strong>'+d.completed+'/'+d.tracks.length+'</strong><span>trilhas concluídas</span></div><div><strong>'+fmt(d.people)+'</strong><span>público registrado</span></div><div><strong>'+(d.delta>=0?'+':'')+d.delta.toFixed(1)+'</strong><span>evolução pré/pós</span></div></div></section>'+
   '<div class="res2-kpis"><div class="res2-kpi"><span>Partidas</span><strong>'+fmt(d.game.games)+'</strong><small>registro agregado</small></div><div class="res2-kpi"><span>Respostas</span><strong>'+fmt(d.game.answers)+'</strong><small>'+fmt(d.game.correct)+' corretas</small></div><div class="res2-kpi"><span>Melhor pontuação</span><strong>'+fmt(d.game.best)+'</strong><small>neste dispositivo</small></div><div class="res2-kpi"><span>Melhor sequência</span><strong>'+fmt(d.game.streak)+'</strong><small>acertos seguidos</small></div><div class="res2-kpi"><span>Conclusões de trilha</span><strong>'+fmt(d.totalCompletions)+'</strong><small>'+d.completed+' trilhas diferentes</small></div><div class="res2-kpi"><span>Certificados</span><strong>'+fmt(d.certs.length)+'</strong><small>emitidos localmente</small></div></div>'+
@@ -129,7 +135,7 @@ export function renderResultsDashboard(host){
   '<div class="res2-grid"><section class="res2-card"><div class="res2-card-head"><div><h3>📚 Aprendizagem por trilha</h3><p>Melhor aproveitamento registrado em cada microtrilha.</p></div><span class="badge">'+d.completed+' concluídas</span></div>'+
     (d.tracks.some(x=>x.completions)?'<div class="res2-bars">'+d.tracks.map(x=>'<div class="res2-bar"><div class="res2-bar-label"><span>'+x.icon+'</span><span>'+esc(x.label)+'</span></div><div class="res2-track"><i style="width:'+x.best+'%"></i></div><strong>'+x.best+'%</strong></div>').join('')+'</div>':'<div class="res2-empty"><strong>Nenhuma trilha concluída ainda.</strong>Os resultados aparecem aqui assim que uma trilha for finalizada.</div>')+
   '</section><section class="res2-card"><div class="res2-card-head"><div><h3>📈 Evolução pedagógica</h3><p>Comparação dos registros pré e pós.</p></div><span class="badge">'+d.evals.length+' registro(s)</span></div>'+
-    (d.evals.length?'<div class="res2-ped"><div class="res2-ped-box"><strong>'+d.pre.toFixed(1)+'</strong><span>média pré</span></div><div class="res2-ped-box"><strong>'+d.post.toFixed(1)+'</strong><span>média pós</span></div></div><div class="res2-evolution"><strong>'+(d.delta>=0?'↑ ':'↓ ')+(d.delta>=0?'+':'')+d.delta.toFixed(1)+' ponto(s)</strong><div class="line"><i style="width:'+deltaPct+'%"></i></div></div>':'<div class="res2-empty"><strong>Sem avaliação pré/pós.</strong>Registre uma avaliação na Central do Educador para acompanhar evolução.</div>')+
+    (d.evals.length?'<div class="res2-ped"><div class="res2-ped-box"><strong>'+d.pre.toFixed(1)+'</strong><span>média pré</span></div><div class="res2-ped-box"><strong>'+d.post.toFixed(1)+'</strong><span>média pós</span></div></div><div class="res2-evolution"><strong>'+(d.delta>=0?'↑ ':'↓ ')+(d.delta>=0?'+':'')+d.delta.toFixed(1)+' p.p.</strong><div class="line"><i style="width:'+deltaPct+'%"></i></div></div>':'<div class="res2-empty"><strong>Sem avaliação pré/pós.</strong>Registre uma avaliação na Central do Educador para acompanhar evolução.</div>')+
   '</section></div>'+
   '<section class="res2-card"><div class="res2-card-head"><div><h3>🌍 Impacto das ações educativas</h3><p>Indicadores registrados em Evidências e Impacto e nos eventos locais.</p></div><span class="badge">'+d.actions+' ação(ões)</span></div><div class="res2-impact"><div><strong>'+fmt(d.people)+'</strong><span>pessoas alcançadas</span></div><div><strong>'+fmt(d.materials)+'</strong><span>materiais distribuídos</span></div><div><strong>'+fmt(d.photos)+'</strong><span>evidências registradas</span></div><div><strong>'+fmt(d.adminPresence)+'</strong><span>presenças em eventos</span></div></div></section>'+
   '<section class="res2-card"><div class="res2-card-head"><div><h3>🧾 Últimas sessões detalhadas</h3><p>Partidas, experiências e trilhas registradas individualmente.</p></div><span class="badge">'+recentSessions.length+' exibidas</span></div>'+
