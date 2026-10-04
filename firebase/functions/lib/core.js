@@ -18,7 +18,7 @@ const protocol=p=>{const d=new Date(),ymd=d.getFullYear()+String(d.getMonth()+1)
 const checkToken=p=>String(p||'Q').slice(0,2).toUpperCase()+(Date.now().toString(36)+Math.random().toString(36).slice(2,10)).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(-11);
 const jsonDate=v=>v?.toDate?.().toISOString?.()||v||null;
 const membershipId=(uid,tenantId)=>crypto.createHash('sha256').update(uid+'|'+tenantId).digest('hex');
-function cors(res){res.set('Access-Control-Allow-Origin','*');res.set('Access-Control-Allow-Headers','Content-Type, Authorization');res.set('Access-Control-Allow-Methods','POST, OPTIONS');}
+function cors(res){res.set('Access-Control-Allow-Origin','*');res.set('Access-Control-Allow-Headers','Content-Type, Authorization, x-bootstrap-key');res.set('Access-Control-Allow-Methods','POST, OPTIONS');}
 const wrap=fn=>async(req,res)=>{cors(res);if(req.method==='OPTIONS')return res.status(204).send('');if(req.method!=='POST')return res.status(405).json({ok:false,message:'Método não permitido.'});try{await fn(req,res);}catch(e){console.error(e);if(!res.headersSent)res.status(500).json({ok:false,message:'Não foi possível concluir a operação.'});}};
 const body=req=>req.body&&typeof req.body==='object'?req.body:{};
 async function ensurePlans(){await Promise.all(Object.entries(PLAN_DEFAULTS).map(([id,p])=>db.collection('plans').doc(id).set({id,...p,active:true,updatedAt:stamp()},{merge:true})));}
