@@ -67,7 +67,20 @@ Write-Host "Mantenha esta janela aberta enquanto estiver testando." -ForegroundC
 Write-Host "Para encerrar os emuladores, pressione Ctrl+C." -ForegroundColor Yellow
 Write-Host ""
 
-& $FirebaseCmd emulators:start --config firebase.emulator.json --only auth,firestore,functions,hosting --project $ProjectId
+$dataDir = Join-Path $Root "firebase\emulator-data"
+$emulatorArgs = @(
+  "emulators:start",
+  "--config","firebase.emulator.json",
+  "--only","auth,firestore,functions,hosting",
+  "--project",$ProjectId,
+  "--export-on-exit",$dataDir
+)
+if (Test-Path (Join-Path $dataDir "firebase-export-metadata.json")) {
+  $emulatorArgs += @("--import",$dataDir)
+  Write-Host "Dados locais anteriores serao restaurados de firebase\emulator-data." -ForegroundColor Green
+}
+
+& $FirebaseCmd @emulatorArgs
 if ($LASTEXITCODE -ne 0) {
   throw "Firebase Emulator Suite encerrou com erro (codigo $LASTEXITCODE)."
 }
