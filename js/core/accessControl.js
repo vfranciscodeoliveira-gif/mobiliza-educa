@@ -91,6 +91,8 @@ export async function createUser(data){
 export function updateUser(id,patch){
  const rows=listUsers(),u=rows.find(x=>x.id===id);if(!u)throw new Error('Usuário não encontrado.');
  if(id===currentUser()?.id&&patch.active===false)throw new Error('Você não pode desativar sua própria sessão.');
+ const willRemainGestor=(patch.profileId??u.profileId)==='GESTOR'&&(patch.active??u.active)!==false;
+ if(u.profileId==='GESTOR'&&u.active&&!willRemainGestor&&rows.filter(x=>x.id!==id&&x.active&&x.profileId==='GESTOR').length===0)throw new Error('Mantenha ao menos um Gestor ativo.');
  if(patch.username){const n=normalizeUsername(patch.username);if(rows.some(x=>x.id!==id&&x.username===n))throw new Error('Este usuário já existe.');patch.username=n;}
  Object.assign(u,patch,{updatedAt:now()});saveUsers(rows);recordAudit('USUARIO_ATUALIZADO','usuario',id,`${u.name} • ${u.profileId} • ${u.active?'ativo':'inativo'}`);return u;
 }
