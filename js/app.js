@@ -1,4 +1,4 @@
-import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=57';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=59';
 import { openQuiz } from './modules/quiz.js?v=29';
 import { openMilhao } from './modules/milhao.js?v=18';
 import { openTrilha } from './modules/trilha.js?v=35';
@@ -10,13 +10,14 @@ import { openLearning } from './modules/learning.js?v=3';
 import { openParticipantMode } from './modules/participant.js?v=3';
 import { openExperience } from './modules/experiencias.js?v=46';
 import { SoundManager } from './core/soundManager.js?v=1';
-import { openAdminModule } from './modules/admin.js?v=8';
+import { openAdminModule } from './modules/admin.js?v=9';
 import { openEducatorModule } from './modules/educator.js?v=1';
 import { renderResultsDashboard } from './modules/results.js?v=2';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
 import { renderHomeNotifications } from './modules/notifications.js?v=3';
-import { renderPublicService } from './modules/publicService.js?v=1';
-import { syncCloudInbox } from './cloudGateway.js?v=1';
+import { renderPublicService } from './modules/publicService.js?v=2';
+import { syncCloudInbox } from './cloudGateway.js?v=2';
+import { openPublicCheckin } from './modules/checkinPublic.js?v=1';
 
 const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
 let deferredPrompt=null,tipIndex=0,currentAudience='criancas';
@@ -130,8 +131,10 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.38.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.39.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 const cloudRefresh=()=>syncCloudInbox().catch(()=>{});window.addEventListener('focus',cloudRefresh);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudRefresh();});
 render();
+const checkinToken=new URLSearchParams(location.search).get('checkin');
+if(checkinToken)openPublicCheckin(checkinToken);
 const plateiaJoinCode=new URLSearchParams(location.search).get('plateia');
 if(plateiaJoinCode)openParticipantMode(plateiaJoinCode);
