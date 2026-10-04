@@ -1,4 +1,4 @@
-import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=63';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=64';
 import { openQuiz } from './modules/quiz.js?v=29';
 import { openMilhao } from './modules/milhao.js?v=18';
 import { openTrilha } from './modules/trilha.js?v=35';
@@ -10,10 +10,11 @@ import { openLearning } from './modules/learning.js?v=3';
 import { openParticipantMode } from './modules/participant.js?v=3';
 import { openExperience } from './modules/experiencias.js?v=46';
 import { SoundManager } from './core/soundManager.js?v=1';
-import { openAdminModule } from './modules/admin.js?v=13';
+import { openAdminModule } from './modules/admin.js?v=14';
 import { openEducatorModule } from './modules/educator.js?v=1';
 import { renderResultsDashboard } from './modules/results.js?v=3';
-import { ensureAdminAccess,isAdminUnlocked,lockAdmin } from './modules/auth.js';
+import { ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser } from './modules/auth.js?v=2';
+import { canAccessModule,installSecurityGuards } from './core/accessControl.js?v=1';
 import { renderHomeNotifications } from './modules/notifications.js?v=4';
 import { renderPublicService } from './modules/publicService.js?v=2';
 import { syncCloudInbox } from './cloudGateway.js?v=3';
@@ -67,11 +68,14 @@ function bindAudienceUI(){
 }
 
 function updateAuthUI(){
- const unlocked=isAdminUnlocked(),lock=qs('#btnAdminLock'),nav=qs('[data-view="gestao"]');
- if(lock)lock.hidden=!unlocked;
+ const unlocked=isAdminUnlocked(),user=getCurrentAdminUser(),lock=qs('#btnAdminLock'),nav=qs('[data-view="gestao"]');
+ if(lock){lock.hidden=!unlocked;lock.textContent=unlocked?'🔒 Sair • '+(user?.name||'Gestor'):'🔒 Sair';lock.title=unlocked?'Encerrar sessão de '+(user?.username||''):'';}
  if(nav)nav.innerHTML=unlocked?'🛠️ Gestão':'🔒 Gestão';
+ qsa('#adminGrid [data-module]').forEach(btn=>{const allowed=!unlocked||canAccessModule(btn.dataset.module);btn.disabled=!allowed;btn.textContent=allowed?'Abrir':'Sem permissão';btn.closest('.module-card')?.classList.toggle('permission-disabled',!allowed);});
  renderHomeNotifications(qs('#homeNotifications'),qs('#authDialog'),updateAuthUI);
 }
+installSecurityGuards();
+
 function render(){
  qs('#audienceGrid').innerHTML=audiences.map(x=>moduleCard(x,'Explorar')).join('');
  const tabs=qs('#audienceTabs'); if(tabs)tabs.innerHTML=audiences.map(x=>`<button class="audience-tab ${x.id===currentAudience?'active':''}" data-audience-tab="${x.id}">${x.icon} ${x.title}</button>`).join('');
@@ -117,7 +121,7 @@ qs('#btnContrast').addEventListener('click',()=>document.documentElement.classLi
 qs('#btnFont').addEventListener('click',()=>document.documentElement.classList.toggle('large-text'));
 qs('#btnAdminLock').addEventListener('click',()=>{lockAdmin();navigate('inicio');updateAuthUI();});
 
-window.addEventListener('mobiliza-admin-auth',updateAuthUI);
+window.addEventListener('mobiliza-admin-auth',e=>{updateAuthUI();if(e.detail?.unlocked===false&&qs('#view-gestao')?.classList.contains('active'))navigate('inicio');});
 window.addEventListener('mobiliza-data-change',()=>{renderHomeNotifications(qs('#homeNotifications'),qs('#authDialog'),updateAuthUI);updateResults();});
 window.addEventListener('mobiliza-learning-progress',updateResults);
 window.addEventListener('mobiliza-educador-change',updateResults);
@@ -133,7 +137,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.43.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.44.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 const cloudRefresh=()=>syncCloudInbox().catch(()=>{});window.addEventListener('focus',cloudRefresh);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudRefresh();});
 render();
 const assessmentInvite=new URLSearchParams(location.search).get('a')||new URLSearchParams(location.search).get('avaliar');
