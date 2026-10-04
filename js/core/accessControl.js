@@ -60,6 +60,8 @@ export function bootstrapSecurity(){
  if(!users.length&&localStorage.getItem(LEGACY_HASH)){
   users=[{id:'legacy-admin',name:'Administrador',username:'admin',profileId:'GESTOR',active:true,passwordHash:localStorage.getItem(LEGACY_HASH),passwordSalt:localStorage.getItem(LEGACY_SALT)||'',hashVersion:'legacy-sha256',createdAt:now(),migratedAt:now(),lastLoginAt:null,failedCount:0,lockedUntil:null,permissions:null}];
   saveUsers(users);
+  localStorage.removeItem(LEGACY_HASH);
+  localStorage.removeItem(LEGACY_SALT);
  }
  return users;
 }
