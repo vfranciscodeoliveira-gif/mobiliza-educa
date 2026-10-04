@@ -3378,3 +3378,25 @@ dialog::backdrop{background:rgba(4,24,38,.68);backdrop-filter:blur(4px)}
 .admin-session-line p{margin:6px 0 0}
 #btnAdminLock{align-items:center;gap:6px}
 @media(max-width:700px){.admin-session-line{align-items:stretch;flex-direction:column}.admin-session-line .btn{width:100%}}
+
+
+/* v0.49.5 • Centro de Gestão em janela própria */
+.admin-hub-dialog{width:min(1280px,96vw);max-width:96vw;max-height:94vh;padding:0;border:0;border-radius:24px;overflow:auto;box-shadow:0 28px 90px rgba(8,37,61,.34)}
+.admin-hub-dialog::backdrop{background:rgba(4,22,38,.68);backdrop-filter:blur(2px)}
+.admin-hub-shell{padding:26px;background:linear-gradient(180deg,#f8fcff,#eef6fa)}
+.admin-hub-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:8px 6px 18px}
+.admin-hub-head h2{margin:4px 0 8px;color:var(--navy);font-size:clamp(1.7rem,3vw,2.5rem)}
+.admin-hub-head p{margin:0;color:var(--muted)}
+.admin-hub-close{float:none;margin:0;flex:0 0 auto}
+.admin-hub-summary{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}
+.admin-hub-summary span{padding:8px 11px;border-radius:999px;background:#e8f5ec;color:#17683c;font-weight:900;font-size:.78rem;border:1px solid #cde8d7}
+.admin-hub-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.admin-hub-card{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:start;padding:18px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(15,60,102,.08)}
+.admin-hub-card .btn{grid-column:1/-1;width:100%}
+.admin-hub-card.disabled{opacity:.62}
+.admin-hub-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:var(--sky);font-size:1.5rem}
+.admin-hub-copy h3{margin:0 0 6px;color:var(--navy);font-size:1rem}
+.admin-hub-copy p{margin:0;color:var(--muted);font-size:.84rem;line-height:1.45}
+.admin-hub-actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:20px;background:transparent;padding:0}
+@media(max-width:980px){.admin-hub-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.admin-hub-dialog{width:98vw;max-width:98vw}.admin-hub-shell{padding:16px}.admin-hub-grid{grid-template-columns:1fr}.admin-hub-head{align-items:center}.admin-hub-actions{flex-direction:column}.admin-hub-actions .btn{width:100%}}

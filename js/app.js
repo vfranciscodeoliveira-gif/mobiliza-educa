@@ -104,6 +104,31 @@ function updateAuthUI(){
 installTenantWorkspaceBridge();
 installSecurityGuards();
 
+function openAdminHub(){
+ if(!isAdminUnlocked())return;
+ const dialog=qs('#adminHubDialog'),host=qs('#adminHubHost');
+ if(!dialog||!host)return;
+ const user=getCurrentAdminUser(),tenantName=activeTenant()?.name||'—';
+ const cards=adminModules.map(item=>{
+  const permissionAllowed=canAccessModule(item.id);
+  const plan=adminModuleEntitlement(item.id);
+  const allowed=permissionAllowed&&plan.allowed;
+  const reason=!permissionAllowed?'Sem permissão':(!plan.allowed?plan.reason:'');
+  return '<article class="admin-hub-card '+(allowed?'':'disabled')+'"><div class="admin-hub-icon">'+(item.icon||'⚙️')+'</div><div class="admin-hub-copy"><h3>'+item.title+'</h3><p>'+item.description+'</p></div><button type="button" class="btn '+(allowed?'primary':'ghost')+'" data-admin-hub-module="'+item.id+'" '+(allowed?'':'disabled')+'>'+(allowed?'Abrir':reason)+'</button></article>';
+ }).join('');
+ host.innerHTML='<section class="admin-hub-shell"><header class="admin-hub-head"><div><p class="eyebrow">CENTRO DE GESTÃO</p><h2>Administração do Mobiliza Educa</h2><p><strong>'+((user?.name||user?.username)||'Gestor')+'</strong> • '+tenantName+'</p></div><button type="button" class="dialog-close admin-hub-close" id="adminHubClose" aria-label="Fechar">×</button></header><div class="admin-hub-summary"><span>✅ Sessão administrativa ativa</span><span>'+adminModules.length+' módulos administrativos</span></div><div class="admin-hub-grid">'+cards+'</div><footer class="admin-hub-actions"><button type="button" class="btn danger" id="adminHubLogout">🚪 Sair do gestor</button><button type="button" class="btn ghost" id="adminHubCloseBottom">Fechar painel</button></footer></section>';
+ const close=()=>{if(dialog.open)dialog.close();};
+ host.querySelector('#adminHubClose')?.addEventListener('click',close);
+ host.querySelector('#adminHubCloseBottom')?.addEventListener('click',close);
+ host.querySelector('#adminHubLogout')?.addEventListener('click',()=>{close();lockAdmin();navigate('inicio');updateAuthUI();});
+ host.querySelectorAll('[data-admin-hub-module]').forEach(btn=>btn.addEventListener('click',()=>{
+  const id=btn.dataset.adminHubModule;if(!id||btn.disabled)return;
+  close();
+  openAdminModule(id,qs('#adminDialog'),qs('#adminHost'),qs('#authDialog'));
+ }));
+ if(!dialog.open)dialog.showModal();
+}
+
 function renderAdminGrid(force=false){
  const grid=qs('#adminGrid');
  if(!grid)return;
@@ -152,15 +177,15 @@ function updateResults(){
  renderResultsDashboard(qs('#resultsDashboard'));
 }
 
-qsa('.nav-item').forEach(b=>b.addEventListener('click',async()=>{const view=b.dataset.view;if(view==='gestao'&&!isAdminUnlocked()){if(!(await ensureAdminAccess(qs('#authDialog'))))return;updateAuthUI();}navigate(view);}));
+qsa('.nav-item').forEach(b=>b.addEventListener('click',async()=>{const view=b.dataset.view;if(view==='gestao'&&!isAdminUnlocked()){if(!(await ensureAdminAccess(qs('#authDialog'))))return;updateAuthUI();}navigate(view);if(view==='gestao'&&isAdminUnlocked())openAdminHub();}));
 qsa('[data-go]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.go)));
 qs('#nextTip').addEventListener('click',()=>showTip(tipIndex+1));
 qs('#btnContrast').addEventListener('click',()=>document.documentElement.classList.toggle('high-contrast'));
 qs('#btnFont').addEventListener('click',()=>document.documentElement.classList.toggle('large-text'));
 qs('#btnAdminLock').addEventListener('click',()=>{lockAdmin();navigate('inicio');updateAuthUI();});
 
-window.addEventListener('mobiliza-admin-auth',e=>{updateAuthUI();if(e.detail?.unlocked===false&&qs('#view-gestao')?.classList.contains('active'))navigate('inicio');});
-window.addEventListener('mobiliza-open-gestao',()=>{if(isAdminUnlocked()){navigate('gestao');updateAuthUI();}});
+window.addEventListener('mobiliza-admin-auth',e=>{updateAuthUI();if(e.detail?.unlocked===true)setTimeout(()=>{navigate('gestao');openAdminHub();},60);if(e.detail?.unlocked===false&&qs('#view-gestao')?.classList.contains('active'))navigate('inicio');});
+window.addEventListener('mobiliza-open-gestao',()=>{if(isAdminUnlocked()){navigate('gestao');updateAuthUI();openAdminHub();}});
 window.addEventListener('mobiliza-plan-change',updateAuthUI);
 window.addEventListener('mobiliza-data-change',()=>{renderHomeNotifications(qs('#homeNotifications'),qs('#authDialog'),updateAuthUI);updateResults();});
 window.addEventListener('mobiliza-learning-progress',updateResults);
@@ -177,7 +202,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.49.4',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.49.5',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 const cloudRefresh=()=>syncCloudInbox().catch(()=>{});window.addEventListener('focus',cloudRefresh);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudRefresh();});
 installEmulatorBadge();
 render();
