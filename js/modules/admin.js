@@ -3,9 +3,10 @@ import {canAccessModule,recordAudit,auditDataWrite} from '../core/accessControl.
 import {publishEvent,updateCloudRequestStatus,updateCloudRegistrationStatus} from '../cloudGateway.js?v=3';
 import {renderPassaporteCertificados} from './passaporteCertificados.js?v=1';
 import {renderAvaliacaoPedagogica} from './avaliacaoPedagogica.js?v=1';
-import {renderEvidenciasImpacto} from './evidenciasImpacto.js?v=1';
+import {renderEvidenciasImpacto} from './evidenciasImpacto.js?v=2';
 import {renderRelatorios360} from './relatorios360.js?v=1';
 import {renderUsuariosAuditoria} from './usuariosAuditoria.js?v=1';
+import {renderSistemaContinuity} from './sistemaContinuity.js?v=1';
 import {qrSvg,makeCheckinToken} from '../core/qr.js?v=1';
 
 const modules={
@@ -34,7 +35,7 @@ const parseLines=(txt,kind)=>String(txt||'').split(/\r?\n/).map(x=>x.trim()).fil
 const csvEscape=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
 const download=(name,text,type='text/csv;charset=utf-8')=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
 
-function shell(m,inner){return `<section class="admin-module"><p class="eyebrow">CENTRO DE GESTÃO WEB • v1.3</p><h2>${m.title}</h2><p class="admin-intro">${m.intro}</p>${inner}</section>`;}
+function shell(m,inner){return `<section class="admin-module"><p class="eyebrow">CENTRO DE GESTÃO WEB • v1.4</p><h2>${m.title}</h2><p class="admin-intro">${m.intro}</p>${inner}</section>`;}
 function byId(entity,id){return read(entity).find(x=>x.id===id);}
 function label(entity,id){const r=byId(entity,id);return r?.nome||'—';}
 function uniqueName(entity,name,exclude){return !read(entity).some(x=>x.id!==exclude&&String(x.nome||'').trim().toLowerCase()===String(name||'').trim().toLowerCase());}
@@ -471,6 +472,7 @@ export function openAdminModule(id,dialog,host,authDialog){
  else if(id==='admin-avaliacao')renderAvaliacaoPedagogica(host);
  else if(id==='admin-evidencias')renderEvidenciasImpacto(host);
  else if(id==='admin-acessos')renderUsuariosAuditoria(host,authDialog);
+ else if(id==='admin-sistema')renderSistemaContinuity(host);
  else renderPlaceholder(id,host);
  dialog.showModal();
 }
