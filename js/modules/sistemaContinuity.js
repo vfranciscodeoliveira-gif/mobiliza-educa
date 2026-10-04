@@ -1,7 +1,7 @@
 import {
  exportOperationalBackup,exportProtectedBackup,inspectBackupContainer,parseBackup,restoreBackup,storageEstimate,backupFilename
-} from '../core/backupManager.js?v=1';
-import {listEvidenceFiles} from '../core/evidenceStore.js?v=2';
+} from '../core/backupManager.js?v=2';
+import {listEvidenceFiles} from '../core/evidenceStore.js?v=3';
 import {recordAudit,currentUser} from '../core/accessControl.js?v=1';
 import {cloudConfigured,hasManagerKey} from '../cloudGateway.js?v=3';
 
