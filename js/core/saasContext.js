@@ -49,7 +49,7 @@ export function saveTenant(patch){
 export function previewPlan(planId){
  const p=PLAN_CATALOG.find(x=>x.id===planId);if(!p)throw new Error('Plano não encontrado.');
  const s=updateSubscription(activeTenantId(),{planId:p.id,status:'active',authority:'local-development'});
- recordAudit('SAAS_PLANO_PREVIEW','produto',p.id,p.name);return s;
+ recordAudit('SAAS_PLANO_PREVIEW','produto',p.id,p.name);window.dispatchEvent(new CustomEvent('mobiliza-plan-change',{detail:{planId:p.id}}));return s;
 }
 export function usageSnapshot(){
  const stats=tenantWorkspaceStats(activeTenantId());
