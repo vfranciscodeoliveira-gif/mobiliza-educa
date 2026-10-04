@@ -60,3 +60,4 @@ export function renderHomeNotifications(host,authDialog,onUnlocked){
  if(syncBtn)syncBtn.onclick=async()=>{syncBtn.disabled=true;try{await cloudMe();await syncCloudInbox();renderHomeNotifications(host,authDialog,onUnlocked);}catch(e){alert(e.message);}finally{syncBtn.disabled=false;}};
  if(pushBtn)pushBtn.onclick=async()=>{pushBtn.disabled=true;try{await enableManagerPush();alert('Notificações Firebase ativadas neste aparelho.');}catch(e){alert(e.message);}finally{pushBtn.disabled=false;}};
  if(logoutBtn)logoutBtn.onclick=async()=>{await signOutCloud();renderHomeNotifications(host,authDialog,onUnlocked);};
+}
