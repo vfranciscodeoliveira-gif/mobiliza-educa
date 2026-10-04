@@ -1,5 +1,6 @@
 import {changeAdminPassword,lockAdmin} from './auth.js?v=2';
 import {canAccessModule,recordAudit,auditDataWrite} from '../core/accessControl.js?v=1';
+import {adminModuleEntitlement} from '../core/saasContext.js?v=2';
 import {publishEvent,updateCloudRequestStatus,updateCloudRegistrationStatus} from '../cloudGateway.js?v=3';
 import {renderPassaporteCertificados} from './passaporteCertificados.js?v=1';
 import {renderAvaliacaoPedagogica} from './avaliacaoPedagogica.js?v=2';
@@ -468,6 +469,7 @@ function renderPlaceholder(id,host){
 export function openAdminModule(id,dialog,host,authDialog){
  if(!modules[id])return;
  if(!canAccessModule(id)){recordAudit('ACESSO_NEGADO','modulo',id,'Usuário tentou abrir módulo sem permissão.','', 'warn');alert('Seu perfil não possui permissão para acessar este módulo.');return;}
+ const entitlement=adminModuleEntitlement(id);if(!entitlement.allowed){recordAudit('PLANO_NEGOU_RECURSO','modulo',id,entitlement.reason,'','warn');alert(entitlement.reason+'\n\nAltere o plano em Produto e assinatura. Este bloqueio é apenas uma prévia local até a ativação do backend.');return;}
  recordAudit('MODULO_ABERTO','modulo',id,modules[id].title);
  if(id==='admin-dashboard')renderDashboard(host,authDialog);
  else if(id==='admin-cadastros')renderCadastros(host);
