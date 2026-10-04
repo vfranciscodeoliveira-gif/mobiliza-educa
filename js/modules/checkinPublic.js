@@ -1,4 +1,4 @@
-import {cloudConfigured,publicCheckin} from '../cloudGateway.js?v=3';
+import {cloudConfigured,publicCheckin} from '../cloudGateway.js?v=4';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const digits=v=>String(v||'').replace(/\D/g,'');
