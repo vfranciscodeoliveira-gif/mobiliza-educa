@@ -1,4 +1,5 @@
-const {admin,db,PLAN_DEFAULTS,stamp,text,slugify,jsonDate,featureAccess}=require('./core');
+const {Timestamp}=require('firebase-admin/firestore');
+const {db,PLAN_DEFAULTS,stamp,text,slugify,jsonDate,featureAccess}=require('./core');
 
 async function createTenantCore({name,slug,planId='TRIAL',trialDays=14,type='CLIENTE',contactName='',contactEmail='',contactPhone='',document='',publicDefault=false,createdBy=''}) {
  const cleanSlug=slugify(slug||name);
@@ -7,7 +8,7 @@ async function createTenantCore({name,slug,planId='TRIAL',trialDays=14,type='CLI
  if(existing.exists)throw new Error('Já existe uma organização com este slug.');
  const tenantRef=db.collection('tenants').doc(),tenantId=tenantRef.id;
  const plan=PLAN_DEFAULTS[planId]?planId:'TRIAL',isTrial=plan==='TRIAL',days=Math.max(1,Number(trialDays)||PLAN_DEFAULTS.TRIAL.trialDays);
- const trialEndsAt=isTrial?admin.firestore.Timestamp.fromDate(new Date(Date.now()+days*86400000)):null;
+ const trialEndsAt=isTrial?Timestamp.fromDate(new Date(Date.now()+days*86400000)):null;
  const batch=db.batch();
  batch.set(tenantRef,{id:tenantId,name:text(name,180),slug:cleanSlug,type:text(type,40)||'CLIENTE',status:'active',document:text(document,40),contactName:text(contactName,180),contactEmail:text(contactEmail,180).toLowerCase(),contactPhone:text(contactPhone,50),publicDefault:!!publicDefault,createdBy:text(createdBy,120),createdAt:stamp(),updatedAt:stamp()});
  batch.set(db.collection('publicTenants').doc(cleanSlug),{tenantId,name:text(name,180),slug:cleanSlug,status:'active',publicDefault:!!publicDefault,updatedAt:stamp()});

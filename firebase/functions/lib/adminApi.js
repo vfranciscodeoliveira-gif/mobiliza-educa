@@ -1,4 +1,5 @@
 const crypto=require('crypto');
+const {getMessaging}=require('firebase-admin/messaging');
 const {db,stamp,text,checkToken,jsonDate,audit}=require('./core');
 const {requireTenant}=require('./authz');
 
@@ -47,7 +48,7 @@ async function registerGestorToken(req,res){
 }
 async function notifyTenant(tenantId,title,message,url='./'){
  const snap=await db.collection('tenants').doc(tenantId).collection('pushDevices').limit(500).get(),tokens=snap.docs.map(d=>d.data().token).filter(Boolean);if(!tokens.length)return;
- const result=await require('./core').admin.messaging().sendEachForMulticast({tokens,notification:{title,body:message},webpush:{fcmOptions:{link:url}}}),bad=[];
+ const result=await getMessaging().sendEachForMulticast({tokens,notification:{title,body:message},webpush:{fcmOptions:{link:url}}}),bad=[];
  result.responses.forEach((x,i)=>{if(!x.success&&['messaging/registration-token-not-registered','messaging/invalid-registration-token'].includes(x.error?.code))bad.push(snap.docs[i].ref.delete());});
  await Promise.all(bad);
 }

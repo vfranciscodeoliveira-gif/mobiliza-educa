@@ -1,7 +1,7 @@
-const admin=require('firebase-admin');
+const {getFirestore,FieldValue}=require('firebase-admin/firestore');
 const crypto=require('crypto');
 
-const db=admin.firestore();
+const db=getFirestore();
 const REGION='southamerica-east1';
 const PLAN_DEFAULTS={
  TRIAL:{name:'Trial',description:'Avaliação do produto antes da contratação.',features:['public_requests','events','checkin_qr'],limits:{users:1,eventsMonth:5,storageMb:50},trialDays:14,order:10},
@@ -10,7 +10,7 @@ const PLAN_DEFAULTS={
  INSTITUCIONAL:{name:'Institucional',description:'Governança, identidade e integração ampliadas.',features:['public_requests','events','checkin_qr','assessments','certificates','evidence','reports360','content_editor','users','audit','backup','branding','cloud_sync'],limits:{users:null,eventsMonth:null,storageMb:null},trialDays:0,order:40}
 };
 const ROLES=['GESTOR','EDUCADOR','OPERADOR','CONSULTA'];
-const stamp=()=>admin.firestore.FieldValue.serverTimestamp();
+const stamp=()=>FieldValue.serverTimestamp();
 const text=(v,n=500)=>String(v??'').trim().slice(0,n);
 const digits=v=>String(v??'').replace(/\D/g,'');
 const slugify=v=>text(v,100).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60);
@@ -25,4 +25,4 @@ async function ensurePlans(){await Promise.all(Object.entries(PLAN_DEFAULTS).map
 function subscriptionStatus(sub={}){let status=sub.status||'active',usable=['active','trialing'].includes(status),daysRemaining=null;if(status==='trialing'&&sub.trialEndsAt){const end=sub.trialEndsAt?.toDate?.()||new Date(sub.trialEndsAt),ms=end-Date.now();daysRemaining=Math.ceil(ms/86400000);if(ms<0){status='trial_expired';usable=false;}}if(['past_due','suspended','canceled','trial_expired'].includes(status))usable=false;return{status,usable,daysRemaining};}
 async function featureAccess(tenantId,feature){const subSnap=await db.collection('subscriptions').doc(tenantId).get();if(!subSnap.exists)return{allowed:false,reason:'Assinatura não encontrada.'};const sub=subSnap.data(),health=subscriptionStatus(sub);if(!health.usable)return{allowed:false,reason:'Assinatura indisponível: '+health.status+'.'};const planSnap=await db.collection('plans').doc(sub.planId||'TRIAL').get(),plan=planSnap.exists?planSnap.data():PLAN_DEFAULTS[sub.planId]||PLAN_DEFAULTS.TRIAL;if(!(plan.features||[]).includes(feature))return{allowed:false,reason:'Recurso não incluído no plano '+(plan.name||sub.planId)+'.'};return{allowed:true,plan,health,sub};}
 async function audit(tenantId,user,action,target='',recordId='',details=''){await db.collection('tenants').doc(tenantId).collection('auditLogs').add({action,target,recordId,details,userId:user?.uid||'',userEmail:user?.email||'',createdAt:stamp()});}
-module.exports={admin,db,REGION,PLAN_DEFAULTS,ROLES,stamp,text,digits,slugify,protocol,checkToken,jsonDate,membershipId,cors,wrap,body,ensurePlans,subscriptionStatus,featureAccess,audit};
+module.exports={db,REGION,PLAN_DEFAULTS,ROLES,stamp,text,digits,slugify,protocol,checkToken,jsonDate,membershipId,cors,wrap,body,ensurePlans,subscriptionStatus,featureAccess,audit};

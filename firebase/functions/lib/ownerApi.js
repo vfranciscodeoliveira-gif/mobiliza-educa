@@ -1,5 +1,6 @@
 const {defineSecret}=require('firebase-functions/params');
-const {admin,db,PLAN_DEFAULTS,stamp,text,ensurePlans,subscriptionStatus,jsonDate,audit}=require('./core');
+const {Timestamp}=require('firebase-admin/firestore');
+const {db,PLAN_DEFAULTS,stamp,text,ensurePlans,subscriptionStatus,jsonDate,audit}=require('./core');
 const {requireAuth,requirePlatformOwner,setMembership}=require('./authz');
 const {createTenantCore}=require('./tenant');
 
@@ -108,12 +109,12 @@ async function ownerUpdateSubscription(req,res){
  if(status==='trialing'){
   const days=Math.max(1,Number(x.trialDays)||PLAN_DEFAULTS.TRIAL.trialDays);
   patch.trialStartedAt=stamp();
-  patch.trialEndsAt=admin.firestore.Timestamp.fromDate(new Date(Date.now()+days*86400000));
+  patch.trialEndsAt=Timestamp.fromDate(new Date(Date.now()+days*86400000));
  }
  if(status==='active'){
   patch.currentPeriodStart=stamp();
   const end=x.currentPeriodEnd?new Date(x.currentPeriodEnd):new Date(Date.now()+31*86400000);
-  patch.currentPeriodEnd=admin.firestore.Timestamp.fromDate(end);
+  patch.currentPeriodEnd=Timestamp.fromDate(end);
  }
  await db.collection('subscriptions').doc(tenantId).set(patch,{merge:true});
  await audit(tenantId,owner,'ASSINATURA_ATUALIZADA','subscription',tenantId,planId+' • '+status);

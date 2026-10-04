@@ -1,8 +1,8 @@
 const {onRequest}=require('firebase-functions/v2/https');
 const {onDocumentCreated}=require('firebase-functions/v2/firestore');
-const admin=require('firebase-admin');
+const {initializeApp}=require('firebase-admin/app');
 
-admin.initializeApp();
+initializeApp();
 
 const {REGION,wrap}=require('./lib/core');
 const publicApi=require('./lib/publicApi');

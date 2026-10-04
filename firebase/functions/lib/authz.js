@@ -1,10 +1,11 @@
-const {admin,db,text,featureAccess,membershipId,stamp,ROLES}=require('./core');
+const {getAuth}=require('firebase-admin/auth');
+const {db,text,featureAccess,membershipId,stamp,ROLES}=require('./core');
 
 async function authUser(req){
  const h=text(req.headers.authorization,5000);
  if(!h.toLowerCase().startsWith('bearer '))return null;
  const token=h.slice(7).trim();if(!token)return null;
- try{return await admin.auth().verifyIdToken(token,true);}catch{return null;}
+ try{return await getAuth().verifyIdToken(token,true);}catch{return null;}
 }
 async function requireAuth(req,res){
  const user=await authUser(req);
