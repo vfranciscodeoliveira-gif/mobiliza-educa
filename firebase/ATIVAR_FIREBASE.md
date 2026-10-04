@@ -1,3 +1,36 @@
+# Desenvolvimento local sem Blaze
+
+Enquanto o projeto permanecer no plano Spark, use o Firebase Emulator Suite para testar o backend SaaS sem publicar Cloud Functions.
+
+Portas configuradas:
+
+- Emulator UI: http://127.0.0.1:4000
+- Authentication: http://127.0.0.1:9099
+- Firestore: http://127.0.0.1:8080
+- Functions: http://127.0.0.1:5001
+
+Na raiz do repositório:
+
+~~~powershell
+powershell -ExecutionPolicy Bypass -File .\firebase\emulator-start.ps1
+~~~
+
+Mantenha essa janela aberta. Em uma segunda janela:
+
+~~~powershell
+powershell -ExecutionPolicy Bypass -File .\firebase\emulator-smoke-test.ps1
+~~~
+
+Depois, para testar Authentication + tenant + membership + assinatura + proprietário:
+
+~~~powershell
+powershell -ExecutionPolicy Bypass -File .\firebase\emulator-bootstrap-owner.ps1
+~~~
+
+Esses scripts usam apenas os emuladores locais. A chave de bootstrap local é gerada em arquivos ignorados pelo Git.
+
+---
+
 # Mobiliza Educa — Backend Firebase SaaS
 
 A partir da versão **0.48.0**, o backend do Mobiliza Educa usa Firebase Authentication, Cloud Firestore multitenant, Cloud Functions, Firebase Cloud Messaging e Cloud Storage opcional. Planos, tenants e assinaturas são validados no servidor.
