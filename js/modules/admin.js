@@ -188,27 +188,167 @@ function printOperationalSheet(event){
  w.document.write(html);w.document.close();
 }
 
+function ensureDashboardCss(){
+ if(document.getElementById('admin-dashboard-360-v2'))return;
+ const s=document.createElement('style');s.id='admin-dashboard-360-v2';s.textContent=`
+ .dash360-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.8fr);gap:16px;margin:14px 0 18px}
+ .dash360-primary{padding:20px;border:1px solid #d8e6ee;border-radius:18px;background:linear-gradient(135deg,#fafdff,#eef8fc)}
+ .dash360-primary h3{margin:5px 0 8px;color:#103f63;font-size:1.35rem}
+ .dash360-primary p{margin:0;color:#637a89}
+ .dash360-health{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .dash360-health article{padding:14px;border:1px solid #dce8ef;border-radius:14px;background:#fff}
+ .dash360-health span,.dash360-health strong,.dash360-health small{display:block}
+ .dash360-health span{font-size:.7rem;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:#78909d}
+ .dash360-health strong{font-size:1.4rem;color:#0b5f8a;margin:3px 0}
+ .dash360-health small{font-size:.75rem;color:#738895}
+ .dash360-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 16px}
+ .dash360-kpi{padding:15px;border:1px solid #d9e7ef;border-radius:15px;background:#fff;box-shadow:0 6px 18px rgba(15,60,102,.06)}
+ .dash360-kpi span,.dash360-kpi strong,.dash360-kpi small{display:block}
+ .dash360-kpi span{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#758a98;font-weight:900}
+ .dash360-kpi strong{font-size:1.7rem;color:#0f3c66;margin:5px 0 2px}
+ .dash360-kpi small{font-size:.76rem;color:#7b8e99}
+ .dash360-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:14px;margin-top:14px}
+ .dash360-panel{padding:18px;border:1px solid #d8e6ee;border-radius:17px;background:#fff}
+ .dash360-panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+ .dash360-panel-head h3{margin:0;color:#173f60}
+ .dash360-count{display:inline-flex;min-width:30px;height:30px;align-items:center;justify-content:center;border-radius:999px;background:#eaf5fb;color:#0a648f;font-weight:900}
+ .dash360-list{display:grid;gap:8px}
+ .dash360-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #edf3f6}
+ .dash360-row:last-child{border-bottom:0}
+ .dash360-row strong,.dash360-row small{display:block}
+ .dash360-row small{margin-top:3px;color:#748895}
+ .dash360-status{font-size:.72rem;font-weight:900;border-radius:999px;padding:5px 8px;background:#edf4f8;color:#35596d;white-space:nowrap}
+ .dash360-status.warn{background:#fff1d8;color:#7a4b00}.dash360-status.danger{background:#ffe5e5;color:#8d2727}.dash360-status.ok{background:#e3f6e9;color:#176438}
+ .dash360-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .dash360-actions .btn{width:100%;min-height:44px;justify-content:flex-start}
+ .dash360-progress{height:10px;border-radius:999px;background:#e8eff3;overflow:hidden;margin:8px 0 4px}
+ .dash360-progress>span{display:block;height:100%;background:linear-gradient(90deg,#0a79ad,#20a16a)}
+ .dash360-alerts{display:grid;gap:8px}
+ .dash360-alert{display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center;padding:10px 11px;border-radius:12px;border:1px solid #e0e9ee;background:#f9fcfd}
+ .dash360-alert.warn{background:#fff9ed;border-color:#f0dfb7}.dash360-alert.danger{background:#fff1f1;border-color:#efcaca}
+ .dash360-alert b{color:#173f60}.dash360-alert small{display:block;color:#728694;margin-top:2px}
+ .dash360-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+ .dash360-tools .btn{flex:1;min-width:180px}
+ @media(max-width:980px){.dash360-hero,.dash360-grid{grid-template-columns:1fr}.dash360-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+ @media(max-width:620px){.dash360-kpis,.dash360-health,.dash360-actions{grid-template-columns:1fr}.dash360-row,.dash360-alert{grid-template-columns:1fr}.dash360-tools .btn{min-width:100%}}
+ `;document.head.appendChild(s);
+}
+
 function renderDashboard(host,authDialog){
- const eventos=read('eventos'),agora=today(),solicitacoes=read('solicitacoes'),inscricoes=read('inscricoes');
- const upcoming=eventos.filter(x=>(x.dataInicio||x.data)>=agora&&x.status!=='Cancelado').sort((a,b)=>(a.dataInicio||a.data).localeCompare(b.dataInicio||b.data)).slice(0,7);
- const games=JSON.parse(localStorage.getItem('mobiliza.results')||'{"games":0}').games||0;
- const abertas=solicitacoes.filter(x=>!['Agendada','Concluída','Cancelada','Não atendida'].includes(x.status)).length,novasSolicitacoes=solicitacoes.filter(x=>['Recebida','Nova'].includes(x.status||'Recebida')).length,novasInscricoes=inscricoes.filter(x=>['Recebida','Pré-inscrição'].includes(x.status||'Recebida')).length;
+ ensureDashboardCss();
+ const eventos=read('eventos'),solicitacoes=read('solicitacoes'),inscricoes=read('inscricoes'),impactos=read('impactos');
+ const agora=today(),em7=addDays(agora,7);
+ const escolas=read('escolas'),instituicoes=read('instituicoes');
+ const upcoming=eventos.filter(x=>(x.dataInicio||x.data)>=agora&&x.status!=='Cancelado').sort((a,b)=>String(a.dataInicio||a.data||'').localeCompare(String(b.dataInicio||b.data||''))).slice(0,6);
+ const hoje=eventos.filter(x=>{const a=x.dataInicio||x.data,b=x.dataFim||a;return a<=agora&&b>=agora&&x.status!=='Cancelado';});
+ const proximos7=eventos.filter(x=>{const d=x.dataInicio||x.data;return d>=agora&&d<=em7&&x.status!=='Cancelado';});
+ const checklistPendentes=proximos7.filter(x=>checklistProgress(x).pct<100);
+ const conflitos=proximos7.filter(x=>eventConflicts(x,x.id).length>0);
+ const semFechamento=eventos.filter(e=>e.status==='Concluído'&&!impactos.some(i=>i.eventId===e.id&&i.status==='Finalizado'));
+ const abertas=solicitacoes.filter(x=>!['Agendada','Concluída','Cancelada','Não atendida'].includes(x.status)).length;
+ const novasSolicitacoes=solicitacoes.filter(x=>['Recebida','Nova'].includes(x.status||'Recebida')).length;
+ const novasInscricoes=inscricoes.filter(x=>['Recebida','Pré-inscrição'].includes(x.status||'Recebida')).length;
  const inscritos=inscricoes.filter(x=>['Confirmada','Presente'].includes(x.status)).reduce((s,x)=>s+(Number(x.quantidade)||1),0);
+ const presentes=inscricoes.filter(x=>x.status==='Presente').reduce((s,x)=>s+(Number(x.quantidade)||1),0);
+ const games=JSON.parse(localStorage.getItem('mobiliza.results')||'{"games":0}').games||0;
+ const readiness=proximos7.length?Math.round(proximos7.reduce((sum,x)=>sum+checklistProgress(x).pct,0)/proximos7.length):100;
+ const priorityCount=novasSolicitacoes+novasInscricoes+checklistPendentes.length+conflitos.length+semFechamento.length;
+ const statusLabel=priorityCount===0?'Operação em dia':priorityCount+' pendência(s) para atenção';
+
  host.innerHTML=shell(modules['admin-dashboard'],`
- <div class="admin-kpis">
-  <article class="admin-kpi"><span>Escolas</span><strong>${read('escolas').length}</strong></article>
-  <article class="admin-kpi"><span>Instituições</span><strong>${read('instituicoes').length}</strong></article>
-  <article class="admin-kpi"><span>Solicitações abertas</span><strong>${abertas}</strong></article>
-  <article class="admin-kpi"><span>Inscritos confirmados</span><strong>${inscritos}</strong></article>
- </div>
- <div class="admin-dashboard-grid">
-  <div class="admin-panel card"><div class="panel-head"><h3>Próximos compromissos</h3><span>${upcoming.length}</span></div>${upcoming.length?upcoming.map(x=>`<div class="admin-list-row"><div><strong>${esc(x.nome)}</strong><small>${fmtDate(x.dataInicio||x.data)} • ${esc(x.horaInicio||'')} • ${esc(x.local||'Local não informado')}</small></div><span class="status-chip">${esc(x.status||'Planejado')}</span></div>`).join(''):'<p class="empty-state">Nenhum evento futuro cadastrado.</p>'}</div>
-  <div class="admin-panel card"><h3>Operação</h3><div class="admin-list-row"><div><strong>Novas solicitações</strong><small>Recebidas e ainda não analisadas pelo gestor.</small></div><span class="status-chip">${novasSolicitacoes}</span></div><div class="admin-list-row"><div><strong>Novas inscrições</strong><small>Recebidas e ainda não confirmadas.</small></div><span class="status-chip">${novasInscricoes}</span></div><div class="admin-list-row"><div><strong>Participantes confirmados</strong><small>Total de vagas confirmadas nas inscrições.</small></div><span class="status-chip">${inscritos}</span></div><p class="admin-help">Partidas registradas neste dispositivo: <strong>${games}</strong>.</p></div>
- </div>
- <div class="admin-dashboard-grid"><div class="admin-panel card"><h3>Ferramentas do gestor</h3><button class="btn ghost admin-tool" id="adminChangePass">🔑 Alterar senha administrativa</button><button class="btn ghost admin-tool" id="adminExportAll">💾 Backup dos dados locais</button><button class="btn danger admin-tool" id="adminLogout">🔒 Bloquear painel do gestor</button></div></div>`);
+ <section class="dash360-hero">
+  <div class="dash360-primary">
+   <p class="eyebrow">VISÃO EXECUTIVA • HOJE</p>
+   <h3>${statusLabel}</h3>
+   <p>${hoje.length?hoje.length+' atividade(s) ocorrendo hoje.':'Nenhuma atividade programada para hoje.'} Próximos 7 dias: <strong>${proximos7.length}</strong> evento(s).</p>
+   <div class="dash360-progress" title="Prontidão média dos checklists"><span style="width:${readiness}%"></span></div>
+   <small>Prontidão operacional média dos próximos 7 dias: <strong>${readiness}%</strong></small>
+  </div>
+  <div class="dash360-health">
+   <article><span>Status</span><strong>${priorityCount===0?'OK':'Atenção'}</strong><small>${priorityCount===0?'Sem pendências críticas':'Revise os alertas abaixo'}</small></article>
+   <article><span>Hoje</span><strong>${hoje.length}</strong><small>atividade(s) em andamento / prevista(s)</small></article>
+   <article><span>Presenças</span><strong>${presentes}</strong><small>participantes registrados</small></article>
+   <article><span>Jogos</span><strong>${games}</strong><small>partidas neste navegador</small></article>
+  </div>
+ </section>
+
+ <section class="dash360-kpis">
+  <article class="dash360-kpi"><span>Escolas</span><strong>${escolas.length}</strong><small>cadastros ativos</small></article>
+  <article class="dash360-kpi"><span>Instituições</span><strong>${instituicoes.length}</strong><small>parceiros / solicitantes</small></article>
+  <article class="dash360-kpi"><span>Solicitações abertas</span><strong>${abertas}</strong><small>${novasSolicitacoes} nova(s)</small></article>
+  <article class="dash360-kpi"><span>Confirmados</span><strong>${inscritos}</strong><small>${novasInscricoes} inscrição(ões) aguardando análise</small></article>
+ </section>
+
+ <section class="dash360-grid">
+  <div class="dash360-panel">
+   <div class="dash360-panel-head"><h3>Próximos compromissos</h3><span class="dash360-count">${upcoming.length}</span></div>
+   <div class="dash360-list">${upcoming.length?upcoming.map(x=>`<div class="dash360-row"><div><strong>${esc(x.nome)}</strong><small>${fmtDate(x.dataInicio||x.data)} • ${esc(x.horaInicio||'')} • ${esc(x.local||'Local não informado')}</small></div><span class="dash360-status">${esc(x.status||'Planejado')}</span></div>`).join(''):'<p class="empty-state">Nenhum evento futuro cadastrado.</p>'}</div>
+   <button class="btn ghost" data-dash-route="admin-eventos" style="margin-top:10px">Abrir agenda completa</button>
+  </div>
+
+  <div class="dash360-panel">
+   <div class="dash360-panel-head"><h3>Prioridades</h3><span class="dash360-count">${priorityCount}</span></div>
+   <div class="dash360-alerts">
+    <div class="dash360-alert ${novasSolicitacoes?'warn':''}"><span>📥</span><div><b>Solicitações novas</b><small>Aguardando análise inicial</small></div><strong>${novasSolicitacoes}</strong></div>
+    <div class="dash360-alert ${novasInscricoes?'warn':''}"><span>📝</span><div><b>Inscrições pendentes</b><small>Necessitam confirmação</small></div><strong>${novasInscricoes}</strong></div>
+    <div class="dash360-alert ${checklistPendentes.length?'warn':''}"><span>✅</span><div><b>Checklist incompleto</b><small>Eventos nos próximos 7 dias</small></div><strong>${checklistPendentes.length}</strong></div>
+    <div class="dash360-alert ${conflitos.length?'danger':''}"><span>⚠️</span><div><b>Conflitos de agenda</b><small>Local, equipe, escola ou turma</small></div><strong>${conflitos.length}</strong></div>
+    <div class="dash360-alert ${semFechamento.length?'danger':''}"><span>📷</span><div><b>Pós-evento pendente</b><small>Ações concluídas sem fechamento</small></div><strong>${semFechamento.length}</strong></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="dash360-grid">
+  <div class="dash360-panel">
+   <div class="dash360-panel-head"><h3>Ações rápidas</h3></div>
+   <div class="dash360-actions">
+    <button class="btn primary" data-dash-action="new-event">📅 Novo agendamento</button>
+    <button class="btn ghost" data-dash-action="requests">📥 Analisar solicitações</button>
+    <button class="btn ghost" data-dash-action="registrations">📝 Conferir inscrições</button>
+    <button class="btn ghost" data-dash-route="admin-cadastros">🏫 Pessoas e instituições</button>
+    <button class="btn ghost" data-dash-route="admin-relatorios">📑 Relatórios 360</button>
+    <button class="btn ghost" data-dash-route="admin-acessos">🔐 Usuários e auditoria</button>
+   </div>
+  </div>
+  <div class="dash360-panel">
+   <div class="dash360-panel-head"><h3>Resumo operacional</h3></div>
+   <div class="dash360-row"><div><strong>Próximos 7 dias</strong><small>Agenda que exige preparação</small></div><span class="dash360-status ${readiness===100?'ok':'warn'}">${readiness}% pronto</span></div>
+   <div class="dash360-row"><div><strong>Participantes confirmados</strong><small>Inscrições confirmadas ou presentes</small></div><span class="dash360-status ok">${inscritos}</span></div>
+   <div class="dash360-row"><div><strong>Presenças registradas</strong><small>Check-ins/presenças confirmadas</small></div><span class="dash360-status">${presentes}</span></div>
+  </div>
+ </section>
+
+ <div class="dash360-tools">
+  <button class="btn ghost" id="adminChangePass">🔑 Alterar minha senha</button>
+  <button class="btn ghost" id="adminExportAll">💾 Exportar backup local</button>
+  <button class="btn danger" id="adminLogout">🚪 Encerrar sessão</button>
+ </div>`);
+
+ const goModule=id=>{
+  if(id==='admin-cadastros')renderCadastros(host);
+  else if(id==='admin-eventos')renderEventos(host);
+  else if(id==='admin-relatorios')renderRelatorios360(host);
+  else if(id==='admin-passaporte')renderPassaporteCertificados(host);
+  else if(id==='admin-avaliacao')renderAvaliacaoPedagogica(host);
+  else if(id==='admin-evidencias')renderEvidenciasImpacto(host);
+  else if(id==='admin-conteudo')renderCentroEditorial(host);
+  else if(id==='admin-acessos')renderUsuariosAuditoria(host,authDialog);
+  else if(id==='admin-sistema')renderSistemaContinuity(host);
+  else if(id==='admin-assinatura')renderAssinaturaSaas(host);
+  else if(id==='admin-plataforma')renderPlataformaComercial(host);
+ };
+
+ host.querySelectorAll('[data-dash-route]').forEach(b=>b.onclick=()=>goModule(b.dataset.dashRoute));
+ host.querySelectorAll('[data-dash-action]').forEach(b=>b.onclick=()=>{
+  const action=b.dataset.dashAction;
+  renderEventos(host);
+  if(action==='new-event')setTimeout(()=>host.querySelector('#eventNew')?.click(),0);
+  if(action==='requests')setTimeout(()=>host.querySelector('[data-central-tab="solicitacoes"]')?.click(),0);
+  if(action==='registrations')setTimeout(()=>host.querySelector('[data-central-tab="inscricoes"]')?.click(),0);
+ });
  host.querySelector('#adminChangePass').onclick=()=>changeAdminPassword(authDialog);
  host.querySelector('#adminLogout').onclick=()=>{lockAdmin();location.reload();};
- host.querySelector('#adminExportAll').onclick=()=>{const data={version:'0.5',exportedAt:new Date().toISOString()};KEYS.forEach(k=>data[k]=read(k));download('mobiliza-educa-backup.json',JSON.stringify(data,null,2),'application/json');};
+ host.querySelector('#adminExportAll').onclick=()=>{const data={version:'0.52.0',exportedAt:new Date().toISOString()};KEYS.forEach(k=>data[k]=read(k));download('mobiliza-educa-backup.json',JSON.stringify(data,null,2),'application/json');};
 }
 
 const defs={
