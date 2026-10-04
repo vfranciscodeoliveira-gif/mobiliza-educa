@@ -1,5 +1,5 @@
 import {isAdminUnlocked,ensureAdminAccess} from './auth.js';
-import {cloudConfigured,enableManagerPush,hasManagerKey,setManagerKey,syncCloudInbox} from '../cloudGateway.js?v=2';
+import {cloudConfigured,enableManagerPush,hasManagerKey,setManagerKey,syncCloudInbox} from '../cloudGateway.js?v=3';
 
 const read=k=>JSON.parse(localStorage.getItem('mobiliza.admin.'+k)||'[]');
 const today=()=>new Date().toISOString().slice(0,10);
