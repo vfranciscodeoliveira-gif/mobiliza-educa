@@ -93,6 +93,7 @@ export function saveEditorialQuestion(input){
  return row;
 }
 export function setQuestionStatus(id,status){
+ if(status==='Homologado'&&currentUser()?.profileId!=='GESTOR')throw new Error('Somente Gestor pode homologar conteúdo.');
  const rows=listEditorialQuestions(),i=rows.findIndex(x=>x.id===id);if(i<0)throw new Error('Questão não encontrada.');
  const before={...rows[i]},row={...rows[i],status,revision:rows[i].revision+1,updatedAt:now()};
  if(status==='Homologado'){const u=currentUser();row.homologatedAt=now();row.homologatedBy=u?.name||'Gestor';}
