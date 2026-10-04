@@ -8,6 +8,13 @@ const CHALLENGES=[
  {title:'O trânsito que eu gostaria de ver',text:'Mostre como seria um trânsito mais humano, organizado e seguro.'}
 ];
 const esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function nextChallenge(){
+ try{
+  const key='mobiliza.atelier.challengeIndex',last=Number(localStorage.getItem(key));
+  const next=Number.isFinite(last)?(last+1)%CHALLENGES.length:Math.floor(Math.random()*CHALLENGES.length);
+  localStorage.setItem(key,String(next));return CHALLENGES[next];
+ }catch{return CHALLENGES[Math.floor(Math.random()*CHALLENGES.length)];}
+}
 
 function css(){
  if(document.getElementById('atelier-host-css'))return;
@@ -40,13 +47,13 @@ function saveHighlight(w,challenge){
 }
 export function openAtelier(dialog,host,onFinish){
  css();dialog.classList.add('atelier-open');
- let session=null,participants=[],works=[],challenge=CHALLENGES[0],accepting=false,closed=false;
+ let session=null,participants=[],works=[],challenge=nextChallenge(),accepting=false,closed=false;
  const uploads=new Map();
  const cleanup=()=>{if(closed)return;closed=true;try{session&&session.close();}catch{}dialog.classList.remove('atelier-open');};
  dialog.addEventListener('close',cleanup,{once:true});
 
  function setup(){
-  host.innerHTML='<section class="ath"><div class="ath-head"><p class="eyebrow">MOBILIZA EDUCA • EXPERIÊNCIA CRIATIVA</p><h2>🎨 Ateliê do Trânsito</h2><p>Desenho livre e colagem pelo celular, galeria moderada, avaliação pedagógica e destaque no telão.</p></div><div class="ath-grid"><div class="ath-card"><h3>Configurar desafio</h3><label>Proposta<select id="athChallenge">'+CHALLENGES.map((x,i)=>'<option value="'+i+'">'+esc(x.title)+'</option>').join('')+'<option value="custom">Personalizado</option></select></label><label id="athCustomWrap" hidden>Texto do desafio<textarea id="athCustom" rows="4"></textarea></label><button class="btn primary" id="athCreate">Criar sessão e QR Code</button></div><div class="ath-card"><h3>Critérios de avaliação</h3><div class="ath-criteria"><div><strong>40%</strong><small>Fidelidade ao desafio</small></div><div><strong>30%</strong><small>Segurança no trânsito</small></div><div><strong>20%</strong><small>Criatividade</small></div><div><strong>10%</strong><small>Clareza da mensagem</small></div></div><p>O nome do participante fica oculto durante a avaliação. O sistema calcula uma nota ponderada de 0 a 100.</p></div></div></section>';
+  host.innerHTML='<section class="ath"><div class="ath-head"><p class="eyebrow">MOBILIZA EDUCA • EXPERIÊNCIA CRIATIVA</p><h2>🎨 Ateliê do Trânsito</h2><p>Desenho livre e colagem pelo celular, galeria moderada, avaliação pedagógica e destaque no telão.</p></div><div class="ath-grid"><div class="ath-card"><h3>Configurar desafio</h3><p style="margin:0 0 8px;color:#607788">🔄 O tema inicial muda automaticamente a cada nova sessão aberta.</p><label>Proposta<select id="athChallenge">'+CHALLENGES.map((x,i)=>'<option value="'+i+'" '+(x===challenge?'selected':'')+'>'+esc(x.title)+'</option>').join('')+'<option value="custom">Personalizado</option></select></label><label id="athCustomWrap" hidden>Texto do desafio<textarea id="athCustom" rows="4"></textarea></label><button class="btn primary" id="athCreate">Criar sessão e QR Code</button></div><div class="ath-card"><h3>Critérios de avaliação</h3><div class="ath-criteria"><div><strong>40%</strong><small>Fidelidade ao desafio</small></div><div><strong>30%</strong><small>Segurança no trânsito</small></div><div><strong>20%</strong><small>Criatividade</small></div><div><strong>10%</strong><small>Clareza da mensagem</small></div></div><p>O nome do participante fica oculto durante a avaliação. O sistema calcula uma nota ponderada de 0 a 100.</p></div></div></section>';
   const sel=host.querySelector('#athChallenge'),wrap=host.querySelector('#athCustomWrap');
   sel.onchange=()=>wrap.hidden=sel.value!=='custom';
   host.querySelector('#athCreate').onclick=async()=>{
