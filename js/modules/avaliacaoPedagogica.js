@@ -1,4 +1,4 @@
-import {assessmentQuestionIds,resolveAssessmentQuestions,scoreAssessment,makeShortCode,buildInviteToken,parseResultToken} from '../core/assessmentEngine.js?v=1';
+import {assessmentQuestionIds,resolveAssessmentQuestions,scoreAssessment,makeShortCode,buildInviteToken,parseResultToken} from '../core/assessmentEngine.js?v=2';
 import {qrSvg} from '../core/qr.js?v=1';
 
 const read=k=>JSON.parse(localStorage.getItem('mobiliza.admin.'+k)||'[]');
