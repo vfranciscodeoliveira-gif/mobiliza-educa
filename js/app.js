@@ -1,4 +1,4 @@
-import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=66';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=67';
 import { openQuiz } from './modules/quiz.js?v=30';
 import { openMilhao } from './modules/milhao.js?v=19';
 import { openTrilha } from './modules/trilha.js?v=36';
@@ -10,11 +10,12 @@ import { openLearning } from './modules/learning.js?v=3';
 import { openParticipantMode } from './modules/participant.js?v=3';
 import { openExperience } from './modules/experiencias.js?v=46';
 import { SoundManager } from './core/soundManager.js?v=1';
-import { openAdminModule } from './modules/admin.js?v=16';
+import { openAdminModule } from './modules/admin.js?v=17';
 import { openEducatorModule } from './modules/educator.js?v=1';
 import { renderResultsDashboard } from './modules/results.js?v=3';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser } from './modules/auth.js?v=2';
 import { canAccessModule,installSecurityGuards } from './core/accessControl.js?v=1';
+import { installTenantWorkspaceBridge,activeTenant } from './core/tenantRegistry.js?v=1';
 import { renderHomeNotifications } from './modules/notifications.js?v=4';
 import { renderPublicService } from './modules/publicService.js?v=2';
 import { syncCloudInbox } from './cloudGateway.js?v=3';
@@ -70,10 +71,11 @@ function bindAudienceUI(){
 function updateAuthUI(){
  const unlocked=isAdminUnlocked(),user=getCurrentAdminUser(),lock=qs('#btnAdminLock'),nav=qs('[data-view="gestao"]');
  if(lock){lock.hidden=!unlocked;lock.textContent=unlocked?'🔒 Sair • '+(user?.name||'Gestor'):'🔒 Sair';lock.title=unlocked?'Encerrar sessão de '+(user?.username||''):'';}
- if(nav)nav.innerHTML=unlocked?'🛠️ Gestão':'🔒 Gestão';
+ if(nav){nav.innerHTML=unlocked?'🛠️ Gestão':'🔒 Gestão';nav.title=unlocked?'Organização: '+(activeTenant()?.name||'—'):'';}
  qsa('#adminGrid [data-module]').forEach(btn=>{const allowed=!unlocked||canAccessModule(btn.dataset.module);btn.disabled=!allowed;btn.textContent=allowed?'Abrir':'Sem permissão';btn.closest('.module-card')?.classList.toggle('permission-disabled',!allowed);});
  renderHomeNotifications(qs('#homeNotifications'),qs('#authDialog'),updateAuthUI);
 }
+installTenantWorkspaceBridge();
 installSecurityGuards();
 
 function render(){
@@ -137,7 +139,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.46.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.47.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 const cloudRefresh=()=>syncCloudInbox().catch(()=>{});window.addEventListener('focus',cloudRefresh);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudRefresh();});
 render();
 const assessmentInvite=new URLSearchParams(location.search).get('a')||new URLSearchParams(location.search).get('avaliar');
