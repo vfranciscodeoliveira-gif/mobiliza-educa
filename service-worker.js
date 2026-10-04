@@ -1,4 +1,4 @@
-const CACHE='mobiliza-educa-v0.39.0';
+const CACHE='mobiliza-educa-v0.40.0';
 const ASSETS=[
  './','./index.html','./assets/app.css?v=41','./assets/showcase.css?v=14',
  './assets/icon.svg','./assets/ai/hero_area_escolar.webp?v=2','./assets/ai/publicos_sprite.webp?v=2','./assets/ai/jogos_experiencias_sprite.webp?v=2','./assets/mobiliza_educa_caminhos_para_a_vida.webp','./assets/icon-32.webp','./assets/icon-192.webp','./assets/brand-cover.webp',
@@ -10,9 +10,9 @@ const ASSETS=[
  './assets/games/cidade_mirim_mobiliza_educa.svg',
  './assets/games/cidade_mirim_realista_ai_v35.webp',
  './assets/memory/pare.svg','./assets/memory/semaforo.svg','./assets/memory/pedestre.svg','./assets/memory/bicicleta.svg','./assets/memory/cinto.svg','./assets/memory/celular.svg','./assets/memory/velocidade.svg','./assets/memory/escola.svg','./assets/memory/capacete.svg','./assets/memory/faixa.svg',
- './js/app.js?v=69','./js/content.js?v=59','./js/modules/quiz.js?v=29','./js/modules/milhao.js?v=18',
+ './js/app.js?v=70','./js/content.js?v=60','./js/modules/quiz.js?v=29','./js/modules/milhao.js?v=18',
  './js/modules/trilha.js?v=35','./js/modules/memoria.js?v=28','./js/modules/eAgora.js?v=40','./js/modules/cruzadas.js?v=31','./js/modules/plateia.js?v=6','./js/modules/participant.js?v=3','./js/modules/learning.js?v=3','./js/core/sharedSession.js?v=1',
- './js/modules/experiencias.js?v=46','./js/modules/experienciasExtra.js?v=3','./js/core/soundManager.js?v=1','./js/core/historyStore.js?v=1','./js/core/questionEngine.js?v=2','./js/data/questionBank.js?v=1','./js/modules/admin.js?v=9','./js/modules/educator.js?v=1','./js/modules/results.js?v=2','./js/modules/auth.js','./js/modules/notifications.js?v=3','./js/modules/publicService.js?v=2','./js/cloudGateway.js?v=2','./js/cloudConfig.js?v=1','./js/core/qr.js?v=1','./js/modules/checkinPublic.js?v=1','./manifest.webmanifest'
+ './js/modules/experiencias.js?v=46','./js/modules/experienciasExtra.js?v=3','./js/core/soundManager.js?v=1','./js/core/historyStore.js?v=1','./js/core/questionEngine.js?v=2','./js/data/questionBank.js?v=1','./js/modules/admin.js?v=10','./js/modules/educator.js?v=1','./js/modules/results.js?v=2','./js/modules/auth.js','./js/modules/notifications.js?v=3','./js/modules/publicService.js?v=2','./js/cloudGateway.js?v=3','./js/cloudConfig.js?v=1','./js/core/qr.js?v=1','./js/modules/checkinPublic.js?v=1','./js/modules/certValidation.js?v=1','./js/modules/passaporteCertificados.js?v=1','./manifest.webmanifest'
 ];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
