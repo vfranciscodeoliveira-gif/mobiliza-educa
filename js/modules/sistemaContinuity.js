@@ -3,7 +3,7 @@ import {
 } from '../core/backupManager.js?v=2';
 import {listEvidenceFiles} from '../core/evidenceStore.js?v=3';
 import {recordAudit,currentUser} from '../core/accessControl.js?v=1';
-import {cloudConfigured,hasManagerKey} from '../cloudGateway.js?v=3';
+import {cloudConfigured,hasCloudSession} from '../cloudGateway.js?v=4';
 
 const SETTINGS='mobiliza.system.settings';
 const BACKUP_STATE='mobiliza.system.backupState';
@@ -46,8 +46,8 @@ function backupEstimateFromMeta(){const arr=safe('mobiliza.admin.evidencias',[])
 export function renderSistemaContinuity(host){
  css();let tab='identidade',restoreFile=null,restoreParsed=null,restoreInfo=null;
  const shell=async()=>{
-  const bs=backupState(),diag=await diagnostics(),cloud=cloudConfigured(),manager=hasManagerKey();
-  host.innerHTML=`<section class="admin-module"><p class="eyebrow">CONFIGURAÇÕES, BACKUP & CONTINUIDADE • v1.0</p><h2>Continuidade operacional do Mobiliza Educa</h2><p class="admin-intro">Proteja dados, identifique a instalação e prepare a migração segura para a nuvem.</p>
+  const bs=backupState(),diag=await diagnostics(),cloud=cloudConfigured(),manager=hasCloudSession();
+  host.innerHTML=`<section class="admin-module"><p class="eyebrow">CONFIGURAÇÕES, BACKUP & CONTINUIDADE • v1.1</p><h2>Continuidade operacional do Mobiliza Educa</h2><p class="admin-intro">Proteja dados, identifique a instalação e prepare a migração segura para a nuvem.</p>
   <div class="sys-kpis"><div class="sys-kpi"><strong>${diag.totalCore}</strong><span>registros operacionais principais</span></div><div class="sys-kpi"><strong>${diag.files}</strong><span>arquivos de evidência locais</span></div><div class="sys-kpi"><strong>${fmtBytes(diag.storage.usage||diag.storage.localBytes)}</strong><span>armazenamento utilizado</span></div><div class="sys-kpi"><strong>${cloud?'Configurada':'Local'}</strong><span>camada de nuvem</span></div></div>
   <div class="sys-tabs"><button class="sys-tab ${tab==='identidade'?'active':''}" data-systab="identidade">🏛️ Identidade</button><button class="sys-tab ${tab==='backup'?'active':''}" data-systab="backup">💾 Backup</button><button class="sys-tab ${tab==='restaurar'?'active':''}" data-systab="restaurar">↩️ Restaurar</button><button class="sys-tab ${tab==='armazenamento'?'active':''}" data-systab="armazenamento">🗄️ Armazenamento</button><button class="sys-tab ${tab==='nuvem'?'active':''}" data-systab="nuvem">☁️ Nuvem</button></div><div id="sysBody"></div></section>`;
   host.querySelectorAll('[data-systab]').forEach(b=>b.onclick=()=>{tab=b.dataset.systab;restoreParsed=null;restoreInfo=null;shell();});
