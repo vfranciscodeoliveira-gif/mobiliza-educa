@@ -11,6 +11,7 @@ const wrap=fn=>async(req,res)=>{cors(res);if(req.method==='OPTIONS')return res.s
 const body=req=>req.body&&typeof req.body==='object'?req.body:{};
 const text=(v,n=500)=>String(v||'').trim().slice(0,n),digits=v=>String(v||'').replace(/\D/g,''),stamp=()=>admin.firestore.FieldValue.serverTimestamp();
 const protocol=p=>{const d=new Date(),ymd=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');return p+'-'+ymd+'-'+Math.random().toString(36).slice(2,7).toUpperCase();};
+const checkToken=p=>String(p||'Q').slice(0,2).toUpperCase()+(Date.now().toString(36)+Math.random().toString(36).slice(2,10)).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(-11);
 const manager=(req,res)=>{if(text(req.headers['x-gestor-key'],300)!==GESTOR_PUSH_KEY.value()){res.status(403).json({ok:false,message:'Acesso do gestor não autorizado.'});return false;}return true;};
 
 exports.submitSolicitacao=onRequest({region:REGION,cors:false},wrap(async(req,res)=>{
@@ -24,7 +25,7 @@ exports.submitInscricao=onRequest({region:REGION,cors:false},wrap(async(req,res)
  const x=body(req),idEvento=text(x.idEvento,120);if(!idEvento||!text(x.nome)||!text(x.email)||!text(x.telefone))return res.status(400).json({ok:false,message:'Preencha os campos obrigatórios.'});
  const ev=await db.collection('eventosPublicos').doc(idEvento).get();if(!ev.exists)return res.status(404).json({ok:false,message:'Atividade não encontrada.'});
  const e=ev.data();if(!e.inscricoesAbertas||e.status!=='Confirmado')return res.status(409).json({ok:false,message:'As inscrições não estão abertas para esta atividade.'});
- const protocolo=protocol('INS'),doc={protocolo,status:'Recebida',idEvento,tipoInscricao:text(x.tipoInscricao,60),nome:text(x.nome,180),responsavel:text(x.responsavel,180),telefone:text(x.telefone,40),email:text(x.email,180).toLowerCase(),quantidade:Math.max(1,Number(x.quantidade)||1),observacao:text(x.observacao,1000),createdAt:stamp(),updatedAt:stamp()};
+ const protocolo=protocol('INS'),doc={protocolo,status:'Recebida',checkinToken:checkToken('I'),idEvento,tipoInscricao:text(x.tipoInscricao,60),nome:text(x.nome,180),responsavel:text(x.responsavel,180),telefone:text(x.telefone,40),email:text(x.email,180).toLowerCase(),quantidade:Math.max(1,Number(x.quantidade)||1),observacao:text(x.observacao,1000),createdAt:stamp(),updatedAt:stamp()};
  const ref=await db.collection('inscricoes').add(doc);res.json({ok:true,id:ref.id,protocolo,status:'Recebida'});
 }));
 
@@ -42,6 +43,23 @@ exports.consultarProtocolo=onRequest({region:REGION,cors:false},wrap(async(req,r
  res.json({ok:true,protocolo:p,status,tipoLabel:collection==='inscricoes'?'Inscrição':'Solicitação',mensagem:msg});
 }));
 
+exports.checkinPublic=onRequest({region:REGION,cors:false},wrap(async(req,res)=>{
+ const x=body(req),eventToken=text(x.eventToken,30),p=text(x.protocolo,40).toUpperCase(),c=text(x.contato,180).toLowerCase();
+ if(!eventToken||!p||!c)return res.status(400).json({ok:false,message:'Informe o QR do evento, protocolo e contato.'});
+ const evs=await db.collection('eventosPublicos').where('checkinToken','==',eventToken).limit(1).get();
+ if(evs.empty)return res.status(404).json({ok:false,message:'Evento de check-in não encontrado.'});
+ const evDoc=evs.docs[0],ev=evDoc.data();
+ const regs=await db.collection('inscricoes').where('protocolo','==',p).limit(1).get();
+ if(regs.empty)return res.status(404).json({ok:false,message:'Inscrição não encontrada.'});
+ const regDoc=regs.docs[0],r=regDoc.data();
+ if(r.idEvento!==evDoc.id)return res.status(409).json({ok:false,message:'Esta inscrição pertence a outro evento.'});
+ const matches=(r.email&&r.email===c)||(r.telefone&&digits(r.telefone)===digits(c));
+ if(!matches)return res.status(403).json({ok:false,message:'Os dados informados não conferem com a inscrição.'});
+ if(!['Confirmada','Presente'].includes(r.status))return res.status(409).json({ok:false,message:'Sua inscrição ainda não está confirmada pelo gestor.'});
+ if(r.status!=='Presente')await regDoc.ref.set({status:'Presente',checkedInAt:stamp(),checkinOrigem:'QR_EVENTO',updatedAt:stamp()},{merge:true});
+ res.json({ok:true,nome:r.nome||r.responsavel||'Participante',evento:ev.nome||'Atividade',status:'Presente'});
+}));
+
 exports.gestorPendencias=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{
  if(!manager(req,res))return;const [s,i]=await Promise.all([db.collection('solicitacoes').orderBy('createdAt','desc').limit(200).get(),db.collection('inscricoes').orderBy('createdAt','desc').limit(200).get()]);
  const cv=snap=>snap.docs.map(d=>({id:d.id,...d.data(),createdAt:d.data().createdAt?.toDate?.().toISOString?.()||'',updatedAt:d.data().updatedAt?.toDate?.().toISOString?.()||''}));
@@ -49,7 +67,7 @@ exports.gestorPendencias=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUS
 }));
 exports.gestorAtualizarSolicitacao=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{if(!manager(req,res))return;const x=body(req),id=text(x.id,120),status=text(x.status,80);if(!id||!status)return res.status(400).json({ok:false,message:'Dados inválidos.'});await db.collection('solicitacoes').doc(id).set({status,updatedAt:stamp(),idEvento:x.idEvento||null},{merge:true});res.json({ok:true});}));
 exports.gestorAtualizarInscricao=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{if(!manager(req,res))return;const x=body(req),id=text(x.id,120),status=text(x.status,80);if(!id||!status)return res.status(400).json({ok:false,message:'Dados inválidos.'});await db.collection('inscricoes').doc(id).set({status,updatedAt:stamp()},{merge:true});res.json({ok:true});}));
-exports.gestorPublicarEvento=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{if(!manager(req,res))return;const e=body(req).evento||{},id=text(e.id,120)||db.collection('eventosPublicos').doc().id,doc={nome:text(e.nome,180),tipo:text(e.tipo,80),status:text(e.status,50)||'Confirmado',dataInicio:text(e.dataInicio,10),dataFim:text(e.dataFim,10),horaInicio:text(e.horaInicio,5),horaFim:text(e.horaFim,5),local:text(e.local,250),vagas:Math.max(0,Number(e.vagas)||0),inscricoesAbertas:e.inscricoesAbertas!==false,publicadoOnline:true,dataLabel:text(e.dataLabel,40)||text(e.dataInicio,10),updatedAt:stamp()};await db.collection('eventosPublicos').doc(id).set(doc,{merge:true});res.json({ok:true,id});}));
+exports.gestorPublicarEvento=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{if(!manager(req,res))return;const e=body(req).evento||{},id=text(e.id,120)||db.collection('eventosPublicos').doc().id,doc={nome:text(e.nome,180),tipo:text(e.tipo,80),status:text(e.status,50)||'Confirmado',dataInicio:text(e.dataInicio,10),dataFim:text(e.dataFim,10),horaInicio:text(e.horaInicio,5),horaFim:text(e.horaFim,5),local:text(e.local,250),vagas:Math.max(0,Number(e.vagas)||0),checkinToken:text(e.checkinToken,20)||checkToken('E'),inscricoesAbertas:e.inscricoesAbertas!==false,publicadoOnline:true,dataLabel:text(e.dataLabel,40)||text(e.dataInicio,10),updatedAt:stamp()};await db.collection('eventosPublicos').doc(id).set(doc,{merge:true});res.json({ok:true,id});}));
 exports.registerGestorToken=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{if(!manager(req,res))return;const x=body(req),token=text(x.token,4096);if(!token)return res.status(400).json({ok:false,message:'Token ausente.'});const id=crypto.createHash('sha256').update(token).digest('hex');await db.collection('gestorTokens').doc(id).set({token,userAgent:text(x.userAgent,500),updatedAt:stamp()},{merge:true});res.json({ok:true});}));
 
 async function notifyGestores(title,body,url='./'){
