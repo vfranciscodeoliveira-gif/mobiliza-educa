@@ -14,6 +14,7 @@ export const submitSolicitacao=data=>api('submitSolicitacao',data);
 export const submitInscricao=data=>api('submitInscricao',data);
 export const consultarProtocolo=(protocolo,contato)=>api('consultarProtocolo',{protocolo,contato});
 export const listPublicEvents=()=>api('publicEvents',{});
+export const publicCheckin=(eventToken,protocolo,contato)=>api('checkinPublic',{eventToken,protocolo,contato});
 const key=()=>localStorage.getItem('mobiliza.cloud.gestorKey')||'';
 export function setManagerKey(v){if(v)localStorage.setItem('mobiliza.cloud.gestorKey',v);else localStorage.removeItem('mobiliza.cloud.gestorKey');}
 export const hasManagerKey=()=>!!key();
