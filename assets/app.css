@@ -3426,3 +3426,23 @@ body.admin-workspace-open{overflow:hidden}
 #btnAdminOpen{align-items:center;gap:6px}
 @media(max-width:980px){.admin-workspace-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.admin-workspace{padding:6px}.admin-workspace-host{width:99vw;max-height:98vh;border-radius:16px}.admin-workspace-shell{padding:14px}.admin-workspace-grid{grid-template-columns:1fr}.admin-workspace-actions{flex-direction:column}.admin-workspace-actions .btn{width:100%}}
+
+
+/* v0.50.0 • Gestão online como área nativa da aplicação */
+.admin-online-heading{align-items:center}
+.online-pill{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:#e8f7ee;color:#146b3a;border:1px solid #c9e8d5;font-weight:1000;font-size:.78rem;white-space:nowrap}
+.admin-online-note{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0 18px;padding:14px 16px;border:1px solid #cfe2ef;border-radius:16px;background:#f5fbff;color:#31566d}
+.admin-online-note strong{color:var(--navy)}
+#view-gestao .admin-grid{margin-top:18px}
+#view-gestao .module-card{min-height:250px}
+#view-gestao .module-card .btn{width:100%;margin-top:auto}
+.home-admin-entry{margin-bottom:14px;align-items:center}
+.home-admin-entry .btn{margin-left:auto;white-space:nowrap}
+.online-mode-card{margin-top:14px;align-items:center}
+.online-mode-card .status-chip{margin-left:auto;white-space:nowrap}
+@media(max-width:700px){
+ .admin-online-heading{align-items:flex-start}
+ .home-admin-entry,.online-mode-card{align-items:flex-start;flex-direction:column}
+ .home-admin-entry .btn,.online-mode-card .status-chip{margin-left:0}
+ .home-admin-entry .btn{width:100%}
+}
