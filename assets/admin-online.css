@@ -19,3 +19,8 @@
 @media(max-width:1180px){:root{--admin-side:260px}.admin-online-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-online-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:820px){.admin-online-app{display:block}.admin-online-sidebar{position:static;height:auto}.admin-online-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-online-main{padding:22px 16px 50px}.admin-online-top{flex-direction:column}.admin-online-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.admin-online-nav{grid-template-columns:1fr}.admin-online-kpis{grid-template-columns:1fr}.admin-online-footer{flex-direction:column}}
+
+
+/* v0.51.2 • estado autenticado sem sobreposição da tela de login */
+.admin-online-login-state[hidden],
+#adminDashboard[hidden]{display:none!important}
