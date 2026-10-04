@@ -15,6 +15,7 @@ firebase/bootstrap-key.local.txt
 firebase/emulator-bootstrap-key.local.txt
 firebase/functions/.secret.local
 firebase/emulator-data/
+firebase/emulator-shell.pid
 
 # Configuracao Web auxiliar local
 firebase/web-config.local.json
