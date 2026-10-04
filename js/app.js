@@ -1,4 +1,4 @@
-import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=67';
+import { games, audiences, audienceProfiles, experiences, learning, educatorModules, adminModules, tips } from './content.js?v=68';
 import { openQuiz } from './modules/quiz.js?v=30';
 import { openMilhao } from './modules/milhao.js?v=19';
 import { openTrilha } from './modules/trilha.js?v=36';
@@ -6,6 +6,8 @@ import { openMemoria } from './modules/memoria.js?v=28';
 import { openCruzadas } from './modules/cruzadas.js?v=31';
 import { openEAgora } from './modules/eAgora.js?v=40';
 import { openPlateia } from './modules/plateia.js?v=6';
+import { openAtelier } from './modules/atelier.js?v=1';
+import { openAtelierParticipant } from './modules/atelierParticipant.js?v=1';
 import { openLearning } from './modules/learning.js?v=3';
 import { openParticipantMode } from './modules/participant.js?v=3';
 import { openExperience } from './modules/experiencias.js?v=46';
@@ -139,6 +141,7 @@ function bindModuleButtons(){
   else if(id==='cruzadas')openCruzadas(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='eagora')openEAgora(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='plateia')openPlateia(qs('#gameDialog'),qs('#gameHost'),updateResults);
+  else if(id==='atelier')openAtelier(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(educatorModules.some(x=>x.id===id))openEducatorModule(id,qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(learning.some(x=>x.id===id))openLearning(qs('#gameDialog'),qs('#gameHost'),id,updateResults);
   else if(audiences.some(x=>x.id===id)){currentAudience=id;navigate('publicos');renderAudienceProfile(id);}
@@ -179,7 +182,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.51.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.53.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 const cloudRefresh=()=>syncCloudInbox().catch(()=>{});window.addEventListener('focus',cloudRefresh);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudRefresh();});
 installEmulatorBadge();
 render();
@@ -191,3 +194,5 @@ const checkinToken=new URLSearchParams(location.search).get('checkin');
 if(checkinToken)openPublicCheckin(checkinToken);
 const plateiaJoinCode=new URLSearchParams(location.search).get('plateia');
 if(plateiaJoinCode)openParticipantMode(plateiaJoinCode);
+const atelierJoinCode=new URLSearchParams(location.search).get('atelier');
+if(atelierJoinCode)openAtelierParticipant(atelierJoinCode);

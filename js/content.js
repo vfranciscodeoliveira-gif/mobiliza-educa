@@ -12,7 +12,8 @@ export const games=[
 {id:'memoria',icon:'🧠',visual:'game-memoria',title:'Jogo da Memória',description:'Cartas animadas, pares de sinais e situações seguras, tempo e pontuação.',tags:['jogar agora','atenção'],ready:true},
 {id:'cruzadas',icon:'✏️',visual:'game-cruzadas',title:'Palavras Cruzadas do Trânsito',description:'Pistas educativas, validação das respostas, tentativas e pontuação.',tags:['jogar agora','vocabulário'],ready:true},
 {id:'eagora',icon:'🎬',cover:'assets/ai/hero_area_escolar.webp',title:'E Agora? — Decisões no Trânsito',description:'Cinco situações em movimento: observe, antecipe o risco, escolha a atitude e veja a consequência com explicação educativa.',tags:['5 situações','simulação','percepção de risco'],ready:true},
-{id:'plateia',icon:'📱',cover:'assets/games/plateia_conectada.svg',title:'Plateia Conectada',description:'QR Code, participantes pelo próprio celular, uma resposta por aparelho, votação e resultado sincronizados no telão.',tags:['QR Code','multijogador','telão'],ready:true}
+{id:'plateia',icon:'📱',cover:'assets/games/plateia_conectada.svg',title:'Plateia Conectada',description:'QR Code, participantes pelo próprio celular, uma resposta por aparelho, votação e resultado sincronizados no telão.',tags:['QR Code','multijogador','telão'],ready:true},
+{id:'atelier',icon:'🎨',cover:'assets/brand-cover.webp',title:'Ateliê do Trânsito',description:'Desenho livre e colagem pelo celular com QR Code, galeria moderada, avaliação pedagógica e destaque no telão.',tags:['desenho','colagem','QR Code','telão'],ready:true}
 ];
 
 export const learning=[
