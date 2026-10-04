@@ -1,4 +1,4 @@
-import { getGameQuestions } from '../core/questionEngine.js?v=2';
+import { getGameQuestions } from '../core/questionEngine.js?v=3';
 import { recordGameResult } from '../core/historyStore.js?v=1';
 import { createHostSession, renderQr, makeSessionCode } from '../core/sharedSession.js?v=1';
 let questions=[];
