@@ -38,3 +38,15 @@ export async function estimateEvidenceStorage(){
  if(navigator.storage?.estimate){const x=await navigator.storage.estimate();return{usage:x.usage||0,quota:x.quota||0};}
  return{usage:0,quota:0};
 }
+
+export async function listEvidenceFiles(){
+ const db=await openDb();
+ return new Promise((resolve,reject)=>{
+  const t=db.transaction(STORE,'readonly'),r=t.objectStore(STORE).getAll();
+  r.onsuccess=()=>{const v=r.result||[];db.close();resolve(v)};r.onerror=()=>{db.close();reject(r.error||new Error('Falha ao listar evidências.'))};
+ });
+}
+export async function putEvidenceRecord(record){
+ if(!record?.id||!record?.blob)throw new Error('Registro de evidência inválido.');
+ await tx('readwrite',s=>s.put(record));return true;
+}
