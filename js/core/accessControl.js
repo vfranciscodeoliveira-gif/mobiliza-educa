@@ -111,7 +111,7 @@ export function currentUser(){
 }
 export function currentProfile(){const u=currentUser();return u?profileById(u.profileId):null;}
 export function userModules(user){
- if(!user)return[];if(Array.isArray(user.permissions))return user.permissions.filter(x=>ADMIN_MODULES.includes(x));
+ if(!user)return[];if(user.profileId==='GESTOR')return[...ADMIN_MODULES];if(Array.isArray(user.permissions))return user.permissions.filter(x=>ADMIN_MODULES.includes(x));
  return profileById(user.profileId).modules||[];
 }
 export function canAccessModule(id,user=currentUser()){return !!user&&user.active&&userModules(user).includes(id);}
