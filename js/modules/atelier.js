@@ -102,4 +102,6 @@ export function openAtelier(dialog,host,onFinish){
   host.querySelector('#athReturn').onclick=render;SoundManager.play('celebrate');
  }
  setup();
+ if(!dialog.open)dialog.showModal();
+ SoundManager.play('open');
 }
