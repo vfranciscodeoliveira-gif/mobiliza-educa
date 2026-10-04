@@ -1,5 +1,5 @@
 import {qrSvg} from '../core/qr.js?v=1';
-import {cloudConfigured,hasCloudSession,publishCertificate,revokeCertificateCloud} from '../cloudGateway.js?v=4';
+import {cloudConfigured,hasCloudSession,publishCertificate,revokeCertificateCloud} from '../cloudGateway.js?v=5';
 
 const read=k=>JSON.parse(localStorage.getItem('mobiliza.admin.'+k)||'[]');
 const write=(k,v)=>{localStorage.setItem('mobiliza.admin.'+k,JSON.stringify(v));window.dispatchEvent(new CustomEvent('mobiliza-data-change',{detail:{entity:k}}));};

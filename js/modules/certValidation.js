@@ -1,4 +1,4 @@
-import {cloudConfigured,validateCertificate} from '../cloudGateway.js?v=4';
+import {cloudConfigured,validateCertificate} from '../cloudGateway.js?v=5';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const localFind=code=>JSON.parse(localStorage.getItem('mobiliza.admin.certificados')||'[]').find(x=>String(x.code||'').toUpperCase()===String(code||'').toUpperCase());

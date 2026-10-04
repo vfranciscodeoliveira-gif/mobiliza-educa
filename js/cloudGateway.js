@@ -1,18 +1,21 @@
 import {cloudConfig} from './cloudConfig.js?v=2';
-import {getCloudAuth,getCloudIdToken,getCloudUser,cloudSessionHint} from './core/cloudAuth.js?v=1';
+import {getCloudAuth,getCloudIdToken,getCloudUser,cloudSessionHint,isCloudEmulatorMode,cloudStoragePrefix} from './core/cloudAuth.js?v=2';
 
-const base=()=>String(cloudConfig.functionsBaseUrl||'').replace(/\/$/,'');
-export const cloudConfigured=()=>!!(cloudConfig.enabled&&base());
+const emulatorBase='http://127.0.0.1:5001/mobiliza-educa/southamerica-east1';
+const base=()=>String(isCloudEmulatorMode()?emulatorBase:(cloudConfig.functionsBaseUrl||'')).replace(/\/$/,'');
+export const cloudConfigured=()=>isCloudEmulatorMode()||!!(cloudConfig.enabled&&base());
+export {isCloudEmulatorMode};
 
 function publicTenantSlug(){
  try{
   const q=new URLSearchParams(location.search).get('tenant');
-  return String(q||cloudConfig.publicTenantSlug||'').trim();
- }catch{return String(cloudConfig.publicTenantSlug||'').trim();}
+  return String(q||(isCloudEmulatorMode()?'mobiliza-educa':cloudConfig.publicTenantSlug)||'').trim();
+ }catch{return String((isCloudEmulatorMode()?'mobiliza-educa':cloudConfig.publicTenantSlug)||'').trim();}
 }
-const tenantKey='mobiliza.cloud.tenantId';
-export const getCloudTenantId=()=>localStorage.getItem(tenantKey)||'';
-export function setCloudTenantId(v){if(v)localStorage.setItem(tenantKey,v);else localStorage.removeItem(tenantKey);window.dispatchEvent(new CustomEvent('mobiliza-cloud-tenant',{detail:{tenantId:v||''}}));}
+const tenantKey=()=>cloudStoragePrefix()+'.tenantId';
+const meKey=()=>cloudStoragePrefix()+'.me';
+export const getCloudTenantId=()=>localStorage.getItem(tenantKey())||'';
+export function setCloudTenantId(v){if(v)localStorage.setItem(tenantKey(),v);else localStorage.removeItem(tenantKey());window.dispatchEvent(new CustomEvent('mobiliza-cloud-tenant',{detail:{tenantId:v||'',emulator:isCloudEmulatorMode()}}));}
 export const hasCloudSession=()=>!!cloudSessionHint();
 
 async function api(name,payload={},opts={}){
@@ -20,7 +23,7 @@ async function api(name,payload={},opts={}){
  const headers={'Content-Type':'application/json'};
  if(opts.auth){
   const token=await getCloudIdToken();
-  if(!token)throw new Error('Conecte sua conta Firebase antes de sincronizar.');
+  if(!token)throw new Error(isCloudEmulatorMode()?'Conecte o usuário do Firebase Emulator antes de sincronizar.':'Conecte sua conta Firebase antes de sincronizar.');
   headers.Authorization='Bearer '+token;
  }
  const r=await fetch(base()+'/'+name,{method:'POST',headers,body:JSON.stringify(payload)});
@@ -39,13 +42,13 @@ export const validateCertificate=code=>api('validateCertificate',publicPayload({
 export const listPlans=()=>api('planCatalog',{});
 
 export function getCachedCloudMe(){
- try{return JSON.parse(localStorage.getItem('mobiliza.cloud.me')||'null');}catch{return null;}
+ try{return JSON.parse(localStorage.getItem(meKey())||'null');}catch{return null;}
 }
 export async function cloudMe(){
  const data=await api('me',{}, {auth:true});
- localStorage.setItem('mobiliza.cloud.me',JSON.stringify(data));
+ localStorage.setItem(meKey(),JSON.stringify(data));
  if(!getCloudTenantId()&&data.memberships?.length)setCloudTenantId(data.memberships[0].tenantId);
- window.dispatchEvent(new CustomEvent('mobiliza-cloud-me',{detail:{user:data.user||null}}));
+ window.dispatchEvent(new CustomEvent('mobiliza-cloud-me',{detail:{user:data.user||null,emulator:isCloudEmulatorMode()}}));
  return data;
 }
 export async function cloudTenantContext(tenantId=getCloudTenantId()){
@@ -66,7 +69,7 @@ export async function syncCloudInbox(){
  const tenantId=getCloudTenantId();if(!tenantId)throw new Error('Organização da nuvem não selecionada.');
  const data=await api('gestorPendencias',{tenantId},{auth:true});
  mergeStore('solicitacoes',data.solicitacoes);mergeStore('inscricoes',data.inscricoes);
- window.dispatchEvent(new CustomEvent('mobiliza-data-change',{detail:{entity:'cloud'}}));
+ window.dispatchEvent(new CustomEvent('mobiliza-data-change',{detail:{entity:'cloud',emulator:isCloudEmulatorMode()}}));
  return {synced:true,solicitacoes:data.solicitacoes?.length||0,inscricoes:data.inscricoes?.length||0};
 }
 export async function updateCloudRequestStatus(id,status,extra={}){
@@ -96,6 +99,7 @@ export async function revokeCertificateCloud(code){
 }
 
 export async function enableManagerPush(){
+ if(isCloudEmulatorMode())throw new Error('Push não é ativado no modo Emulator. Teste push somente quando o backend de produção estiver publicado.');
  if(!cloudConfigured())throw new Error('Configure o Firebase antes de ativar notificações.');
  const user=await getCloudUser();if(!user)throw new Error('Conecte sua conta Firebase primeiro.');
  const tenantId=getCloudTenantId();if(!tenantId)throw new Error('Selecione a organização da nuvem.');

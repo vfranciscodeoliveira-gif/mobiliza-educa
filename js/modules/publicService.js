@@ -1,4 +1,4 @@
-import {cloudConfigured,submitSolicitacao,submitInscricao,consultarProtocolo,listPublicEvents} from '../cloudGateway.js?v=4';
+import {cloudConfigured,submitSolicitacao,submitInscricao,consultarProtocolo,listPublicEvents,isCloudEmulatorMode} from '../cloudGateway.js?v=5';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const phone=v=>String(v||'').replace(/\D/g,'').replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d{4}).*/,'$1-$2');
@@ -15,7 +15,7 @@ function css(){
  @media(max-width:700px){.ps-hero{grid-template-columns:1fr}.ps-grid{grid-template-columns:1fr}.ps .span2{grid-column:auto}}
  `;document.head.appendChild(s);
 }
-function availability(){return cloudConfigured()?'<div class="ps-alert"><strong>Envio online ativo.</strong> Solicitações e inscrições são encaminhadas à área do gestor para análise.</div>':'<div class="ps-alert ps-offline"><strong>Integração online em ativação.</strong> O formulário está pronto para revisão, mas o envio está bloqueado até a conexão do Firebase/Cloud Functions. Nenhuma informação será perdida silenciosamente.</div>';}
+function availability(){if(isCloudEmulatorMode())return '<div class="ps-alert"><strong>Emulador local ativo.</strong> Solicitações e inscrições serão gravadas somente no ambiente Firebase local desta máquina.</div>';return cloudConfigured()?'<div class="ps-alert"><strong>Envio online ativo.</strong> Solicitações e inscrições são encaminhadas à área do gestor para análise.</div>':'<div class="ps-alert ps-offline"><strong>Integração online em ativação.</strong> O formulário está pronto para revisão, mas o envio está bloqueado até a conexão do Firebase/Cloud Functions. Nenhuma informação será perdida silenciosamente.</div>';}
 
 export async function renderPublicService(host){
  if(!host)return;css();let tab='solicitar',events=[];
