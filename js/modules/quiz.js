@@ -1,4 +1,4 @@
-import { getQuestionSet } from '../core/questionEngine.js?v=2';
+import { getQuestionSet } from '../core/questionEngine.js?v=3';
 import { SoundManager } from '../core/soundManager.js?v=1';
 import { recordGameResult } from '../core/historyStore.js?v=1';
 
