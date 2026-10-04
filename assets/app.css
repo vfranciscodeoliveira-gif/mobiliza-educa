@@ -3400,3 +3400,29 @@ dialog::backdrop{background:rgba(4,24,38,.68);backdrop-filter:blur(4px)}
 .admin-hub-actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:20px;background:transparent;padding:0}
 @media(max-width:980px){.admin-hub-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.admin-hub-dialog{width:98vw;max-width:98vw}.admin-hub-shell{padding:16px}.admin-hub-grid{grid-template-columns:1fr}.admin-hub-head{align-items:center}.admin-hub-actions{flex-direction:column}.admin-hub-actions .btn{width:100%}}
+
+
+/* v0.49.6 • Centro de Gestão fixo, independente de <dialog> */
+body.admin-workspace-open{overflow:hidden}
+.admin-workspace[hidden]{display:none!important}
+.admin-workspace{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:18px}
+.admin-workspace-backdrop{position:absolute;inset:0;background:rgba(4,22,38,.72);backdrop-filter:blur(3px)}
+.admin-workspace-host{position:relative;z-index:1;width:min(1280px,96vw);max-height:94vh;overflow:auto;border-radius:24px;box-shadow:0 32px 100px rgba(0,0,0,.38);background:#f4f9fc}
+.admin-workspace-shell{padding:26px;background:linear-gradient(180deg,#f8fcff,#eef6fa)}
+.admin-workspace-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:8px 6px 18px}
+.admin-workspace-head h2{margin:4px 0 8px;color:var(--navy);font-size:clamp(1.7rem,3vw,2.5rem)}
+.admin-workspace-head p{margin:0;color:var(--muted)}
+.admin-workspace-x{width:44px;height:44px;border:0;border-radius:50%;background:#eaf2f7;color:var(--navy);font-size:1.8rem;font-weight:900;cursor:pointer;flex:0 0 auto}
+.admin-workspace-summary{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}
+.admin-workspace-summary span{padding:8px 11px;border-radius:999px;background:#e8f5ec;color:#17683c;font-weight:900;font-size:.78rem;border:1px solid #cde8d7}
+.admin-workspace-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.admin-workspace-card{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:start;padding:18px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(15,60,102,.08)}
+.admin-workspace-card .btn{grid-column:1/-1;width:100%}
+.admin-workspace-card.disabled{opacity:.62}
+.admin-workspace-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:var(--sky);font-size:1.5rem}
+.admin-workspace-copy h3{margin:0 0 6px;color:var(--navy);font-size:1rem}
+.admin-workspace-copy p{margin:0;color:var(--muted);font-size:.84rem;line-height:1.45}
+.admin-workspace-actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:20px;background:transparent;padding:0}
+#btnAdminOpen{align-items:center;gap:6px}
+@media(max-width:980px){.admin-workspace-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.admin-workspace{padding:6px}.admin-workspace-host{width:99vw;max-height:98vh;border-radius:16px}.admin-workspace-shell{padding:14px}.admin-workspace-grid{grid-template-columns:1fr}.admin-workspace-actions{flex-direction:column}.admin-workspace-actions .btn{width:100%}}
