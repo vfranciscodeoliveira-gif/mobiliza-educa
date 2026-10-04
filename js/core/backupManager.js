@@ -1,9 +1,10 @@
-import {listEvidenceFiles,putEvidenceRecord,clearEvidenceFiles} from './evidenceStore.js?v=2';
+import {listEvidenceFiles,listAllEvidenceFiles,putEvidenceRecord,clearEvidenceFiles,clearAllEvidenceFiles} from './evidenceStore.js?v=3';
+import {snapshotActiveTenant} from './tenantRegistry.js?v=1';
 
-const APP_VERSION='0.45.0';
+const APP_VERSION='0.47.0';
 const FORMAT='MOBILIZA_BACKUP';
-const SCHEMA=2;
-const SENSITIVE_PREFIXES=['mobiliza.security.','mobiliza.admin.password','mobiliza.saas.subscription'];
+const SCHEMA=3;
+const OPERATIONAL_EXCLUDE=['mobiliza.security.','mobiliza.platform.','mobiliza.saas.','mobiliza.cloud.','mobiliza.admin.password'];
 const enc=s=>new TextEncoder().encode(s);
 const dec=b=>new TextDecoder().decode(b);
 const now=()=>new Date().toISOString();
@@ -25,7 +26,7 @@ function blobToB64(blob){return new Promise((resolve,reject)=>{const r=new FileR
 function jsonMaybe(s){try{return JSON.parse(s)}catch{return null}}
 function localKeys(scope='operational'){
  const keys=[];
- for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith('mobiliza.'))continue;if(scope==='operational'&&SENSITIVE_PREFIXES.some(p=>k.startsWith(p)))continue;keys.push(k);}
+ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith('mobiliza.'))continue;if(scope==='operational'&&OPERATIONAL_EXCLUDE.some(p=>k.startsWith(p)))continue;keys.push(k);}
  return keys.sort();
 }
 function statsFromStorage(obj){
@@ -45,11 +46,12 @@ function mergeValue(current,imported){
 }
 
 export async function buildBackup({scope='operational',includeEvidenceFiles=false}={}){
+ if(scope==='full')snapshotActiveTenant();
  const storage={};for(const k of localKeys(scope))storage[k]=localStorage.getItem(k);
  const evidence=[];
  if(includeEvidenceFiles){
-  const files=await listEvidenceFiles();
-  for(const f of files)evidence.push({id:f.id,name:f.name||'',type:f.type||'',size:f.size||f.blob?.size||0,updatedAt:f.updatedAt||'',data:await blobToB64(f.blob)});
+  const files=scope==='full'?await listAllEvidenceFiles():await listEvidenceFiles();
+  for(const f of files)evidence.push({id:f.id,tenantId:f.tenantId||null,name:f.name||'',type:f.type||'',size:f.size||f.blob?.size||0,updatedAt:f.updatedAt||'',data:await blobToB64(f.blob)});
  }
  const payload={format:FORMAT,schema:SCHEMA,appVersion:APP_VERSION,createdAt:now(),scope,storage,evidenceFiles:evidence};
  const checksum=await sha256(stable(payload));
@@ -107,8 +109,8 @@ export async function restoreBackup(parsed,{mode='replace',restoreEvidenceFiles=
  }
  let files=0;
  if(restoreEvidenceFiles&&(p.evidenceFiles||[]).length){
-  if(mode==='replace')await clearEvidenceFiles();
-  for(const f of p.evidenceFiles){const blob=new Blob([b64ToBytes(f.data)],{type:f.type||'application/octet-stream'});await putEvidenceRecord({id:f.id,blob,name:f.name||'',type:f.type||'',size:blob.size,updatedAt:f.updatedAt||now()});files++;}
+  if(mode==='replace'){if(p.scope==='full')await clearAllEvidenceFiles();else await clearEvidenceFiles();}
+  for(const f of p.evidenceFiles){const blob=new Blob([b64ToBytes(f.data)],{type:f.type||'application/octet-stream'});await putEvidenceRecord({id:f.id,tenantId:f.tenantId||undefined,blob,name:f.name||'',type:f.type||'',size:blob.size,updatedAt:f.updatedAt||now()});files++;}
  }
  return{keys:keys.length,evidenceFiles:files,mode};
 }
