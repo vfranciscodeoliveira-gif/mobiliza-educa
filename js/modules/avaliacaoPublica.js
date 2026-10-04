@@ -1,4 +1,4 @@
-import {assessmentQuestionIds,resolveAssessmentQuestions,parseInviteToken,buildResultToken,scoreAssessment} from '../core/assessmentEngine.js?v=1';
+import {assessmentQuestionIds,resolveAssessmentQuestions,parseInviteToken,buildResultToken,scoreAssessment} from '../core/assessmentEngine.js?v=2';
 import {qrSvg} from '../core/qr.js?v=1';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
