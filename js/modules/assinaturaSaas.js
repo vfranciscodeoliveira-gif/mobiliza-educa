@@ -1,4 +1,4 @@
-import {tenant,subscription,currentPlan,PLAN_CATALOG,FEATURE_CATALOG,saveTenant,previewPlan,usageSnapshot} from '../core/saasContext.js?v=1';
+import {tenant,subscription,currentPlan,PLAN_CATALOG,FEATURE_CATALOG,saveTenant,previewPlan,usageSnapshot} from '../core/saasContext.js?v=2';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function css(){
