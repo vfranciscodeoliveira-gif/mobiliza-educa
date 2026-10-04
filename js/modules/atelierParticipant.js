@@ -33,7 +33,7 @@ export function openAtelierParticipant(rawCode){
  document.body.classList.add('atelier-participant-open');
  const root=document.createElement('div');root.className='atp';root.id='atelierParticipant';document.body.appendChild(root);
  let client=null,name=localStorage.getItem('mobiliza.atelier.name')||'',team=localStorage.getItem('mobiliza.atelier.team')||'',state=null,closing=false;
- let mode='draw',color='#173f60',width=8,eraser=false,sticker=STICKERS[0],ops=[],current=null;
+ let mode='draw',color='#173f60',width=8,eraser=false,sticker=STICKERS[0],ops=[],current=null,submitTimer=null,sending=false;
  const W=900,H=600;
 
  const shell=body=>'<div class="atp-shell"><div class="atp-brand"><img src="assets/icon-192.webp?v=9" alt=""><div><h1>MOBILIZA EDUCA</h1><p>Ateliê do Trânsito</p></div><span class="atp-code">'+esc(code)+'</span></div>'+body+'<div class="atp-footer">Sessão criativa ao vivo • <button class="atp-exit" id="atpExit">sair</button></div></div>';
@@ -69,8 +69,25 @@ export function openAtelierParticipant(rawCode){
   const end=e=>{current=null;try{c.releasePointerCapture(e.pointerId)}catch{}};c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end);
  }
  function msg(text,type=''){const b=root.querySelector('#atpMsg');if(b)b.innerHTML='<div class="atp-msg '+type+'">'+esc(text)+'</div>';}
- function submit(){
-  if(!ops.length){msg('Crie algo antes de enviar.','bad');return;}const c=root.querySelector('#atpCanvas');drawScene();const image=c.toDataURL('image/jpeg',.82);root.querySelector('#atpSubmit').disabled=true;msg('Enviando para a galeria...');client.send({type:'atelier-submit',work:{name,team,mode:mode==='collage'?'colagem':'desenho',image}});
+ function compactImage(source){
+  const sizes=[[640,427,.68],[560,373,.62],[480,320,.56]];let image='';
+  for(const [w,h,q] of sizes){const out=document.createElement('canvas');out.width=w;out.height=h;const x=out.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(source,0,0,w,h);image=out.toDataURL('image/jpeg',q);if(image.length<=420000)break;}
+  return image;
+ }
+ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+ async function submit(){
+  if(sending)return;
+  if(!ops.length){msg('Crie algo antes de enviar.','bad');return;}
+  if(!client?.conn?.open){msg('A conexão com a sessão foi interrompida. Saia e entre novamente pelo QR Code.','bad');return;}
+  const c=root.querySelector('#atpCanvas');drawScene();const image=compactImage(c);
+  if(!image||image.length>650000){msg('O desenho ficou grande demais para transmissão. Tente limpar alguns elementos e reenviar.','bad');return;}
+  const button=root.querySelector('#atpSubmit');if(button)button.disabled=true;sending=true;
+  const uploadId='U'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),chunkSize=12000,total=Math.ceil(image.length/chunkSize);
+  msg('Enviando para a galeria • 0%');
+  client.send({type:'atelier-submit-start',uploadId,total,name,team,mode:mode==='collage'?'colagem':'desenho'});await sleep(45);
+  for(let i=0;i<total;i++){if(!sending)return;client.send({type:'atelier-submit-chunk',uploadId,index:i,chunk:image.slice(i*chunkSize,(i+1)*chunkSize)});if(i%2===1||i===total-1){msg('Enviando para a galeria • '+Math.round(((i+1)/total)*100)+'%');await sleep(22);}}
+  client.send({type:'atelier-submit-end',uploadId});msg('Envio concluído. Aguardando confirmação da galeria...');
+  clearTimeout(submitTimer);submitTimer=setTimeout(()=>{sending=false;const b=root.querySelector('#atpSubmit');if(b)b.disabled=false;msg('Não recebemos a confirmação da galeria. Sua arte continua na tela — toque em Enviar trabalho novamente.','bad');},12000);
  }
  function winner(data){
   const w=data.work||{};root.innerHTML=shell('<section class="atp-card atp-winner"><p class="eyebrow">🏆 '+esc(data.label||'TRABALHO DESTAQUE')+'</p><h2>'+esc(data.challenge||'Ateliê do Trânsito')+'</h2><img src="'+(w.image||'')+'" alt="Trabalho destaque"><h2>'+esc(w.name||'Participante')+'</h2><p>'+esc(w.team||'')+'</p>'+(w.score?'<span class="atp-score">'+esc(w.score)+'/100</span>':'')+'<p>Parabéns! O mais importante é transformar criatividade em atitudes mais seguras.</p></section>');bindExit();SoundManager.play('celebrate');
@@ -79,14 +96,16 @@ export function openAtelierParticipant(rawCode){
  function onMessage(data){
   if(!data||typeof data!=='object')return;
   if(data.type==='atelier-state'){state=data;state.accepting?workspace():waiting('O educador ainda não abriu os envios.');return;}
-  if(data.type==='atelier-submit-ack'){const b=root.querySelector('#atpSubmit');if(b)b.disabled=false;msg(data.message||'Trabalho recebido.',data.ok?'ok':'bad');return;}
+  if(data.type==='atelier-upload-ready'){msg('Preparando transmissão do desenho...');return;}
+  if(data.type==='atelier-upload-progress'){const pct=Math.round((Number(data.received)||0)*100/Math.max(1,Number(data.total)||1));msg('Enviando para a galeria • '+pct+'%');return;}
+  if(data.type==='atelier-submit-ack'){clearTimeout(submitTimer);submitTimer=null;sending=false;const b=root.querySelector('#atpSubmit');if(b)b.disabled=false;msg(data.message||'Trabalho recebido.',data.ok?'ok':'bad');if(data.ok)SoundManager.play('correct');return;}
   if(data.type==='atelier-submission-status'){msg(data.status==='approved'?'✅ Seu trabalho foi aprovado para a galeria.':'Seu trabalho voltou para moderação.',data.status==='approved'?'ok':'');return;}
   if(data.type==='atelier-winner'){winner(data);return;}
   if(data.type==='session-finished'||data.type==='session-closed'){closed();return;}
  }
  async function connect(){
   connecting();
-  try{client=await connectParticipant(code,name,{onMessage,onStatus:s=>{if((s.type==='closed'||s.type==='disconnected')&&!closing)setTimeout(()=>join('A conexão foi encerrada. Tente novamente.'),500);}});client.send({type:'atelier-ready'});waiting();}
+  try{client=await connectParticipant(code,name,{onMessage,onStatus:s=>{if((s.type==='closed'||s.type==='disconnected')&&!closing){clearTimeout(submitTimer);sending=false;setTimeout(()=>join('A conexão foi encerrada. Tente novamente.'),500);}}});client.send({type:'atelier-ready'});waiting();}
   catch(e){try{client&&client.close()}catch{}client=null;join(e.message||'Não foi possível entrar na sessão.');}
  }
  join();return true;

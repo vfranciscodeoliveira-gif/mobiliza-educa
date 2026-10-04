@@ -41,6 +41,7 @@ function saveHighlight(w,challenge){
 export function openAtelier(dialog,host,onFinish){
  css();dialog.classList.add('atelier-open');
  let session=null,participants=[],works=[],challenge=CHALLENGES[0],accepting=false,closed=false;
+ const uploads=new Map();
  const cleanup=()=>{if(closed)return;closed=true;try{session&&session.close();}catch{}dialog.classList.remove('atelier-open');};
  dialog.addEventListener('close',cleanup,{once:true});
 
@@ -60,16 +61,39 @@ export function openAtelier(dialog,host,onFinish){
    render();
   }catch(e){host.innerHTML='<section class="ath"><div class="ath-card"><h2>Não foi possível criar a sessão</h2><p>'+esc(e.message)+'</p><button class="btn primary" id="athRetry">Tentar novamente</button></div></section>';host.querySelector('#athRetry').onclick=setup;}
  }
+ function receiveWork(clientId,w,participant){
+  if(!accepting){session.sendTo(clientId,{type:'atelier-submit-ack',ok:false,message:'Os envios estão encerrados.'});return;}
+  const img=String(w.image||'');
+  if(!img.startsWith('data:image/')||img.length>900000){session.sendTo(clientId,{type:'atelier-submit-ack',ok:false,message:'Imagem inválida ou muito grande. Tente reenviar.'});return;}
+  const old=works.find(x=>x.clientId===clientId),row={id:old?old.id:'W'+Date.now().toString(36),clientId,name:String(w.name||participant?.name||'Participante').slice(0,40),team:String(w.team||'').slice(0,40),mode:String(w.mode||'desenho').slice(0,20),image:img,status:old?old.status:'pending',score:old?old.score:0,scores:old?old.scores:null};
+  if(old)Object.assign(old,row);else works.unshift(row);
+  session.sendTo(clientId,{type:'atelier-submit-ack',ok:true,message:'✅ Trabalho recebido na galeria!'});
+  SoundManager.play('correct');render();
+ }
  function handle(msg){
   const data=msg.data||{},clientId=msg.clientId;
   if(data.type==='participant-ready'||data.type==='atelier-ready'){session.sendTo(clientId,{type:'atelier-state',challenge,accepting});return;}
-  if(data.type==='atelier-submit'){
+  if(data.type==='atelier-submit'){receiveWork(clientId,data.work||{},msg.participant);return;}
+  if(data.type==='atelier-submit-start'){
    if(!accepting){session.sendTo(clientId,{type:'atelier-submit-ack',ok:false,message:'Os envios estão encerrados.'});return;}
-   const w=data.work||{},img=String(w.image||'');
-   if(!img.startsWith('data:image/')||img.length>1600000){session.sendTo(clientId,{type:'atelier-submit-ack',ok:false,message:'Imagem inválida ou muito grande.'});return;}
-   const old=works.find(x=>x.clientId===clientId),row={id:old?old.id:'W'+Date.now().toString(36),clientId,name:String(w.name||msg.participant?.name||'Participante').slice(0,40),team:String(w.team||'').slice(0,40),mode:String(w.mode||'desenho').slice(0,20),image:img,status:old?old.status:'pending',score:old?old.score:0,scores:old?old.scores:null};
-   if(old)Object.assign(old,row);else works.unshift(row);
-   session.sendTo(clientId,{type:'atelier-submit-ack',ok:true,message:'Trabalho recebido! Aguarde a avaliação do educador.'});SoundManager.play('correct');render();
+   const total=Math.max(1,Math.min(100,Number(data.total)||0)),uploadId=String(data.uploadId||'').slice(0,80);
+   if(!uploadId||!total){session.sendTo(clientId,{type:'atelier-submit-ack',ok:false,message:'Falha ao iniciar o envio.'});return;}
+   uploads.set(clientId,{uploadId,total,chunks:new Array(total),received:0,meta:{name:String(data.name||'').slice(0,40),team:String(data.team||'').slice(0,40),mode:String(data.mode||'desenho').slice(0,20)}});
+   session.sendTo(clientId,{type:'atelier-upload-ready',uploadId,total});return;
+  }
+  if(data.type==='atelier-submit-chunk'){
+   const up=uploads.get(clientId);if(!up||up.uploadId!==String(data.uploadId||''))return;
+   const i=Number(data.index);if(!Number.isInteger(i)||i<0||i>=up.total)return;
+   const chunk=String(data.chunk||'');if(chunk.length>20000)return;
+   if(typeof up.chunks[i]!=='string'){up.chunks[i]=chunk;up.received++;}
+   if(up.received%5===0||up.received===up.total)session.sendTo(clientId,{type:'atelier-upload-progress',uploadId:up.uploadId,received:up.received,total:up.total});
+   return;
+  }
+  if(data.type==='atelier-submit-end'){
+   const up=uploads.get(clientId);if(!up||up.uploadId!==String(data.uploadId||''))return;
+   uploads.delete(clientId);
+   if(up.received!==up.total||up.chunks.some(x=>typeof x!=='string')){session.sendTo(clientId,{type:'atelier-submit-ack',ok:false,message:'O envio ficou incompleto. Toque em enviar novamente.'});return;}
+   receiveWork(clientId,{...up.meta,image:up.chunks.join('')},msg.participant);
   }
  }
  function render(){
