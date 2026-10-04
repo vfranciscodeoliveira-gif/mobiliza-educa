@@ -1,4 +1,4 @@
-import {putEvidenceFile,getEvidenceFile,deleteEvidenceFile,blobToDataUrl,estimateEvidenceStorage} from '../core/evidenceStore.js?v=2';
+import {putEvidenceFile,getEvidenceFile,deleteEvidenceFile,blobToDataUrl,estimateEvidenceStorage} from '../core/evidenceStore.js?v=3';
 
 const K='mobiliza.admin.';
 const read=k=>{try{return JSON.parse(localStorage.getItem(K+k)||'[]')}catch{return[]}};
