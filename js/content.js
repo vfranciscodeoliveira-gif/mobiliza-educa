@@ -98,13 +98,14 @@ export const adminModules=[
 {id:'admin-dashboard',icon:'📊',title:'Dashboard administrativo',description:'Visão geral de escolas, participantes, eventos, partidas, presença, avaliações e pendências.',tags:['Windows → Web','prioridade'],ready:true},
 {id:'admin-cadastros',icon:'🏫',title:'Pessoas e instituições',description:'Escolas, instituições, contatos, turmas, professores e alunos em uma base única.',tags:['cadastros','solicitantes'],ready:true},
 {id:'admin-eventos',icon:'📅',title:'Agenda, solicitações e inscrições',description:'Receba demandas, transforme pedidos em agendamentos e acompanhe calendário, conflitos, checklist, QR Code, check-in, vagas, inscrições, presença, equipe e materiais.',tags:['agenda','inscrições','atendimento'],ready:true},
-{id:'admin-conteudo',icon:'📝',title:'Conteúdo pedagógico',description:'Banco de perguntas, categorias, dificuldades, revisão, auditoria e Centro Editorial.',tags:['editorial'],ready:true},
+{id:'admin-conteudo',icon:'📝',title:'Conteúdo pedagógico',description:'Banco editorial versionado com categorias, público, dificuldade, revisão e homologação. Só conteúdo homologado alimenta jogos e avaliações.',tags:['editorial'],ready:true},
 {id:'admin-avaliacao',icon:'📈',title:'Presença e avaliações',description:'Pré-teste e pós-teste pareados, aplicação por QR no celular, importação offline, evolução por participante/turma e indicadores por categoria.',tags:['impacto'],ready:true},
 {id:'admin-evidencias',icon:'📷',title:'Evidências e impacto',description:'Fechamento pós-evento, público alcançado, materiais distribuídos, parceiros, fotos/documentos autorizados e relatório final automático.',tags:['comprovação','pós-evento'],ready:true},
 {id:'admin-passaporte',icon:'🎓',title:'Passaporte e certificados',description:'Passaporte digital, conquistas, certificados por participante, QR de validação, revogação e histórico de emissão.',tags:['reconhecimento'],ready:true},
 {id:'admin-relatorios',icon:'📑',title:'Relatórios e indicadores',description:'Painel 360 com filtros por período, instituição, ação e público; alcance, pré/pós, materiais, certificados, parceiros, evidências, rankings e qualidade dos dados.',tags:['gestão'],ready:true},
 {id:'admin-acessos',icon:'🔐',title:'Usuários, perfis e auditoria',description:'Múltiplos usuários, perfis Gestor/Educador/Operador/Consulta, permissões por módulo, sessão por inatividade, bloqueio e trilha de auditoria.',tags:['segurança'],ready:true},
-{id:'admin-sistema',icon:'⚙️',title:'Configurações, backup e sincronização',description:'Identidade institucional, backup operacional, backup completo criptografado, restauração com integridade, diagnóstico de armazenamento e prontidão da nuvem.',tags:['sistema'],ready:true}
+{id:'admin-sistema',icon:'⚙️',title:'Configurações, backup e sincronização',description:'Identidade institucional, backup operacional, backup completo criptografado, restauração com integridade, diagnóstico de armazenamento e prontidão da nuvem.',tags:['sistema'],ready:true},
+{id:'admin-assinatura',icon:'💳',title:'Produto e assinatura',description:'Base SaaS com organização/tenant, catálogo de planos, recursos liberados e limites de uso — cobrança segura será autoritativa no backend.',tags:['SaaS','comercial'],ready:true}
 ];
 
 export const tips=[
