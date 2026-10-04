@@ -82,18 +82,25 @@ function bindAudienceUI(){
 }
 
 function updateAuthUI(){
- const unlocked=isAdminUnlocked(),user=getCurrentAdminUser(),lock=qs('#btnAdminLock'),nav=qs('[data-view="gestao"]');
+ const unlocked=isAdminUnlocked(),user=getCurrentAdminUser(),lock=qs('#btnAdminLock'),nav=qs('[data-view="gestao"]'),adminState=qs('#adminAccessState');
  if(lock){lock.hidden=!unlocked;lock.textContent=unlocked?'🔒 Sair • '+(user?.name||'Gestor'):'🔒 Sair';lock.title=unlocked?'Encerrar sessão de '+(user?.username||''):'';}
  if(nav){nav.innerHTML=unlocked?'🛠️ Gestão':'🔒 Gestão';nav.title=unlocked?'Organização: '+(activeTenant()?.name||'—'):'';}
+ if(adminState){
+  const tenantName=activeTenant()?.name||'—';
+  adminState.innerHTML=unlocked
+   ?'<strong>✅ Centro de Gestão liberado</strong><p>Usuário: <b>'+(user?.name||user?.username||'Gestor')+'</b> • Organização: <b>'+tenantName+'</b> • '+adminModules.length+' módulos administrativos disponíveis.</p>'
+   :'<strong>🔒 Centro de Gestão protegido</strong><p>Faça login como Gestor para liberar os módulos administrativos.</p>';
+ }
  qsa('#adminGrid [data-module]').forEach(btn=>{const permissionAllowed=!unlocked||canAccessModule(btn.dataset.module),plan=unlocked?adminModuleEntitlement(btn.dataset.module):{allowed:true,reason:''},allowed=permissionAllowed&&plan.allowed;btn.disabled=!allowed;btn.textContent=allowed?'Abrir':(!permissionAllowed?'Sem permissão':'Não incluído no plano');btn.title=!permissionAllowed?'Seu perfil não possui acesso.':(!plan.allowed?plan.reason:'');btn.closest('.module-card')?.classList.toggle('permission-disabled',!allowed);});
  renderHomeNotifications(qs('#homeNotifications'),qs('#authDialog'),updateAuthUI);
 }
 installTenantWorkspaceBridge();
 installSecurityGuards();
 
-function renderAdminGrid(){
+function renderAdminGrid(force=false){
  const grid=qs('#adminGrid');
- if(grid)grid.innerHTML=adminModules.map(x=>moduleCard(x,'Abrir')).join('');
+ if(!grid)return;
+ if(force||!grid.children.length)grid.innerHTML=adminModules.map(x=>moduleCard(x,'Abrir')).join('');
 }
 function render(){
  qs('#audienceGrid').innerHTML=audiences.map(x=>moduleCard(x,'Explorar')).join('');
@@ -106,13 +113,16 @@ function render(){
  bindModuleButtons();bindAudienceUI();bindGlobalSound();renderAudienceProfile(currentAudience);renderPublicService(qs('#publicServiceHost'));showTip(0);updateResults();updateAuthUI();
 }
 function navigate(view){
- if(view==='gestao')renderAdminGrid();
+ if(view==='gestao'){renderAdminGrid(false);bindModuleButtons();updateAuthUI();}
  qsa('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${view}`));
  qsa('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
  qs('#conteudo').focus();window.scrollTo({top:0,behavior:'smooth'});
 }
 function bindModuleButtons(){
- qsa('[data-module]').forEach(btn=>btn.addEventListener('click',async()=>{
+ qsa('[data-module]').forEach(btn=>{
+  if(btn.dataset.mobilizaBound==='1')return;
+  btn.dataset.mobilizaBound='1';
+  btn.addEventListener('click',async()=>{
   const id=btn.dataset.module;
   if(id==='quiz')openQuiz(qs('#gameDialog'),qs('#gameHost'),updateResults);
   else if(id==='milhao')openMilhao(qs('#gameDialog'),qs('#gameHost'),updateResults);
@@ -127,7 +137,8 @@ function bindModuleButtons(){
   else if(adminModules.some(x=>x.id===id)){
    if(await ensureAdminAccess(qs('#authDialog'))){updateAuthUI();openAdminModule(id,qs('#adminDialog'),qs('#adminHost'),qs('#authDialog'));}
   }else if(!btn.disabled)alert('Este módulo está preparado para a próxima etapa funcional.');
- }));
+  });
+ });
 }
 function showTip(index){tipIndex=index%tips.length;qs('#tipTitle').textContent=tips[tipIndex].title;qs('#tipText').textContent=tips[tipIndex].text;}
 function updateResults(){
@@ -159,7 +170,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.49.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.49.2',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 const cloudRefresh=()=>syncCloudInbox().catch(()=>{});window.addEventListener('focus',cloudRefresh);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudRefresh();});
 installEmulatorBadge();
 render();
