@@ -8,7 +8,7 @@ const LEGACY_SALT='mobiliza.admin.passwordSalt';
 
 export const ADMIN_MODULES=[
  'admin-dashboard','admin-cadastros','admin-eventos','admin-conteudo','admin-avaliacao',
- 'admin-evidencias','admin-passaporte','admin-relatorios','admin-acessos','admin-sistema'
+ 'admin-evidencias','admin-passaporte','admin-relatorios','admin-acessos','admin-sistema','admin-assinatura'
 ];
 export const MODULE_LABELS={
  'admin-dashboard':'Dashboard',
@@ -20,7 +20,8 @@ export const MODULE_LABELS={
  'admin-passaporte':'Passaporte e certificados',
  'admin-relatorios':'Relatórios e indicadores',
  'admin-acessos':'Usuários, perfis e auditoria',
- 'admin-sistema':'Configurações e backup'
+ 'admin-sistema':'Configurações e backup',
+ 'admin-assinatura':'Produto e assinatura'
 };
 const DEFAULT_PROFILES=[
  {id:'GESTOR',name:'Gestor',description:'Acesso administrativo completo.',modules:[...ADMIN_MODULES],locked:true},
