@@ -11,3 +11,6 @@ firebase/functions/node_modules/
 # Nunca versionar segredos locais
 *.secret
 *.key.local
+
+# Configuracao Web auxiliar local
+firebase/web-config.local.json
