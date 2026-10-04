@@ -1,5 +1,6 @@
 import {changeAdminPassword,lockAdmin} from './auth.js';
-import {publishEvent,updateCloudRequestStatus,updateCloudRegistrationStatus} from '../cloudGateway.js?v=2';
+import {publishEvent,updateCloudRequestStatus,updateCloudRegistrationStatus} from '../cloudGateway.js?v=3';
+import {renderPassaporteCertificados} from './passaporteCertificados.js?v=1';
 import {qrSvg,makeCheckinToken} from '../core/qr.js?v=1';
 
 const modules={
@@ -14,7 +15,7 @@ const modules={
 'admin-sistema':{title:'Configurações, backup e sincronização',intro:'Configurações gerais e continuidade operacional.',sections:['Identidade institucional','Preferências','Telão e projeção','Backup local','Importação/exportação','Sincronização futura']}
 };
 
-const KEYS=['escolas','instituicoes','pessoas','turmas','professores','alunos','eventos','solicitacoes','inscricoes'];
+const KEYS=['escolas','instituicoes','pessoas','turmas','professores','alunos','eventos','solicitacoes','inscricoes','certificados'];
 const read=k=>JSON.parse(localStorage.getItem('mobiliza.admin.'+k)||'[]');
 const write=(k,v)=>{localStorage.setItem('mobiliza.admin.'+k,JSON.stringify(v));window.dispatchEvent(new CustomEvent('mobiliza-data-change',{detail:{entity:k}}));};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
@@ -27,7 +28,7 @@ const parseLines=(txt,kind)=>String(txt||'').split(/\r?\n/).map(x=>x.trim()).fil
 const csvEscape=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
 const download=(name,text,type='text/csv;charset=utf-8')=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
 
-function shell(m,inner){return `<section class="admin-module"><p class="eyebrow">CENTRO DE GESTÃO WEB • v0.8</p><h2>${m.title}</h2><p class="admin-intro">${m.intro}</p>${inner}</section>`;}
+function shell(m,inner){return `<section class="admin-module"><p class="eyebrow">CENTRO DE GESTÃO WEB • v0.9</p><h2>${m.title}</h2><p class="admin-intro">${m.intro}</p>${inner}</section>`;}
 function byId(entity,id){return read(entity).find(x=>x.id===id);}
 function label(entity,id){const r=byId(entity,id);return r?.nome||'—';}
 function uniqueName(entity,name,exclude){return !read(entity).some(x=>x.id!==exclude&&String(x.nome||'').trim().toLowerCase()===String(name||'').trim().toLowerCase());}
@@ -458,6 +459,7 @@ export function openAdminModule(id,dialog,host,authDialog){
  else if(id==='admin-cadastros')renderCadastros(host);
  else if(id==='admin-eventos')renderEventos(host);
  else if(id==='admin-relatorios')renderReports(host);
+ else if(id==='admin-passaporte')renderPassaporteCertificados(host);
  else renderPlaceholder(id,host);
  dialog.showModal();
 }
