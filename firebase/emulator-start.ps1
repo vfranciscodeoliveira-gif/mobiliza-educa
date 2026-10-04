@@ -56,6 +56,7 @@ Write-Host " MOBILIZA EDUCA - FIREBASE EMULATOR SUITE" -ForegroundColor Cyan
 Write-Host "====================================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Projeto local: $ProjectId"
+Write-Host "Site local:       http://127.0.0.1:5000/?emulator=1"
 Write-Host "Emulator UI:      http://127.0.0.1:4000"
 Write-Host "Authentication:   http://127.0.0.1:9099"
 Write-Host "Firestore:        http://127.0.0.1:8080"
@@ -66,7 +67,7 @@ Write-Host "Mantenha esta janela aberta enquanto estiver testando." -ForegroundC
 Write-Host "Para encerrar os emuladores, pressione Ctrl+C." -ForegroundColor Yellow
 Write-Host ""
 
-& $FirebaseCmd emulators:start --only auth,firestore,functions --project $ProjectId
+& $FirebaseCmd emulators:start --config firebase.emulator.json --only auth,firestore,functions,hosting --project $ProjectId
 if ($LASTEXITCODE -ne 0) {
   throw "Firebase Emulator Suite encerrou com erro (codigo $LASTEXITCODE)."
 }
