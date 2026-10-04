@@ -60,6 +60,15 @@ exports.checkinPublic=onRequest({region:REGION,cors:false},wrap(async(req,res)=>
  res.json({ok:true,nome:r.nome||r.responsavel||'Participante',evento:ev.nome||'Atividade',status:'Presente'});
 }));
 
+exports.validateCertificate=onRequest({region:REGION,cors:false},wrap(async(req,res)=>{
+ const code=text(body(req).code,40).toUpperCase();
+ if(!code)return res.status(400).json({ok:false,message:'Informe o código do certificado.'});
+ const snap=await db.collection('certificados').doc(code).get();
+ if(!snap.exists)return res.status(404).json({ok:false,message:'Certificado não encontrado.'});
+ const c=snap.data();
+ res.json({ok:true,code,participantName:c.participantName||'',activityName:c.activityName||'',eventDateLabel:c.eventDateLabel||'',workloadLabel:c.workloadLabel||'',status:c.status||'Emitido',institution:c.institution||'',issuedAt:c.issuedAt||''});
+}));
+
 exports.gestorPendencias=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{
  if(!manager(req,res))return;const [s,i]=await Promise.all([db.collection('solicitacoes').orderBy('createdAt','desc').limit(200).get(),db.collection('inscricoes').orderBy('createdAt','desc').limit(200).get()]);
  const cv=snap=>snap.docs.map(d=>({id:d.id,...d.data(),createdAt:d.data().createdAt?.toDate?.().toISOString?.()||'',updatedAt:d.data().updatedAt?.toDate?.().toISOString?.()||''}));
@@ -68,6 +77,18 @@ exports.gestorPendencias=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUS
 exports.gestorAtualizarSolicitacao=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{if(!manager(req,res))return;const x=body(req),id=text(x.id,120),status=text(x.status,80);if(!id||!status)return res.status(400).json({ok:false,message:'Dados inválidos.'});await db.collection('solicitacoes').doc(id).set({status,updatedAt:stamp(),idEvento:x.idEvento||null},{merge:true});res.json({ok:true});}));
 exports.gestorAtualizarInscricao=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{if(!manager(req,res))return;const x=body(req),id=text(x.id,120),status=text(x.status,80);if(!id||!status)return res.status(400).json({ok:false,message:'Dados inválidos.'});await db.collection('inscricoes').doc(id).set({status,updatedAt:stamp()},{merge:true});res.json({ok:true});}));
 exports.gestorPublicarEvento=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{if(!manager(req,res))return;const e=body(req).evento||{},id=text(e.id,120)||db.collection('eventosPublicos').doc().id,doc={nome:text(e.nome,180),tipo:text(e.tipo,80),status:text(e.status,50)||'Confirmado',dataInicio:text(e.dataInicio,10),dataFim:text(e.dataFim,10),horaInicio:text(e.horaInicio,5),horaFim:text(e.horaFim,5),local:text(e.local,250),vagas:Math.max(0,Number(e.vagas)||0),checkinToken:text(e.checkinToken,20)||checkToken('E'),inscricoesAbertas:e.inscricoesAbertas!==false,publicadoOnline:true,dataLabel:text(e.dataLabel,40)||text(e.dataInicio,10),updatedAt:stamp()};await db.collection('eventosPublicos').doc(id).set(doc,{merge:true});res.json({ok:true,id});}));
+exports.gestorPublicarCertificado=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{
+ if(!manager(req,res))return;
+ const c=body(req).certificado||{},code=text(c.code,40).toUpperCase();
+ if(!code||!text(c.participantName,180)||!text(c.activityName,220))return res.status(400).json({ok:false,message:'Dados do certificado inválidos.'});
+ const doc={code,participantName:text(c.participantName,180),activityName:text(c.activityName,220),eventDateLabel:text(c.eventDateLabel,60),workloadLabel:text(c.workloadLabel,60),institution:text(c.institution,220),status:text(c.status,40)||'Emitido',issuedAt:text(c.issuedAt,60),updatedAt:stamp()};
+ await db.collection('certificados').doc(code).set(doc,{merge:true});res.json({ok:true,code});
+}));
+exports.gestorRevogarCertificado=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{
+ if(!manager(req,res))return;const code=text(body(req).code,40).toUpperCase();
+ if(!code)return res.status(400).json({ok:false,message:'Código obrigatório.'});
+ await db.collection('certificados').doc(code).set({status:'Revogado',revokedAt:stamp(),updatedAt:stamp()},{merge:true});res.json({ok:true,code});
+}));
 exports.registerGestorToken=onRequest({region:REGION,cors:false,secrets:[GESTOR_PUSH_KEY]},wrap(async(req,res)=>{if(!manager(req,res))return;const x=body(req),token=text(x.token,4096);if(!token)return res.status(400).json({ok:false,message:'Token ausente.'});const id=crypto.createHash('sha256').update(token).digest('hex');await db.collection('gestorTokens').doc(id).set({token,userAgent:text(x.userAgent,500),updatedAt:stamp()},{merge:true});res.json({ok:true});}));
 
 async function notifyGestores(title,body,url='./'){
