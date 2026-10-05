@@ -1,4 +1,5 @@
-import {renderCloudEvents,renderCloudReports} from './cloudOperations.js?v=1';
+import {renderAppointments} from './appointments.js?v=1';
+import {renderCloudReports} from './cloudOperations.js?v=1';
 import {accessSnapshot,permissionAllowed,requirePermission,listAccessTenants} from '../core/cloudAccess.js?v=1';
 import {renderCustomCertificates} from './customCertificates.js?v=6';
 import {openSchoolPdfImport} from './schoolPdfImport.js?v=4';
@@ -378,7 +379,7 @@ function renderDashboard(host,authDialog){
 
  const goModule=id=>{
   if(id==='admin-cadastros')renderCadastros(host);
-  else if(id==='admin-eventos'){if(accessSnapshot()?.owner)renderEventos(host);else renderCloudEvents(host);}
+  else if(id==='admin-eventos'){renderAppointments(host,{openLegacy:accessSnapshot()?.owner?()=>renderEventos(host):undefined});}
   else if(id==='admin-relatorios'){if(accessSnapshot()?.owner)renderRelatorios360(host);else renderCloudReports(host);}
   else if(id==='admin-passaporte'){if(accessSnapshot()?.owner)renderPassaporteCertificados(host);else renderCustomCertificates(host);}
   else if(id==='admin-avaliacao')renderAvaliacaoPedagogica(host);
@@ -668,7 +669,7 @@ export function openAdminModule(id,dialog,host,authDialog){
  recordAudit('MODULO_ABERTO','modulo',id,modules[id].title);
  if(id==='admin-dashboard')renderDashboard(host,authDialog);
  else if(id==='admin-cadastros')renderCadastros(host);
- else if(id==='admin-eventos'){if(accessSnapshot()?.owner)renderEventos(host);else renderCloudEvents(host);}
+ else if(id==='admin-eventos'){renderAppointments(host,{openLegacy:accessSnapshot()?.owner?()=>renderEventos(host):undefined});}
  else if(id==='admin-relatorios'){if(accessSnapshot()?.owner)renderRelatorios360(host);else renderCloudReports(host);}
  else if(id==='admin-passaporte'){if(accessSnapshot()?.owner)renderPassaporteCertificados(host);else renderCustomCertificates(host);}
  else if(id==='admin-avaliacao')renderAvaliacaoPedagogica(host);
