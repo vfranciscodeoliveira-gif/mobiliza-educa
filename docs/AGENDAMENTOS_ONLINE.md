@@ -23,3 +23,7 @@ O proprietário tem o botão Agenda anterior para consultar a operação local a
 Testes de política cobrem datas, duração, capacidade, vínculo de turma, demanda espontânea, recorrência e sobreposição. Testes de interface em DOM cobrem gravação com mensagem, erro sem perder formulário, filtros de turma, calendário e navegação durante carregamento. Testes reais no Firebase Emulator cobrem criação, leitura, cancelamento, isolamento, lote de 60 ocorrências, proteção de metadados e edição concorrente do repositório. Os testes existentes de permissões também passaram. Não foram feitas gravações de teste no Firebase de produção.
 
 Para repetir: em tests, execute npm install, npm run agenda e npm run rules.
+
+## Carregamento de escolas e turmas
+
+A nova central e o formulário da agenda anterior consultam o catálogo no Firestore sem depender da visita prévia aos cadastros. Trocar a escola limpa a seleção e carrega as turmas daquela escola no servidor. A tela ignora respostas de seleções anteriores. Enquanto carrega, ou se falhar, o salvamento fica bloqueado; a falha tem mensagem e botão Tentar novamente. As respostas também são descartadas se o cliente ou módulo mudar durante a consulta.

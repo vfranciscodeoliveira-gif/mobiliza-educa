@@ -1,4 +1,5 @@
-import {renderAppointments} from './appointments.js?v=1';
+import {loadAppointmentCatalog,loadSchoolClasses} from '../core/appointmentRepository.js?v=2';
+import {renderAppointments} from './appointments.js?v=2';
 import {renderCloudReports} from './cloudOperations.js?v=1';
 import {accessSnapshot,permissionAllowed,requirePermission,listAccessTenants} from '../core/cloudAccess.js?v=1';
 import {renderCustomCertificates} from './customCertificates.js?v=6';
@@ -483,8 +484,8 @@ function occurrenceSeries(data){
  return out;
 }
 
-function eventForm(row,host,onDone){
- const editing=!!(row&&!row._new),escolas=read('escolas'),instituicoes=read('instituicoes'),turmas=read('turmas'),selected=new Set(row?.idsTurmas||[]);
+function eventForm(row,host,onDone,catalog){
+ const editing=!!(row&&!row._new),escolas=catalog?.schools||read('escolas'),instituicoes=read('instituicoes'),selected=new Set(row?.idsTurmas||[]);let turmas=catalog?.classes||read('turmas'),classRequest=0,classesLoading=false;
  host.innerHTML=`<form id="eventForm"><div class="crud-editor-head"><div><span class="eyebrow">${editing?'EDITAR AGENDAMENTO':'NOVO AGENDAMENTO'}</span><h3>Ficha do evento / atividade</h3></div><button type="button" class="icon-btn" id="eventCancel">×</button></div>
  <div class="form-grid">
  <label>Nome / título<input name="nome" required value="${esc(row?.nome||'')}"></label>
@@ -517,10 +518,19 @@ function eventForm(row,host,onDone){
   const schoolId=schoolSelect.value,rows=turmas.filter(t=>t.idEscola===schoolId);
   host.querySelector('#eventClasses').innerHTML=!schoolId?'<p class="empty-state">Selecione uma escola para ver suas turmas.</p>':rows.length?rows.map(t=>`<label class="check-card"><input type="checkbox" name="turma" value="${esc(t.id)}" ${keepSelection&&selected.has(t.id)?'checked':''}><span><strong>${esc(t.nome)}</strong><small>${esc(t.turno||'')} • ${esc(t.anoLetivo||'')}</small></span></label>`).join(''):'<p class="empty-state">Esta escola ainda não possui turmas cadastradas.</p>';
  };
- schoolSelect.addEventListener('change',()=>drawEventClasses(false));drawEventClasses(true);
+ const eventFormElement=host.querySelector('#eventForm');
+ const refreshEventClasses=async()=>{
+  const request=++classRequest,schoolId=schoolSelect.value;
+  classesLoading=!!schoolId;eventFormElement.querySelector('button.btn.primary').disabled=classesLoading;
+  host.querySelector('#eventClasses').innerHTML=schoolId?'<p role="status">Carregando turmas da escola...</p>':'<p class="empty-state">Selecione uma escola para ver suas turmas.</p>';
+  if(!schoolId)return;
+  try{const rows=await loadSchoolClasses(schoolId,catalog?.tenantId);if(request!==classRequest||!eventFormElement.isConnected||schoolSelect.value!==schoolId)return;turmas=turmas.filter(t=>t.idEscola!==schoolId).concat(rows);drawEventClasses(false);host.querySelector('#eventError').hidden=true;classesLoading=false;eventFormElement.querySelector('button.btn.primary').disabled=false;}
+  catch(error){if(request!==classRequest||!eventFormElement.isConnected)return;host.querySelector('#eventClasses').innerHTML='<p>Não foi possível carregar as turmas.</p><button type="button" class="btn ghost" id="eventClassesRetry">Tentar novamente</button>';host.querySelector('#eventClassesRetry').onclick=refreshEventClasses;const err=host.querySelector('#eventError');err.hidden=false;err.textContent=error.message;}
+ };
+ schoolSelect.addEventListener('change',refreshEventClasses);schoolSelect.addEventListener('input',refreshEventClasses);drawEventClasses(true);
  const close=()=>onDone(null);host.querySelector('#eventCancel').onclick=close;host.querySelector('#eventCancel2').onclick=close;
  host.querySelectorAll('[data-phone]').forEach(i=>i.oninput=()=>i.value=fmtPhone(i.value));
- host.querySelector('#eventForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target),data=Object.fromEntries(fd.entries()),err=host.querySelector('#eventError');data.idsTurmas=fd.getAll('turma');data.materiais=parseLines(data.materiaisText,'materials');data.equipe=parseLines(data.equipeText,'team');data.parceiros=parseLines(data.parceirosText,'partners');data.telefone=fmtPhone(data.telefone);delete data.materiaisText;delete data.equipeText;delete data.parceirosText;
+ host.querySelector('#eventForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target),data=Object.fromEntries(fd.entries()),err=host.querySelector('#eventError');if(classesLoading){err.hidden=false;err.textContent='Aguarde o carregamento das turmas antes de salvar.';return;}data.idsTurmas=fd.getAll('turma');data.materiais=parseLines(data.materiaisText,'materials');data.equipe=parseLines(data.equipeText,'team');data.parceiros=parseLines(data.parceirosText,'partners');data.telefone=fmtPhone(data.telefone);delete data.materiaisText;delete data.equipeText;delete data.parceirosText;
   if(data.idsTurmas.some(id=>!turmas.some(t=>t.id===id&&t.idEscola===data.idEscola))){err.hidden=false;err.textContent='Selecione somente turmas da escola escolhida.';return;}
   if(data.dataFim<data.dataInicio){err.hidden=false;err.textContent='A data final não pode ser anterior à data inicial.';return;}
   if(data.dataFim===data.dataInicio&&data.horaFim<=data.horaInicio){err.hidden=false;err.textContent='A hora final deve ser posterior à hora inicial.';return;}
@@ -597,7 +607,12 @@ function renderEventos(host){
  const panel=host.querySelector('#centralPanel'),editor=host.querySelector('#eventEditor');
  const kpis=()=>{const req=read('solicitacoes').filter(x=>['Recebida','Nova','Em análise','Aguardando complementação','Aguardando disponibilidade'].includes(x.status||'Recebida')).length,regs=read('inscricoes'),seats=regs.filter(x=>['Confirmada','Presente'].includes(x.status)).reduce((s,x)=>s+(Number(x.quantidade)||1),0);host.querySelector('#centralEventKpi').textContent=read('eventos').length;host.querySelector('#centralReqKpi').textContent=req;host.querySelector('#centralRegKpi').textContent=regs.length;host.querySelector('#centralSeatsKpi').textContent=seats;};
  const closeEditor=()=>editor.hidden=true;
- const openEvent=(row=null,after=null)=>{editor.hidden=false;eventForm(row,editor,saved=>{closeEditor();if(saved&&after)after(saved);renderTab();});};
+ let editorRequest=0;
+ const openEvent=async(row=null,after=null)=>{
+  const request=++editorRequest;editor.hidden=false;editor.innerHTML='<p role="status">Carregando escolas e turmas online...</p>';const loading=editor.firstElementChild;
+  try{const catalog=await loadAppointmentCatalog();if(request!==editorRequest||!editor.isConnected||!editor.contains(loading))return;eventForm(row,editor,saved=>{closeEditor();if(saved&&after)after(saved);renderTab();},catalog);}
+  catch(error){if(request!==editorRequest||!editor.isConnected||!editor.contains(loading))return;editor.innerHTML='<p role="alert"></p><button class="btn ghost" type="button">Tentar novamente</button>';editor.querySelector('p').textContent='Não foi possível carregar os cadastros: '+error.message;editor.querySelector('button').onclick=()=>openEvent(row,after);}
+ };
  const openRequest=(row=null)=>{editor.hidden=false;requestForm(row,editor,()=>{closeEditor();renderTab();});};
  const openReg=(row=null,eventId='')=>{editor.hidden=false;registrationForm(row,editor,()=>{closeEditor();renderTab();},eventId);};
  function agenda(){
@@ -689,3 +704,4 @@ export function openAdminModule(id,dialog,host,authDialog){
  else renderPlaceholder(id,host);
  dialog.showModal();
 }
+
