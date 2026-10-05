@@ -1,14 +1,17 @@
-import {openSchoolPdfImport} from './schoolPdfImport.js?v=3';
-import {supportsEducationEntity,educationRows,loadEducation,saveEducation,deleteEducation} from '../core/educationRepository.js?v=1';
+import {renderCloudEvents,renderCloudReports} from './cloudOperations.js?v=1';
+import {accessSnapshot,permissionAllowed,requirePermission,listAccessTenants} from '../core/cloudAccess.js?v=1';
+import {renderCustomCertificates} from './customCertificates.js?v=6';
+import {openSchoolPdfImport} from './schoolPdfImport.js?v=4';
+import {supportsEducationEntity,educationRows,loadEducation,saveEducation,deleteEducation} from '../core/educationRepository.js?v=2';
 import {changeAdminPassword,lockAdmin} from './auth.js?v=2';
-import {canAccessModule,recordAudit,auditDataWrite} from '../core/accessControl.js?v=1';
+import {canAccessModule,recordAudit,auditDataWrite} from '../core/accessControl.js?v=2';
 import {adminModuleEntitlement} from '../core/saasContext.js?v=2';
 import {publishEvent,updateCloudRequestStatus,updateCloudRegistrationStatus} from '../cloudGateway.js?v=6';
-import {renderPassaporteCertificados} from './passaporteCertificados.js?v=8';
+import {renderPassaporteCertificados} from './passaporteCertificados.js?v=9';
 import {renderAvaliacaoPedagogica} from './avaliacaoPedagogica.js?v=2';
 import {renderEvidenciasImpacto} from './evidenciasImpacto.js?v=3';
 import {renderRelatorios360} from './relatorios360.js?v=2';
-import {renderUsuariosAuditoria} from './usuariosAuditoria.js?v=1';
+import {renderCloudUsers as renderUsuariosAuditoria} from './cloudUsers.js?v=1';
 import {renderSistemaContinuity} from './sistemaContinuity.js?v=4';
 import {renderCentroEditorial} from './centroEditorial.js?v=1';
 import {renderAssinaturaSaas} from './assinaturaSaas.js?v=2';
@@ -41,6 +44,7 @@ const read=k=>{
  }catch(e){console.error('Mobiliza Educa: falha ao ler '+k,e);return[];}
 };
 const write=(k,v)=>{
+ if(accessSnapshot()&&!accessSnapshot().owner&&['eventos','solicitacoes','inscricoes'].includes(k)&&!permissionAllowed(accessSnapshot(),'events.manage'))throw new Error('Sem permissão para alterar a agenda.');
  if(!KEYS.includes(k))throw new Error('Coleção administrativa inválida: '+k);
  if(!Array.isArray(v))throw new Error('Os dados de '+k+' devem ser uma lista.');
  const before=read(k),payload=JSON.stringify(v);
@@ -282,6 +286,7 @@ function ensureDashboardCss(){
 }
 
 function renderDashboard(host,authDialog){
+ if(accessSnapshot()&&!accessSnapshot().owner){host.innerHTML='<section class="admin-module"><h2>Gestão do cliente</h2><p>Use os módulos liberados no painel para consultar os cadastros, emitir certificados ou gerenciar acessos.</p></section>';return;}
  ensureDashboardCss();
  const eventos=read('eventos'),solicitacoes=read('solicitacoes'),inscricoes=read('inscricoes'),impactos=read('impactos');
  const agora=today(),em7=addDays(agora,7);
@@ -373,9 +378,9 @@ function renderDashboard(host,authDialog){
 
  const goModule=id=>{
   if(id==='admin-cadastros')renderCadastros(host);
-  else if(id==='admin-eventos')renderEventos(host);
-  else if(id==='admin-relatorios')renderRelatorios360(host);
-  else if(id==='admin-passaporte')renderPassaporteCertificados(host);
+  else if(id==='admin-eventos'){if(accessSnapshot()?.owner)renderEventos(host);else renderCloudEvents(host);}
+  else if(id==='admin-relatorios'){if(accessSnapshot()?.owner)renderRelatorios360(host);else renderCloudReports(host);}
+  else if(id==='admin-passaporte'){if(accessSnapshot()?.owner)renderPassaporteCertificados(host);else renderCustomCertificates(host);}
   else if(id==='admin-avaliacao')renderAvaliacaoPedagogica(host);
   else if(id==='admin-evidencias')renderEvidenciasImpacto(host);
   else if(id==='admin-conteudo')renderCentroEditorial(host);
@@ -461,12 +466,12 @@ async function renderCadastros(host){
  const bindMasks=box=>box.querySelectorAll('[data-phone]').forEach(i=>i.addEventListener('input',()=>i.value=fmtPhone(i.value)));
  const openEditor=id=>{const row=id?byId(entity,id):null,d=defs[entity],box=host.querySelector('#crudEditor');box.hidden=false;box.innerHTML=`<form id="crudForm"><div class="crud-editor-head"><div><span class="eyebrow">${row?'EDITAR':'NOVO REGISTRO'}</span><h3>${d.label}</h3></div><button type="button" class="icon-btn" id="crudCancel">×</button></div><div class="form-grid">${d.fields.map(f=>fieldHtml(f,row?.[f[0]]||'')).join('')}</div><p class="form-error" id="crudError" hidden></p><div class="form-actions"><button type="button" class="btn ghost" id="crudCancel2">Cancelar</button><button class="btn primary">Salvar</button></div></form>`;bindMasks(box);const close=()=>box.hidden=true;box.querySelector('#crudCancel').onclick=close;box.querySelector('#crudCancel2').onclick=close;box.querySelector('#crudForm').onsubmit=async e=>{e.preventDefault();const targetEntity=entity,data=Object.fromEntries(new FormData(e.target).entries()),err=box.querySelector('#crudError');if(!uniqueName(entity,data.nome,row?.id)){err.hidden=false;err.textContent='Já existe um registro com este nome.';return;}if(data.dataNascimento&&data.dataNascimento>today()){err.hidden=false;err.textContent='A data de nascimento não pode estar no futuro.';return;}Object.keys(data).filter(k=>k.toLowerCase().includes('telefone')).forEach(k=>data[k]=fmtPhone(data[k]));const all=read(entity);try{if(row){const i=all.findIndex(x=>x.id===row.id);if(i<0)throw new Error('Registro não encontrado para atualização.');all[i]={...all[i],...data,updatedAt:new Date().toISOString()};}else all.unshift({id:uid(),...data,createdAt:new Date().toISOString()});const button=e.target.querySelector('button.btn.primary');button.disabled=true;try{await saveEducation(targetEntity,row?all.find(x=>x.id===row.id):all[0]);}finally{button.disabled=false;}close();draw();}catch(ex){err.hidden=false;err.textContent=ex.message||'Não foi possível salvar o registro.';}};};
 
- const openImport=()=>{const box=host.querySelector('#crudEditor'),d=defs[entity];box.hidden=false;box.innerHTML=`<div class="crud-editor-head"><div><span class="eyebrow">IMPORTAÇÃO EM LOTE</span><h3>${d.label}</h3></div><button class="icon-btn" id="importClose">×</button></div><p>Use CSV com cabeçalho: <code>${d.headers.join(';')}</code></p><input id="importFile" type="file" accept=".csv,text/csv"><textarea id="importText" rows="8" placeholder="Ou cole o conteúdo CSV aqui..."></textarea><p class="form-error" id="importMsg" hidden></p><div class="form-actions"><button class="btn ghost" id="downloadTemplate">Baixar modelo</button><button class="btn primary" id="runImport">Importar dados</button></div>`;box.querySelector('#importClose').onclick=()=>box.hidden=true;box.querySelector('#downloadTemplate').onclick=()=>download(`modelo-${entity}.csv`,d.headers.join(';')+'\n');box.querySelector('#importFile').onchange=async e=>box.querySelector('#importText').value=await e.target.files[0].text();box.querySelector('#runImport').onclick=async()=>{try{const rows=parseCsv(box.querySelector('#importText').value,entity).map(r=>normalizeImport(entity,r)).filter(r=>r.nome);if(!rows.length){const m=box.querySelector('#importMsg');m.hidden=false;m.textContent='Nenhum registro válido encontrado.';return;}const existing=read(entity),names=new Set(existing.map(x=>x.nome.toLowerCase()));const fresh=rows.filter(x=>!names.has(x.nome.toLowerCase()));for(const record of fresh)await saveEducation(entity,record);box.hidden=true;page=1;draw();alert(`${fresh.length} registro(s) importado(s). Duplicados por nome foram ignorados.`);}catch(e){const m=box.querySelector('#importMsg');m.hidden=false;m.textContent=e.message;draw();}};};
+ const openImport=()=>{if(!permissionAllowed(accessSnapshot(),'education.create')){alert('Sem permissão para importar.');return;}const box=host.querySelector('#crudEditor'),d=defs[entity];box.hidden=false;box.innerHTML=`<div class="crud-editor-head"><div><span class="eyebrow">IMPORTAÇÃO EM LOTE</span><h3>${d.label}</h3></div><button class="icon-btn" id="importClose">×</button></div><p>Use CSV com cabeçalho: <code>${d.headers.join(';')}</code></p><input id="importFile" type="file" accept=".csv,text/csv"><textarea id="importText" rows="8" placeholder="Ou cole o conteúdo CSV aqui..."></textarea><p class="form-error" id="importMsg" hidden></p><div class="form-actions"><button class="btn ghost" id="downloadTemplate">Baixar modelo</button><button class="btn primary" id="runImport">Importar dados</button></div>`;box.querySelector('#importClose').onclick=()=>box.hidden=true;box.querySelector('#downloadTemplate').onclick=()=>download(`modelo-${entity}.csv`,d.headers.join(';')+'\n');box.querySelector('#importFile').onchange=async e=>box.querySelector('#importText').value=await e.target.files[0].text();box.querySelector('#runImport').onclick=async()=>{try{const rows=parseCsv(box.querySelector('#importText').value,entity).map(r=>normalizeImport(entity,r)).filter(r=>r.nome);if(!rows.length){const m=box.querySelector('#importMsg');m.hidden=false;m.textContent='Nenhum registro válido encontrado.';return;}const existing=read(entity),names=new Set(existing.map(x=>x.nome.toLowerCase()));const fresh=rows.filter(x=>!names.has(x.nome.toLowerCase()));for(const record of fresh)await saveEducation(entity,record);box.hidden=true;page=1;draw();alert(`${fresh.length} registro(s) importado(s). Duplicados por nome foram ignorados.`);}catch(e){const m=box.querySelector('#importMsg');m.hidden=false;m.textContent=e.message;draw();}};};
 
  host.querySelectorAll('[data-entity]').forEach(b=>b.onclick=()=>{entity=b.dataset.entity;page=1;query='';host.querySelectorAll('.admin-tab').forEach(x=>x.classList.toggle('active',x===b));host.querySelector('#crudTitle').textContent=defs[entity].label;host.querySelector('#crudSearch').value='';host.querySelector('#crudEditor').hidden=true;draw();});
  host.querySelector('#crudPdfImport').onclick=()=>openSchoolPdfImport(host.querySelector('#crudEditor'),draw);
- host.querySelector('#crudSearch').oninput=e=>{query=e.target.value;page=1;draw();};host.querySelector('#crudSort').onchange=e=>{sort=e.target.value;page=1;draw();};host.querySelector('#crudNew').onclick=()=>openEditor();host.querySelector('#crudImport').onclick=openImport;host.querySelector('#pagePrev').onclick=()=>{page--;draw();};host.querySelector('#pageNext').onclick=()=>{page++;draw();};
- host.querySelector('#crudBody').onclick=async e=>{const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');if(edit)openEditor(edit.dataset.edit);if(del){const refs=dependencySummary(entity,del.dataset.delete);if(refs.length){alert('Este registro não pode ser excluído porque possui vínculos:\n\n• '+refs.join('\n• ')+'\n\nRemova ou altere os vínculos primeiro.');return;}if(confirm('Excluir este registro?')){try{await deleteEducation(entity,del.dataset.delete);draw();}catch(ex){alert(ex.message);}}}};
+ host.querySelector('#crudSearch').oninput=e=>{query=e.target.value;page=1;draw();};host.querySelector('#crudSort').onchange=e=>{sort=e.target.value;page=1;draw();};host.querySelector('#crudNew').hidden=!permissionAllowed(accessSnapshot(),'education.create');host.querySelector('#crudImport').hidden=!permissionAllowed(accessSnapshot(),'education.create');host.querySelector('#crudPdfImport').hidden=!permissionAllowed(accessSnapshot(),'education.create');host.querySelector('#crudNew').onclick=()=>openEditor();host.querySelector('#crudImport').onclick=openImport;host.querySelector('#pagePrev').onclick=()=>{page--;draw();};host.querySelector('#pageNext').onclick=()=>{page++;draw();};
+ host.querySelector('#crudBody').onclick=async e=>{const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');if(edit&&permissionAllowed(accessSnapshot(),'education.update'))openEditor(edit.dataset.edit);if(del&&permissionAllowed(accessSnapshot(),'education.delete')){const refs=dependencySummary(entity,del.dataset.delete);if(refs.length){alert('Este registro não pode ser excluído porque possui vínculos:\n\n• '+refs.join('\n• ')+'\n\nRemova ou altere os vínculos primeiro.');return;}if(confirm('Excluir este registro?')){try{await deleteEducation(entity,del.dataset.delete);draw();}catch(ex){alert(ex.message);}}}};
  draw();
 }
 
@@ -663,9 +668,9 @@ export function openAdminModule(id,dialog,host,authDialog){
  recordAudit('MODULO_ABERTO','modulo',id,modules[id].title);
  if(id==='admin-dashboard')renderDashboard(host,authDialog);
  else if(id==='admin-cadastros')renderCadastros(host);
- else if(id==='admin-eventos')renderEventos(host);
- else if(id==='admin-relatorios')renderRelatorios360(host);
- else if(id==='admin-passaporte')renderPassaporteCertificados(host);
+ else if(id==='admin-eventos'){if(accessSnapshot()?.owner)renderEventos(host);else renderCloudEvents(host);}
+ else if(id==='admin-relatorios'){if(accessSnapshot()?.owner)renderRelatorios360(host);else renderCloudReports(host);}
+ else if(id==='admin-passaporte'){if(accessSnapshot()?.owner)renderPassaporteCertificados(host);else renderCustomCertificates(host);}
  else if(id==='admin-avaliacao')renderAvaliacaoPedagogica(host);
  else if(id==='admin-evidencias')renderEvidenciasImpacto(host);
  else if(id==='admin-conteudo')renderCentroEditorial(host);
