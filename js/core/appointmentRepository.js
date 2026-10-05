@@ -1,13 +1,24 @@
 import {accessDb,requirePermission} from './cloudAccess.js?v=1';
 import {getCloudTenantId} from '../cloudGateway.js?v=6';
 import {validateAppointment,buildOccurrences,appointmentConflicts} from './appointmentPolicy.js?v=1';
-export async function loadAppointments(){
+async function calendarContext(expectedTenant=''){
  const access=await requirePermission('events.read');if(!access.allSchools)throw new Error('Agenda exige acesso a todas as escolas do cliente.');
- const tenantId=getCloudTenantId(),{db,fs}=await accessDb();
- const [appointments,schools,classes]=await Promise.all(['appointments','schools','classes'].map(c=>fs.getDocsFromServer(fs.collection(db,'tenants',tenantId,c))));
- if(getCloudTenantId()!==tenantId)throw new Error('Cliente alterado. Reabra a agenda.');
- const rows=s=>s.docs.map(d=>({...d.data(),id:d.id}));
- return {tenantId,access,rows:rows(appointments),schools:rows(schools).filter(r=>!r.deletedAt),classes:rows(classes).filter(r=>!r.deletedAt)};
+ const tenantId=getCloudTenantId();if(expectedTenant&&expectedTenant!==tenantId)throw new Error('Cliente alterado. Reabra a agenda.');
+ return {access,tenantId,...await accessDb()};
+}
+function currentCalendar(ctx){if(getCloudTenantId()!==ctx.tenantId)throw new Error('Cliente alterado. Reabra a agenda.');}
+const calendarRows=snap=>snap.docs.map(d=>({...d.data(),id:d.id})).filter(r=>!r.deletedAt);
+export async function loadAppointmentCatalog(){
+ const ctx=await calendarContext();const [schools,classes]=await Promise.all(['schools','classes'].map(c=>ctx.fs.getDocsFromServer(ctx.fs.collection(ctx.db,'tenants',ctx.tenantId,c))));currentCalendar(ctx);
+ return {tenantId:ctx.tenantId,access:ctx.access,schools:calendarRows(schools),classes:calendarRows(classes)};
+}
+export async function loadSchoolClasses(schoolId,expectedTenant){
+ const ctx=await calendarContext(expectedTenant);if(!schoolId)return[];
+ const ref=ctx.fs.collection(ctx.db,'tenants',ctx.tenantId,'classes'),snap=await ctx.fs.getDocsFromServer(ctx.fs.query(ref,ctx.fs.where('idEscola','==',schoolId)));currentCalendar(ctx);return calendarRows(snap);
+}
+export async function loadAppointments(){
+ const ctx=await loadAppointmentCatalog(),{db,fs}=await accessDb();const snap=await fs.getDocsFromServer(fs.collection(db,'tenants',ctx.tenantId,'appointments'));currentCalendar(ctx);
+ return {...ctx,rows:calendarRows(snap)};
 }
 export async function saveAppointment(data,context,{id='',version=null,frequency='Nenhuma',until='',acceptConflicts=false}={}){
  const access=await requirePermission('events.manage');if(!access.allSchools||getCloudTenantId()!==context.tenantId)throw new Error('Cliente alterado ou sem permissão. Reabra a agenda.');
