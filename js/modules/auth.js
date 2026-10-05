@@ -1,14 +1,16 @@
+import {onlineAccessEnabled,refreshOnlineAccess,clearOnlineAccess} from '../core/cloudAccess.js?v=1';
+import {signInCloud,signOutCloud,getCloudUser,getCloudAuth} from '../core/cloudAuth.js?v=3';
 import {
  bootstrapSecurity,listUsers,createFirstManager,normalizeUsername,verifyPassword,startSession,endSession,sessionState,
  markLoginFailure,userLockRemaining,resetUserPassword,changeCurrentPassword,currentUser,recordAudit
-} from '../core/accessControl.js?v=1';
+} from '../core/accessControl.js?v=2';
 
 const LEGACY_HASH='mobiliza.admin.passwordHash';
 
 export function isAdminUnlocked(){
  const s=sessionState();if(s.expired){endSession('timeout');return false;}return !!s.unlocked;
 }
-export function lockAdmin(){endSession('manual');}
+export function lockAdmin(){clearOnlineAccess();endSession('manual');if(onlineAccessEnabled())signOutCloud().catch(console.error);}
 export function hasAdminPassword(){return bootstrapSecurity().length>0||!!localStorage.getItem(LEGACY_HASH);}
 export function getCurrentAdminUser(){return currentUser();}
 
@@ -51,6 +53,7 @@ function forcedChangeHtml(user){
 }
 
 export async function ensureAdminAccess(dialog){
+ if(onlineAccessEnabled())return ensureOnlineLogin(dialog);
  if(isAdminUnlocked())return true;
  let users=bootstrapSecurity(),first=users.length===0;
  dialog.innerHTML=first?firstHtml():loginHtml(users);dialog.showModal();
@@ -98,6 +101,7 @@ export async function ensureAdminAccess(dialog){
 }
 
 export async function changeAdminPassword(dialog){
+ if(onlineAccessEnabled()){const user=await getCloudUser();if(!user)return false;const sdk=await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js');await sdk.sendPasswordResetEmail(await getCloudAuth(),user.email);alert('E-mail de redefinição solicitado para sua conta Firebase.');return true;}
  if(!isAdminUnlocked())return false;const u=currentUser();if(!u)return false;
  dialog.innerHTML=`<form method="dialog" class="auth-card" id="changeForm"><p class="eyebrow">SEGURANÇA • ${u.username}</p><h2>Alterar minha senha</h2><p>Use uma senha com pelo menos 8 caracteres.</p><label>Nova senha<input id="newPass" type="password" minlength="8" required></label><label>Confirmar senha<input id="newConfirm" type="password" minlength="8" required></label><p id="changeError" class="auth-error" hidden></p><div class="form-actions"><button type="button" class="btn ghost" id="changeCancel">Cancelar</button><button class="btn primary">Salvar nova senha</button></div></form>`;
  dialog.showModal();
@@ -106,4 +110,10 @@ export async function changeAdminPassword(dialog){
   dialog.querySelector('#changeCancel').onclick=()=>end(false);
   dialog.querySelector('#changeForm').onsubmit=async e=>{e.preventDefault();const a=dialog.querySelector('#newPass').value,b=dialog.querySelector('#newConfirm').value,err=dialog.querySelector('#changeError');if(a.length<8||a!==b){err.hidden=false;err.textContent=a.length<8?'Use pelo menos 8 caracteres.':'As senhas não conferem.';return;}try{await changeCurrentPassword(a);recordAudit('MINHA_SENHA_ALTERADA','usuario',u.id,u.username);end(true);}catch(ex){err.hidden=false;err.textContent=ex.message;}};
  });
+}
+
+async function ensureOnlineLogin(dialog){
+ try{const u=await getCloudUser();if(u){const result=await refreshOnlineAccess();if(result.access.active)return true;}}catch{}
+ dialog.innerHTML='<form id="onlineLogin" class="auth-card"><h2>Acesso à Gestão</h2><p>Entre com sua conta Firebase. O administrador define os clientes, escolas e ações autorizados.</p><label>E-mail<input name="email" type="email" autocomplete="username" required></label><label>Senha<input name="password" type="password" autocomplete="current-password" required></label><p id="onlineError" role="status"></p><div class="form-actions"><button class="btn ghost" type="button" id="onlineCancel">Cancelar</button><button class="btn primary" type="submit">Entrar</button></div></form>';dialog.showModal();
+ return new Promise(resolve=>{let done=false;const finish=value=>{if(done)return;done=true;dialog.removeEventListener('cancel',cancel);if(dialog.open)dialog.close();resolve(value);};const cancel=e=>{e.preventDefault();finish(false);};dialog.addEventListener('cancel',cancel);dialog.querySelector('#onlineCancel').onclick=()=>finish(false);dialog.querySelector('#onlineLogin').onsubmit=async e=>{e.preventDefault();const data=new FormData(e.target),button=e.target.querySelector('[type=submit]');button.disabled=true;try{await signInCloud(data.get('email'),data.get('password'));const result=await refreshOnlineAccess();if(!result.access.active)throw new Error('Esta conta ainda não possui cliente/escola autorizado. Solicite acesso ao administrador.');finish(true);}catch(err){dialog.querySelector('#onlineError').textContent=err.message;}finally{button.disabled=false;}};});
 }
