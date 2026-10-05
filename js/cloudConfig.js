@@ -5,7 +5,7 @@ export const cloudConfig=Object.freeze({
   functionsBaseUrl:'',
   publicTenantSlug:'mobiliza-educa',
   firebaseWebConfig:Object.freeze({
-    apiKey:'AIzaSyA-uelY-ld_U35_iAr4lHm5ZskVQTFyK2U',
+    apiKey:'AIzaSyA-ue1Y-1d_U35_iAr4lHm5ZskVQTfyK2U',
     authDomain:'mobiliza-educa.firebaseapp.com',
     projectId:'mobiliza-educa',
     storageBucket:'mobiliza-educa.firebasestorage.app',
