@@ -1,3 +1,4 @@
+import {renderCustomCertificates} from './customCertificates.js?v=1';
 import {qrSvg} from '../core/qr.js?v=1';
 import {cloudConfigured,hasCloudSession,publishCertificate,revokeCertificateCloud} from '../cloudGateway.js?v=5';
 
@@ -69,7 +70,7 @@ function printPassport(p){
  w.document.write(html);w.document.close();
 }
 
-export function renderPassaporteCertificados(host){
+function renderLegacyPassaporteCertificados(host){
  ensureCss();let tab='emitir',selectedEvent='';
  function shell(){
   const all=certs(),valid=all.filter(x=>x.status!=='Revogado'),rev=all.filter(x=>x.status==='Revogado'),pass=passports();
@@ -101,4 +102,17 @@ export function renderPassaporteCertificados(host){
   const p=prefs();body.innerHTML='<div class="cert-panel"><div class="cert-help"><strong>Assinatura institucional configurável.</strong></div><div class="cert-grid"><label>Responsável / autoridade<input id="cfgSign" value="'+esc(p.signatory||'')+'"></label><label>Cargo / função<input id="cfgRole" value="'+esc(p.role||'')+'"></label><label>Cidade / UF<input id="cfgCity" value="'+esc(p.city||'')+'"></label></div><div class="cert-actions"><button class="btn primary" id="saveCfg">Salvar configuração</button></div></div>';body.querySelector('#saveCfg').onclick=()=>{savePrefs({signatory:body.querySelector('#cfgSign').value.trim(),role:body.querySelector('#cfgRole').value.trim(),city:body.querySelector('#cfgCity').value.trim()});alert('Configuração salva.');};
  }
  shell();
+}
+
+export function renderPassaporteCertificados(host){
+ host.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"><button type="button" class="btn" data-mode="school">Por escola e turma</button><button type="button" class="btn" data-mode="event">Por evento / passaporte</button></div><div data-certificate-content></div>';
+ const content=host.querySelector('[data-certificate-content]');
+ function show(mode){
+  const frame=document.createElement('div');content.replaceChildren(frame);
+  host.querySelectorAll('[data-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.mode===mode)));
+  if(mode==='event')renderLegacyPassaporteCertificados(frame);
+  else renderCustomCertificates(frame).catch(error=>{frame.textContent='Não foi possível abrir os certificados: '+error.message;});
+ }
+ host.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>show(button.dataset.mode)));
+ show('school');
 }
