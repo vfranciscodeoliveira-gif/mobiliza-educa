@@ -1,0 +1,10 @@
+import {readFile} from 'node:fs/promises';
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),PDFLib=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/pdf-lib');
+const source=(await readFile(new URL('../js/modules/customCertificates.js',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'');
+const {fitCertificateName,certificatePdf}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+const model={nameX:50,nameY:44.5,nameWidth:58,fontSize:24,showQr:false};
+test('nome longo reduz fonte para caber sem truncar',()=>{const font={widthOfTextAtSize:(text,size)=>text.length*size};assert.equal(fitCertificateName(font,'ALUNO EXEMPLO',24,400),24);assert.ok(fitCertificateName(font,'NOME MUITO LONGO DE ALUNO',24,240)<24);assert.throws(()=>fitCertificateName(font,'NOME'.repeat(100),24,100),/Nome muito longo/);});
+test('gera PDF A4 horizontal com uma página por aluno selecionado',async()=>{const result=await certificatePdf(PDFLib,model,[{id:'1',nome:'ALUNO EXEMPLO'},{id:'2',nome:'JOÃO EXEMPLO'}],{schoolId:'school',classId:'class',activity:'Agente de Trânsito Mirim',date:'2026-10-05'});const pdf=await PDFLib.PDFDocument.load(result.bytes);assert.equal(pdf.getPageCount(),2);assert.equal(pdf.getPage(0).getWidth(),841.89);assert.equal(result.records.length,2);assert.notEqual(result.records[0].code,result.records[1].code);assert.equal(result.records[1].name,'JOÃO EXEMPLO');});
