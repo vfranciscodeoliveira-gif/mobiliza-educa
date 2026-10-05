@@ -1,9 +1,12 @@
-import {cloudConfig} from './cloudConfig.js?v=2';
-import {getCloudAuth,getCloudIdToken,getCloudUser,cloudSessionHint,isCloudEmulatorMode,cloudStoragePrefix} from './core/cloudAuth.js?v=2';
+import {cloudConfig} from './cloudConfig.js?v=3';
+import {getCloudAuth,getCloudIdToken,getCloudUser,cloudSessionHint,isCloudEmulatorMode,cloudStoragePrefix} from './core/cloudAuth.js?v=3';
+import {directFirestoreConfigured,directCloudMe,syncDirectInbox,updateDirectRequestStatus,updateDirectRegistrationStatus,publishEventDireto} from './directFirestore.js?v=1';
 
 const emulatorBase='http://127.0.0.1:5001/mobiliza-educa/southamerica-east1';
 const base=()=>String(isCloudEmulatorMode()?emulatorBase:(cloudConfig.functionsBaseUrl||'')).replace(/\/$/,'');
-export const cloudConfigured=()=>isCloudEmulatorMode()||!!(cloudConfig.enabled&&base());
+const functionsConfigured=()=>isCloudEmulatorMode()||!!(cloudConfig.enabled&&base());
+export const cloudConfigured=()=>functionsConfigured();
+export const directCloudConfigured=()=>directFirestoreConfigured();
 export {isCloudEmulatorMode};
 
 function publicTenantSlug(){
@@ -19,7 +22,7 @@ export function setCloudTenantId(v){if(v)localStorage.setItem(tenantKey(),v);els
 export const hasCloudSession=()=>!!cloudSessionHint();
 
 async function api(name,payload={},opts={}){
- if(!cloudConfigured())throw new Error('Integração online ainda não configurada.');
+ if(!functionsConfigured())throw new Error('Cloud Functions não estão publicadas para esta operação.');
  const headers={'Content-Type':'application/json'};
  if(opts.auth){
   const token=await getCloudIdToken();
@@ -45,10 +48,10 @@ export function getCachedCloudMe(){
  try{return JSON.parse(localStorage.getItem(meKey())||'null');}catch{return null;}
 }
 export async function cloudMe(){
- const data=await api('me',{}, {auth:true});
+ const data=functionsConfigured()?await api('me',{}, {auth:true}):await directCloudMe();
  localStorage.setItem(meKey(),JSON.stringify(data));
  if(!getCloudTenantId()&&data.memberships?.length)setCloudTenantId(data.memberships[0].tenantId);
- window.dispatchEvent(new CustomEvent('mobiliza-cloud-me',{detail:{user:data.user||null,emulator:isCloudEmulatorMode()}}));
+ window.dispatchEvent(new CustomEvent('mobiliza-cloud-me',{detail:{user:data.user||null,emulator:isCloudEmulatorMode(),direct:!functionsConfigured()}}));
  return data;
 }
 export async function cloudTenantContext(tenantId=getCloudTenantId()){
@@ -66,6 +69,7 @@ function mergeStore(name,remote){
  localStorage.setItem(k,JSON.stringify([...map.values()]));
 }
 export async function syncCloudInbox(){
+ if(!functionsConfigured())return syncDirectInbox();
  const tenantId=getCloudTenantId();if(!tenantId)throw new Error('Organização da nuvem não selecionada.');
  const data=await api('gestorPendencias',{tenantId},{auth:true});
  mergeStore('solicitacoes',data.solicitacoes);mergeStore('inscricoes',data.inscricoes);
@@ -73,16 +77,19 @@ export async function syncCloudInbox(){
  return {synced:true,solicitacoes:data.solicitacoes?.length||0,inscricoes:data.inscricoes?.length||0};
 }
 export async function updateCloudRequestStatus(id,status,extra={}){
+ if(!functionsConfigured()&&directFirestoreConfigured())return updateDirectRequestStatus(id,status,extra);
  if(!cloudConfigured())return;
  const tenantId=getCloudTenantId();if(!tenantId)throw new Error('Organização da nuvem não selecionada.');
  return api('gestorAtualizarSolicitacao',{tenantId,id,status,...extra},{auth:true});
 }
 export async function updateCloudRegistrationStatus(id,status){
+ if(!functionsConfigured()&&directFirestoreConfigured())return updateDirectRegistrationStatus(id,status);
  if(!cloudConfigured())return;
  const tenantId=getCloudTenantId();if(!tenantId)throw new Error('Organização da nuvem não selecionada.');
  return api('gestorAtualizarInscricao',{tenantId,id,status},{auth:true});
 }
 export async function publishEvent(evento){
+ if(!functionsConfigured()&&directFirestoreConfigured())return publishEventDireto(evento);
  if(!cloudConfigured())throw new Error('Nuvem não configurada.');
  const tenantId=getCloudTenantId();if(!tenantId)throw new Error('Organização da nuvem não selecionada.');
  return api('gestorPublicarEvento',{tenantId,evento},{auth:true});
@@ -100,6 +107,7 @@ export async function revokeCertificateCloud(code){
 
 export async function enableManagerPush(){
  if(isCloudEmulatorMode())throw new Error('Push não é ativado no modo Emulator. Teste push somente quando o backend de produção estiver publicado.');
+ if(!functionsConfigured())throw new Error('Push exige Cloud Functions/FCM de produção; o modo Firestore direto não usa push.');
  if(!cloudConfigured())throw new Error('Configure o Firebase antes de ativar notificações.');
  const user=await getCloudUser();if(!user)throw new Error('Conecte sua conta Firebase primeiro.');
  const tenantId=getCloudTenantId();if(!tenantId)throw new Error('Selecione a organização da nuvem.');

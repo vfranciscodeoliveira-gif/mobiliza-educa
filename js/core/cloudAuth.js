@@ -1,4 +1,4 @@
-import {cloudConfig} from '../cloudConfig.js?v=2';
+import {cloudConfig} from '../cloudConfig.js?v=3';
 
 let appPromise=null;
 let authPromise=null;

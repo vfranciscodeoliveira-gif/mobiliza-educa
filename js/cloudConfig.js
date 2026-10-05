@@ -1,10 +1,20 @@
 // Configuração pública do Mobiliza Educa Cloud.
-// Preencha somente depois de criar um projeto Firebase exclusivo do Mobiliza Educa.
-// Estes valores identificam o App Web e NÃO são segredos privados.
+// Os identificadores abaixo pertencem ao App Web do Firebase e não são segredos privados.
 export const cloudConfig=Object.freeze({
-  enabled:false,
+  enabled:true,
   functionsBaseUrl:'',
-  publicTenantSlug:'',
-  firebaseWebConfig:null,
+  publicTenantSlug:'mobiliza-educa',
+  firebaseWebConfig:Object.freeze({
+    apiKey:'AIzaSyA-uelY-ld_U35_iAr4lHm5ZskVQTFyK2U',
+    authDomain:'mobiliza-educa.firebaseapp.com',
+    projectId:'mobiliza-educa',
+    storageBucket:'mobiliza-educa.firebasestorage.app',
+    messagingSenderId:'39731938550',
+    appId:'1:39731938550:web:099c367925c82487a618d7'
+  }),
+  directFirestore:Object.freeze({
+    enabled:true,
+    tenantId:'mobiliza-educa'
+  }),
   vapidKey:''
 });
