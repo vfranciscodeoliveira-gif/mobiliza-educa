@@ -1,4 +1,4 @@
-import {openSchoolPdfImport} from './schoolPdfImport.js?v=1';
+import {openSchoolPdfImport} from './schoolPdfImport.js?v=2';
 import {supportsEducationEntity,educationRows,loadEducation,saveEducation,deleteEducation} from '../core/educationRepository.js?v=1';
 import {changeAdminPassword,lockAdmin} from './auth.js?v=2';
 import {canAccessModule,recordAudit,auditDataWrite} from '../core/accessControl.js?v=1';
@@ -450,7 +450,7 @@ async function renderCadastros(host){
  let entity='escolas',page=1,pageSize=10,sort='nameAsc',query='';
  host.innerHTML=shell(modules['admin-cadastros'],`
  <div class="admin-tabs">${Object.keys(defs).map((k,i)=>`<button class="admin-tab ${i===0?'active':''}" data-entity="${k}">${defs[k].label}</button>`).join('')}</div>
- <div class="crud-toolbar"><div><h3 id="crudTitle">Escolas</h3><span id="crudCount"></span></div><div class="crud-toolbar-actions"><input id="crudSearch" type="search" placeholder="Pesquisar..."><select id="crudSort"><option value="nameAsc">Nome A–Z</option><option value="nameDesc">Nome Z–A</option><option value="recent">Mais recentes</option></select><button type="button" class="btn ghost" id="crudPdfImport">📄 Lista da escola (PDF)</button><button class="btn ghost" id="crudImport">⬆ Importar CSV</button><button class="btn primary" id="crudNew">+ Novo</button></div></div>
+ <div class="crud-toolbar"><div><h3 id="crudTitle">Escolas</h3><span id="crudCount"></span></div><div class="crud-toolbar-actions"><input id="crudSearch" type="search" placeholder="Pesquisar..."><select id="crudSort"><option value="nameAsc">Nome A–Z</option><option value="nameDesc">Nome Z–A</option><option value="recent">Mais recentes</option></select><button type="button" class="btn ghost" id="crudPdfImport">📄 Lista da escola (PDF/DOCX)</button><button class="btn ghost" id="crudImport">⬆ Importar CSV</button><button class="btn primary" id="crudNew">+ Novo</button></div></div>
  <div class="table-wrap"><table class="admin-table"><thead><tr><th>Nome</th><th>Vínculo / Local</th><th>Detalhes</th><th>Ações</th></tr></thead><tbody id="crudBody"></tbody></table></div>
  <div class="pagination"><button class="btn ghost small" id="pagePrev">←</button><span id="pageInfo"></span><button class="btn ghost small" id="pageNext">→</button></div>
  <div id="crudEditor" class="crud-editor" hidden></div>`);

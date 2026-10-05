@@ -1,3 +1,4 @@
+import {parseSchoolDocxBlocks,docxXmlBlocks} from '../core/schoolDocxParser.js?v=1';
 import {educationRows,saveEducation,loadEducation} from '../core/educationRepository.js?v=1';
 import {getCloudTenantId} from '../cloudGateway.js?v=6';
 import {linesFromPdfItems,parseSchoolPages,normalizeSchoolText} from '../core/schoolPdfParser.js?v=1';
@@ -13,48 +14,67 @@ async function readPdf(file){
   return parseSchoolPages(pages);
  }finally{await pdf.destroy();}
 }
+async function readSchoolFile(file){
+ if(!file||file.size>10*1024*1024)throw new Error('Selecione um PDF ou DOCX de até 10 MB.');
+ if(/\.pdf$/i.test(file.name))return readPdf(file);
+ if(!/\.docx$/i.test(file.name))throw new Error('Formato não suportado. Use PDF ou DOCX; arquivos .doc devem ser salvos como .docx no Word.');
+ const {default:JSZip}=await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm');
+ const zip=await JSZip.loadAsync(await file.arrayBuffer()),entry=zip.file('word/document.xml');
+ if(!entry)throw new Error('Este arquivo não é um DOCX válido.');
+ if(entry._data?.uncompressedSize>8*1024*1024)throw new Error('O conteúdo do DOCX é muito grande. Divida a lista.');
+ const xml=await entry.async('string');if(xml.length>8*1024*1024)throw new Error('O conteúdo do DOCX é muito grande.');
+ return parseSchoolDocxBlocks(docxXmlBlocks(xml));
+}
 export function openSchoolPdfImport(box,onDone){
  let parsed=null,sourceTenant=getCloudTenantId(),busy=false;
- box.hidden=false;box.innerHTML=`<div class="crud-editor-head"><h3>Importar lista de alunos da escola</h3><button type="button" class="icon-btn" id="pdfClose">×</button></div><p>PDF com texto selecionável no modelo de lista SED. Confira a escola, as turmas e os nomes antes de gravar. O arquivo é lido no navegador.</p><input id="schoolPdfFile" type="file" accept="application/pdf,.pdf"><p id="schoolPdfMessage" role="status"></p><div id="schoolPdfPreview"></div>`;
+ box.hidden=false;box.innerHTML=`<div class="crud-editor-head"><h3>Importar lista de alunos — PDF ou DOCX</h3><button type="button" class="icon-btn" id="pdfClose">×</button></div><p>PDF com texto selecionável no modelo SED ou DOCX com tabela de alunos/lista numerada. Confira a escola, as turmas e os nomes antes de gravar. O arquivo é lido no navegador.</p><div id="schoolFileDrop" role="button" tabindex="0" aria-label="Selecionar ou soltar lista escolar" style="border:2px dashed #1593aa;border-radius:14px;padding:24px;text-align:center;background:#eef8fb;cursor:pointer"><strong>Arraste e solte aqui um PDF ou DOCX</strong><p>ou clique para escolher — um arquivo de até 10 MB</p></div><input id="schoolPdfFile" type="file" accept="application/pdf,.pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="Arquivo da lista escolar"><p id="schoolPdfMessage" role="status"></p><div id="schoolPdfPreview"></div>`;
  const message=box.querySelector('#schoolPdfMessage'),preview=box.querySelector('#schoolPdfPreview'),fileInput=box.querySelector('#schoolPdfFile');
  box.querySelector('#pdfClose').onclick=()=>{if(!busy)box.hidden=true;};
- fileInput.onchange=async()=>{
-  if(busy)return;parsed=null;preview.innerHTML='';message.textContent='Lendo o PDF...';fileInput.disabled=true;
+ const drop=box.querySelector('#schoolFileDrop');
+ drop.onclick=()=>{if(!busy)fileInput.click();};
+ drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(!busy)fileInput.click();}};
+ for(const event of ['dragenter','dragover'])drop.addEventListener(event,e=>{e.preventDefault();e.stopPropagation();if(!busy)drop.style.background='#d7f3f7';});
+ drop.addEventListener('dragleave',()=>drop.style.background='#eef8fb');
+ drop.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();drop.style.background='#eef8fb';if(busy)return;if(e.dataTransfer.files.length!==1){message.textContent='Solte um arquivo por vez.';return;}analyze(e.dataTransfer.files[0]);});
+ fileInput.onchange=()=>analyze(fileInput.files[0]);
+ async function analyze(file){
+  if(busy||!file)return;busy=true;parsed=null;preview.innerHTML='';message.textContent='Lendo '+file.name+'...';fileInput.disabled=true;
   try{
-   parsed=await readPdf(fileInput.files[0]);sourceTenant=getCloudTenantId();
+   parsed=await readSchoolFile(file);sourceTenant=getCloudTenantId();
    const schools=educationRows('escolas'),match=schools.find(s=>normalizeSchoolText(s.nome)===normalizeSchoolText(parsed.schoolName));
-   preview.innerHTML=`<p><strong>Escola no PDF:</strong> ${esc(parsed.schoolName)} — código ${esc(parsed.schoolCode)}</p><label>Escola de destino<select id="pdfSchool"><option value="">Selecione a escola correta</option>${schools.map(s=>`<option value="${esc(s.id)}" ${s.id===match?.id?'selected':''}>${esc(s.nome)}</option>`).join('')}<option value="__new">Criar escola com o nome do PDF</option></select></label><label><input type="checkbox" id="pdfBirth"> Incluir data de nascimento</label><p>Somente alunos com situação ATIVO serão importados. RA será usado para identificar duplicados. Informações de deficiência não serão importadas.</p><div class="table-wrap"><table class="admin-table"><thead><tr><th>Turma</th><th>Turno</th><th>Ativos</th><th>Ignorados</th></tr></thead><tbody>${parsed.groups.map(g=>`<tr><td>${esc(g.nome)} — ${esc(g.anoLetivo)}</td><td>${esc(g.turno)}</td><td>${g.students.filter(s=>s.situacao==='ATIVO').length}</td><td>${g.students.filter(s=>s.situacao!=='ATIVO').length}</td></tr>`).join('')}</tbody></table></div>${parsed.groups.map(g=>`<details><summary>Conferir nomes — ${esc(g.nome)} / ${esc(g.turno)}</summary><ol>${g.students.map(s=>`<li>${esc(s.nome)} — ${esc(s.situacao)}</li>`).join('')}</ol></details>`).join('')}<label><input type="checkbox" id="pdfReviewed"> Conferi a escola de destino, as turmas e os nomes.</label><button type="button" class="btn primary" id="pdfSave">Importar turmas e alunos</button>`;
+   preview.innerHTML=`<p><strong>Escola no arquivo:</strong> ${esc(parsed.schoolName||'Não identificada — selecione a escola abaixo')}${parsed.schoolCode?' — código '+esc(parsed.schoolCode):''}</p><label>Escola de destino<select id="pdfSchool"><option value="">Selecione a escola correta</option>${schools.map(s=>`<option value="${esc(s.id)}" ${s.id===match?.id?'selected':''}>${esc(s.nome)}</option>`).join('')}${parsed.schoolName?'<option value="__new">Criar escola com o nome do arquivo</option>':''}</select></label><label><input type="checkbox" id="pdfBirth"> Incluir data de nascimento</label><p>Somente alunos com situação ATIVO serão importados. RA será usado para identificar duplicados. Informações de deficiência não serão importadas.</p><div class="table-wrap"><table class="admin-table"><thead><tr><th>Turma</th><th>Turno</th><th>Ativos</th><th>Ignorados</th></tr></thead><tbody>${parsed.groups.map((g,index)=>`<tr><td><input data-group-name="${index}" aria-label="Nome da turma ${index+1}" value="${esc(g.nome)}" placeholder="Ex.: 2º ANO A"><input data-group-year="${index}" aria-label="Ano letivo da turma ${index+1}" type="number" min="2000" max="2100" value="${esc(g.anoLetivo)}"></td><td><select data-group-shift="${index}" aria-label="Turno da turma ${index+1}"><option value="">Selecione</option>${['Manhã','Tarde','Noite','Integral'].map(turno=>`<option ${turno===g.turno?'selected':''}>${turno}</option>`).join('')}</select></td><td>${g.students.filter(s=>s.situacao==='ATIVO').length}</td><td>${g.students.filter(s=>s.situacao!=='ATIVO').length}</td></tr>`).join('')}</tbody></table></div>${parsed.groups.map(g=>`<details><summary>Conferir nomes — ${esc(g.nome)} / ${esc(g.turno)}</summary><ol>${g.students.map(s=>`<li>${esc(s.nome)} — ${esc(s.situacao)}</li>`).join('')}</ol></details>`).join('')}<label><input type="checkbox" id="pdfReviewed"> Conferi a escola de destino, as turmas e os nomes.</label><button type="button" class="btn primary" id="pdfSave">Importar turmas e alunos</button>`;
    message.textContent='Leitura concluída. Nada foi gravado ainda.';
    preview.querySelector('#pdfSave').onclick=commit;
-  }catch(e){message.textContent=e.message||'Não foi possível ler o PDF.';}finally{fileInput.disabled=false;}
- };
+  }catch(e){message.textContent=e.message||'Não foi possível ler o arquivo.';}finally{fileInput.disabled=false;busy=false;}
+ }
  async function commit(){
   if(busy||!parsed)return;
+  for(let i=0;i<parsed.groups.length;i++){const g=parsed.groups[i];g.nome=preview.querySelector('[data-group-name="'+i+'"]').value.trim();g.turno=preview.querySelector('[data-group-shift="'+i+'"]').value;g.anoLetivo=preview.querySelector('[data-group-year="'+i+'"]').value;if(!g.nome||!g.turno||!/^20\d{2}$/.test(g.anoLetivo)){message.textContent='Informe nome, turno e ano letivo de todas as turmas.';return;}g.key=[g.nome,g.turno,g.anoLetivo].join('|');}
   const schoolSelection=preview.querySelector('#pdfSchool').value,includeBirth=preview.querySelector('#pdfBirth').checked;
   if(!schoolSelection||!preview.querySelector('#pdfReviewed').checked){message.textContent='Selecione a escola e confirme a revisão antes de importar.';return;}
-  if(getCloudTenantId()!==sourceTenant){message.textContent='A organização mudou. Leia o PDF novamente.';return;}
+  if(getCloudTenantId()!==sourceTenant){message.textContent='A organização mudou. Leia o arquivo novamente.';return;}
   const existingSchool=educationRows('escolas').find(s=>s.id===schoolSelection);
-  if(existingSchool&&normalizeSchoolText(existingSchool.nome)!==normalizeSchoolText(parsed.schoolName)&&!confirm(`O PDF é de ${parsed.schoolName}, mas você selecionou ${existingSchool.nome}. Confirma o vínculo com essa escola?`))return;
+  if(existingSchool&&parsed.schoolName&&normalizeSchoolText(existingSchool.nome)!==normalizeSchoolText(parsed.schoolName)&&!confirm(`O arquivo é de ${parsed.schoolName}, mas você selecionou ${existingSchool.nome}. Confirma o vínculo com essa escola?`))return;
   busy=true;box.querySelectorAll('button,input,select').forEach(el=>el.disabled=true);let imported=0,skipped=0,conflicts=0,classesCreated=0;
   try{
    await loadEducation();
    const ensureTenant=()=>{if(getCloudTenantId()!==sourceTenant)throw new Error('A organização mudou. Operação interrompida.');};
    ensureTenant();let school=educationRows('escolas').find(s=>s.id===schoolSelection);
    if(schoolSelection==='__new'){
-    school=educationRows('escolas').find(s=>s.codigoEscola===parsed.schoolCode||normalizeSchoolText(s.nome)===normalizeSchoolText(parsed.schoolName));
-    if(!school){school={id:await stableId(sourceTenant+'|school|'+parsed.schoolCode),nome:parsed.schoolName,codigoEscola:parsed.schoolCode};await saveEducation('escolas',school);}
+    school=educationRows('escolas').find(s=>(parsed.schoolCode&&s.codigoEscola===parsed.schoolCode)||normalizeSchoolText(s.nome)===normalizeSchoolText(parsed.schoolName));
+    if(!school){school={id:await stableId(sourceTenant+'|school|'+(parsed.schoolCode||normalizeSchoolText(parsed.schoolName))),nome:parsed.schoolName,codigoEscola:parsed.schoolCode};await saveEducation('escolas',school);}
    }
    if(!school)throw new Error('Escola de destino não encontrada.');
    for(const group of parsed.groups){
     ensureTenant();let turma=educationRows('turmas').find(t=>t.idEscola===school.id&&normalizeSchoolText(t.nome)===normalizeSchoolText(group.nome)&&t.turno===group.turno&&String(t.anoLetivo||'')===group.anoLetivo);
     if(!turma){turma={id:await stableId(sourceTenant+'|'+school.id+'|'+group.key),nome:group.nome,turno:group.turno,ano:group.nome.split(' ANO')[0]+' ANO',anoLetivo:group.anoLetivo,idEscola:school.id};await saveEducation('turmas',turma);classesCreated++;}
     for(const student of group.students.filter(s=>s.situacao==='ATIVO')){
-     ensureTenant();const ra=student.ra+'-'+student.digito+'-'+student.uf;
-     const existing=educationRows('alunos').find(a=>a.ra===ra||(a.idTurma===turma.id&&normalizeSchoolText(a.nome)===normalizeSchoolText(student.nome)));
+     ensureTenant();const ra=student.ra?[student.ra,student.digito,student.uf].filter(Boolean).join('-'):'';
+     const existing=educationRows('alunos').find(a=>(ra&&a.ra===ra)||(a.idTurma===turma.id&&normalizeSchoolText(a.nome)===normalizeSchoolText(student.nome)));
      if(existing){if(existing.idTurma!==turma.id)conflicts++;else skipped++;continue;}
      message.textContent=`Gravando... ${imported} aluno(s) salvo(s).`;
-     const row={id:await stableId(sourceTenant+'|'+turma.id+'|'+ra),nome:student.nome,ra,idTurma:turma.id,idEscola:school.id,anoLetivo:group.anoLetivo,situacao:'ATIVO'};
-     if(includeBirth)row.dataNascimento=student.dataNascimento;
+     const row={id:await stableId(sourceTenant+'|'+turma.id+'|'+(ra||normalizeSchoolText(student.nome))),nome:student.nome,ra,idTurma:turma.id,idEscola:school.id,anoLetivo:group.anoLetivo,situacao:'ATIVO'};
+     if(includeBirth&&student.dataNascimento)row.dataNascimento=student.dataNascimento;
      await saveEducation('alunos',row);imported++;
     }
    }

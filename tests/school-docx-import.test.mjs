@@ -1,0 +1,19 @@
+import {readFile} from 'node:fs/promises';
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+const normalizer=`const normalizeSchoolText=v=>String(v||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toUpperCase().replace(/\\s+/g,' ').trim();`;
+const source=(await readFile(new URL('../js/core/schoolDocxParser.js',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'');
+const {parseSchoolDocxBlocks}=await import('data:text/javascript;base64,'+Buffer.from(normalizer+source).toString('base64'));
+const p=text=>({type:'paragraph',text});
+test('DOCX tabela separa turmas e lê nome, RA, nascimento e situação',()=>{
+ const result=parseSchoolDocxBlocks([p('Escola: ESCOLA EXEMPLO'),p('Ano Letivo: 2026'),p('Turma: 2º ANO A MANHÃ'),{type:'table',rows:[['Nome do aluno','RA','Data de nascimento','Situação'],['ALUNO EXEMPLO','01234','12/03/2018','ATIVO'],['ALUNA EXEMPLO','05678','','REMA']]},p('Turma: 2º ANO B TARDE'),{type:'table',rows:[['Nome completo'],['OUTRO ALUNO']]}]);
+ assert.equal(result.groups.length,2);assert.equal(result.groups[0].students[0].ra,'01234');assert.equal(result.groups[0].students[0].dataNascimento,'2018-03-12');assert.equal(result.groups[0].students[1].situacao,'REMA');assert.equal(result.groups[1].turno,'Tarde');
+});
+test('lista numerada preserva nomes sem RA e exige definição de turma na prévia',()=>{const result=parseSchoolDocxBlocks([p('1. ALUNO EXEMPLO'),{type:'paragraph',text:'ALUNA EXEMPLO',numbered:true}]);assert.equal(result.groups[0].students.length,2);assert.equal(result.groups[0].nome,'');assert.equal(result.groups[0].students[0].ra,'');});
+test('não importa cabeçalho repetido nem interpreta texto avulso como aluno',()=>{const result=parseSchoolDocxBlocks([p('Observações da coordenação'),{type:'table',rows:[['Nome'],['ALUNO EXEMPLO'],['Nome'],['TOTAL']]}]);assert.equal(result.groups[0].students.length,1);});
+test('bloqueia documento sem nomes reconhecidos e mistura de escolas',()=>{assert.throws(()=>parseSchoolDocxBlocks([p('Documento sem lista')]),/Nenhum aluno/);assert.throws(()=>parseSchoolDocxBlocks([p('Escola: A'),p('1. ALUNO EXEMPLO'),p('Escola: B'),p('Turma: 2º ANO A TARDE'),p('1. OUTRO ALUNO')]),/arquivo por escola/);});
+const uiSource=(await readFile(new URL('../js/modules/schoolPdfImport.js',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'');
+const ui=await import('data:text/javascript;base64,'+Buffer.from(`const educationRows=()=>[];const getCloudTenantId=()=>"test";`+uiSource).toString('base64'));
+function boxFixture(){const nodes=new Map();const node=()=>({style:{},listeners:{},addEventListener(type,fn){this.listeners[type]=fn;},click(){this.clicks=(this.clicks||0)+1;}});return {hidden:true,querySelector(sel){if(!nodes.has(sel))nodes.set(sel,node());return nodes.get(sel);},nodes};}
+test('área aceita clique/teclado e rejeita vários arquivos soltos',()=>{const box=boxFixture();ui.openSchoolPdfImport(box);const drop=box.querySelector('#schoolFileDrop');drop.onclick();assert.equal(box.querySelector('#schoolPdfFile').clicks,1);let prevented=0;drop.onkeydown({key:'Enter',preventDefault(){prevented++;}});assert.equal(prevented,1);drop.listeners.drop({preventDefault(){},stopPropagation(){},dataTransfer:{files:[{},{}]}});assert.equal(box.querySelector('#schoolPdfMessage').textContent,'Solte um arquivo por vez.');});
+test('arquivo .doc solto recebe instrução para converter a DOCX',async()=>{const box=boxFixture();ui.openSchoolPdfImport(box);box.querySelector('#schoolFileDrop').listeners.drop({preventDefault(){},stopPropagation(){},dataTransfer:{files:[{name:'lista.doc',size:100}]}});await new Promise(resolve=>setTimeout(resolve,0));assert.match(box.querySelector('#schoolPdfMessage').textContent,/salvos como .docx/);assert.equal(box.querySelector('#schoolPdfFile').disabled,false);});
