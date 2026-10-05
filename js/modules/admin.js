@@ -1,4 +1,4 @@
-import {openSchoolPdfImport} from './schoolPdfImport.js?v=2';
+import {openSchoolPdfImport} from './schoolPdfImport.js?v=3';
 import {supportsEducationEntity,educationRows,loadEducation,saveEducation,deleteEducation} from '../core/educationRepository.js?v=1';
 import {changeAdminPassword,lockAdmin} from './auth.js?v=2';
 import {canAccessModule,recordAudit,auditDataWrite} from '../core/accessControl.js?v=1';
