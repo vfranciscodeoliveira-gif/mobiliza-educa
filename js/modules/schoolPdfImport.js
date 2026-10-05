@@ -25,8 +25,8 @@ async function readSchoolFile(file){
  const xml=await entry.async('string');if(xml.length>8*1024*1024)throw new Error('O conteúdo do DOCX é muito grande.');
  return parseSchoolDocxBlocks(docxXmlBlocks(xml));
 }
-export function openSchoolPdfImport(box,onDone){
- let parsed=null,sourceTenant=getCloudTenantId(),busy=false;
+export function openSingleSchoolImport(box,onDone){
+ let parsed=null,sourceTenant=getCloudTenantId(),busy=false,completed=false;
  box.hidden=false;box.innerHTML=`<div class="crud-editor-head"><h3>Importar lista de alunos — PDF ou DOCX</h3><button type="button" class="icon-btn" id="pdfClose">×</button></div><p>PDF com texto selecionável no modelo SED ou DOCX com tabela de alunos/lista numerada. Confira a escola, as turmas e os nomes antes de gravar. O arquivo é lido no navegador.</p><div id="schoolFileDrop" role="button" tabindex="0" aria-label="Selecionar ou soltar lista escolar" style="border:2px dashed #1593aa;border-radius:14px;padding:24px;text-align:center;background:#eef8fb;cursor:pointer"><strong>Arraste e solte aqui um PDF ou DOCX</strong><p>ou clique para escolher — um arquivo de até 10 MB</p></div><input id="schoolPdfFile" type="file" accept="application/pdf,.pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="Arquivo da lista escolar"><p id="schoolPdfMessage" role="status"></p><div id="schoolPdfPreview"></div>`;
  const message=box.querySelector('#schoolPdfMessage'),preview=box.querySelector('#schoolPdfPreview'),fileInput=box.querySelector('#schoolPdfFile');
  box.querySelector('#pdfClose').onclick=()=>{if(!busy)box.hidden=true;};
@@ -38,7 +38,7 @@ export function openSchoolPdfImport(box,onDone){
  drop.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();drop.style.background='#eef8fb';if(busy)return;if(e.dataTransfer.files.length!==1){message.textContent='Solte um arquivo por vez.';return;}analyze(e.dataTransfer.files[0]);});
  fileInput.onchange=()=>analyze(fileInput.files[0]);
  async function analyze(file){
-  if(busy||!file)return;busy=true;parsed=null;preview.innerHTML='';message.textContent='Lendo '+file.name+'...';fileInput.disabled=true;
+  if(busy||!file)return;busy=true;completed=false;parsed=null;preview.innerHTML='';message.textContent='Lendo '+file.name+'...';fileInput.disabled=true;
   try{
    parsed=await readSchoolFile(file);sourceTenant=getCloudTenantId();
    const schools=educationRows('escolas'),match=schools.find(s=>normalizeSchoolText(s.nome)===normalizeSchoolText(parsed.schoolName));
@@ -80,8 +80,67 @@ export function openSchoolPdfImport(box,onDone){
    }
    message.textContent=`Concluído: ${classesCreated} turma(s) criada(s), ${imported} aluno(s) importado(s), ${skipped} já cadastrado(s), ${conflicts} conflito(s) de turma não alterado(s).`;
    if(conflicts)message.textContent+=' Confira alunos com o mesmo RA em outra turma.';
-   onDone?.();
+   completed=true;onDone?.();
   }catch(e){message.textContent=`Importação interrompida: ${e.message}. ${imported} aluno(s) já foi(ram) gravado(s). Você pode tentar novamente; os registros existentes serão ignorados.`;}
   finally{busy=false;box.querySelectorAll('button,input,select').forEach(el=>el.disabled=false);}
  }
+ return {analyze,commit,state:()=>({parsed:!!parsed,busy,completed,message:message.textContent}),validate:()=>{
+  if(!parsed)return 'Arquivo não reconhecido: '+message.textContent;
+  if(!preview.querySelector('#pdfSchool')?.value||!preview.querySelector('#pdfReviewed')?.checked)return 'Selecione a escola e confirme a revisão.';
+  for(let i=0;i<parsed.groups.length;i++){
+   if(!preview.querySelector('[data-group-name="'+i+'"]').value.trim()||!preview.querySelector('[data-group-shift="'+i+'"]').value||!/^20\d{2}$/.test(preview.querySelector('[data-group-year="'+i+'"]').value))return 'Informe turma, turno e ano letivo.';
+  }
+  if(getCloudTenantId()!==sourceTenant)return 'A organização mudou. Leia o arquivo novamente.';
+  return '';
+ }};
+
+}
+
+
+export function openSchoolPdfImport(box,onDone){
+ const entries=[];let processing=false;
+ box.hidden=false;
+ box.innerHTML=`<div class="crud-editor-head"><h3>Importar listas de escolas — PDF e DOCX</h3><button type="button" class="icon-btn" id="batchClose">×</button></div><div id="schoolBatchDrop" role="button" tabindex="0" aria-label="Selecionar ou soltar listas escolares" style="border:2px dashed #1593aa;border-radius:14px;padding:24px;text-align:center;background:#eef8fb;cursor:pointer"><strong>Arraste e solte vários PDFs ou DOCX aqui</strong><p>ou clique para selecionar — até 20 arquivos, 10 MB por arquivo</p></div><input id="schoolBatchFiles" type="file" multiple accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"><p id="schoolBatchMessage" role="status">Adicione os arquivos e revise cada prévia antes de importar.</p><div id="schoolBatchList" class="admin-tabs"></div><div id="schoolBatchPreviews"></div><button type="button" class="btn primary" id="schoolBatchSave" disabled>Importar arquivos revisados</button>`;
+ const drop=box.querySelector('#schoolBatchDrop'),input=box.querySelector('#schoolBatchFiles'),message=box.querySelector('#schoolBatchMessage'),list=box.querySelector('#schoolBatchList'),previews=box.querySelector('#schoolBatchPreviews'),save=box.querySelector('#schoolBatchSave');
+ const select=entry=>{for(const item of entries){item.pane.hidden=item!==entry;item.button.classList.toggle('active',item===entry);}};
+ const refresh=()=>{entries.forEach(entry=>{const state=entry.controller.state();entry.button.textContent=entry.name+' — '+(state.completed?'Importado':state.parsed?'Revisar':'Erro de leitura');});save.disabled=processing||!entries.some(e=>e.controller.state().parsed&&!e.controller.state().completed);};
+ box.querySelector('#batchClose').onclick=()=>{if(!processing)box.hidden=true;};
+ async function addFiles(files){
+  if(processing||!files.length)return;
+  if(entries.length+files.length>20){message.textContent='A fila aceita até 20 arquivos. Termine este lote antes de abrir outro.';return;}
+  processing=true;input.disabled=true;save.disabled=true;
+  try{
+   for(const file of files){
+    message.textContent='Lendo '+file.name+'...';
+    const pane=document.createElement('div'),button=document.createElement('button');button.type='button';button.className='admin-tab';button.textContent=file.name+' — Lendo';previews.appendChild(pane);list.appendChild(button);
+    const controller=openSingleSchoolImport(pane),entry={name:file.name,pane,button,controller};entries.push(entry);button.onclick=()=>select(entry);select(entry);
+    // The queue owns file selection. Per-file controls only review this file.
+    pane.querySelector('#schoolFileDrop').hidden=true;pane.querySelector('#schoolPdfFile').hidden=true;pane.querySelector('#pdfClose').hidden=true;
+    await controller.analyze(file);
+    const perFileSave=pane.querySelector('#pdfSave');if(perFileSave)perFileSave.hidden=true;
+    refresh();
+   }
+   message.textContent=entries.length+' arquivo(s) na fila. Clique em cada arquivo para revisar escola e turmas. Arquivos com erro de leitura serão ignorados.';
+  }finally{processing=false;input.disabled=false;refresh();}
+ }
+ input.onchange=()=>{addFiles(Array.from(input.files));input.value='';};
+ drop.onclick=()=>{if(!processing)input.click();};
+ drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(!processing)input.click();}};
+ for(const type of ['dragenter','dragover'])drop.addEventListener(type,e=>{e.preventDefault();e.stopPropagation();if(!processing)drop.style.background='#d7f3f7';});
+ drop.addEventListener('dragleave',()=>drop.style.background='#eef8fb');
+ drop.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();drop.style.background='#eef8fb';addFiles(Array.from(e.dataTransfer.files));});
+ save.onclick=async()=>{
+  if(processing)return;
+  const pending=entries.filter(e=>e.controller.state().parsed&&!e.controller.state().completed);
+  for(const entry of pending){const error=entry.controller.validate();if(error){select(entry);message.textContent=entry.name+': '+error;return;}}
+  processing=true;input.disabled=true;save.disabled=true;previews.querySelectorAll('button,input,select').forEach(el=>el.disabled=true);let finished=0;
+  try{
+   for(const entry of pending){select(entry);message.textContent='Importando '+entry.name+'...';await entry.controller.commit();refresh();
+    if(!entry.controller.state().completed){message.textContent='Lote interrompido em '+entry.name+': '+entry.controller.state().message;return;}
+    finished++;
+   }
+   const invalid=entries.filter(e=>!e.controller.state().parsed).length;
+   message.textContent='Lote concluído: '+finished+' arquivo(s) importado(s) nesta execução; '+invalid+' com erro de leitura não importado(s). Confira o resumo individual de cada arquivo.';
+  }finally{processing=false;input.disabled=false;previews.querySelectorAll('button,input,select').forEach(el=>el.disabled=false);refresh();onDone?.();}
+ };
 }
