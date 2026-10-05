@@ -1,6 +1,6 @@
 import {cloudConfig} from './cloudConfig.js?v=3';
 import {getCloudAuth,getCloudIdToken,getCloudUser,cloudSessionHint,isCloudEmulatorMode,cloudStoragePrefix} from './core/cloudAuth.js?v=3';
-import {directFirestoreConfigured,directCloudMe,syncDirectInbox,updateDirectRequestStatus,updateDirectRegistrationStatus,publishEventDireto} from './directFirestore.js?v=1';
+import {directFirestoreConfigured,directCloudMe,syncDirectInbox,updateDirectRequestStatus,updateDirectRegistrationStatus,publishEventDireto} from './directFirestore.js?v=2';
 
 const emulatorBase='http://127.0.0.1:5001/mobiliza-educa/southamerica-east1';
 const base=()=>String(isCloudEmulatorMode()?emulatorBase:(cloudConfig.functionsBaseUrl||'')).replace(/\/$/,'');

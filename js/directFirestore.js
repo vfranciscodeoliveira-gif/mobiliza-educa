@@ -1,5 +1,5 @@
 import {cloudConfig} from './cloudConfig.js?v=3';
-import {getCloudUser} from './core/cloudAuth.js?v=3';
+import {getCloudUser,cloudStoragePrefix} from './core/cloudAuth.js?v=3';
 
 let dbPromise=null;
 const trim=(v,n=500)=>String(v??'').trim().slice(0,n);
@@ -94,6 +94,7 @@ export async function consultarProtocoloDireto(protocolo){
  });
 }
 
+const adminTenantId=()=>localStorage.getItem(cloudStoragePrefix()+'.tenantId')||tenantId();
 async function requireUser(){
  const user=await getCloudUser();if(!user)throw new Error('Conecte sua conta Firebase na Gestão para sincronizar.');
  return user;
@@ -112,7 +113,7 @@ export async function directCloudMe(){
  return run(async()=>{
   const user=await requireUser(),ctx=await db(),{fs}=ctx,memberships=[];
   const owner=await fs.getDoc(fs.doc(ctx.db,'platformOwners',user.uid));
-  if(owner.exists()&&owner.data().active===true)memberships.push({tenantId:tenantId(),role:'GESTOR',tenant:{id:tenantId(),name:'Mobiliza Educa',slug:cloudConfig.publicTenantSlug||tenantId()},owner:true});
+  if(owner.exists()&&owner.data().active===true)memberships.push({tenantId:adminTenantId(),role:'GESTOR',tenant:{id:adminTenantId(),name:'Mobiliza Educa',slug:cloudConfig.publicTenantSlug||adminTenantId()},owner:true});
   if(!memberships.length){
    const q=fs.query(fs.collection(ctx.db,'memberships'),fs.where('uid','==',user.uid),fs.limit(25)),snap=await fs.getDocs(q);
    for(const d of snap.docs){const m=d.data();if(m.active===false)continue;let t={id:m.tenantId,name:m.tenantName||m.tenantId,slug:m.tenantSlug||''};try{const td=await fs.getDoc(fs.doc(ctx.db,'tenants',m.tenantId));if(td.exists())t={id:td.id,...td.data()};}catch{}memberships.push({tenantId:m.tenantId,role:m.role||'OPERADOR',tenant:t});}
@@ -123,7 +124,7 @@ export async function directCloudMe(){
 export async function syncDirectInbox(){
  return run(async()=>{
   await requireUser();const ctx=await db(),{fs}=ctx;
-  const [rq,rg]=await Promise.all([fs.getDocs(fs.query(fs.collection(ctx.db,'tenants',tenantId(),'requests'),fs.limit(300))),fs.getDocs(fs.query(fs.collection(ctx.db,'tenants',tenantId(),'registrations'),fs.limit(300)))]);
+  const [rq,rg]=await Promise.all([fs.getDocs(fs.query(fs.collection(ctx.db,'tenants',adminTenantId(),'requests'),fs.limit(300))),fs.getDocs(fs.query(fs.collection(ctx.db,'tenants',adminTenantId(),'registrations'),fs.limit(300)))]);
   const solicitacoes=normalizeSnap(rq).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt))),inscricoes=normalizeSnap(rg).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
   mergeLocal('solicitacoes',solicitacoes);mergeLocal('inscricoes',inscricoes);
   return{synced:true,solicitacoes:solicitacoes.length,inscricoes:inscricoes.length};
@@ -131,9 +132,9 @@ export async function syncDirectInbox(){
 }
 async function updateStatus(collection,id,status,extra={}){
  return run(async()=>{
-  await requireUser();const ctx=await db(),{fs}=ctx,ref=fs.doc(ctx.db,'tenants',tenantId(),collection,id),snap=await fs.getDoc(ref);if(!snap.exists())throw new Error('Registro online não encontrado.');
+  await requireUser();const ctx=await db(),{fs}=ctx,ref=fs.doc(ctx.db,'tenants',adminTenantId(),collection,id),snap=await fs.getDoc(ref);if(!snap.exists())throw new Error('Registro online não encontrado.');
   const row=snap.data(),batch=fs.writeBatch(ctx.db),patch={status:trim(status,80),updatedAt:fs.serverTimestamp(),...extra};batch.update(ref,patch);
-  if(row.protocolo){const st=fs.doc(ctx.db,'tenants',tenantId(),'publicStatuses',row.protocolo);batch.set(st,{status:trim(status,80),updatedAt:fs.serverTimestamp()},{merge:true});}
+  if(row.protocolo){const st=fs.doc(ctx.db,'tenants',adminTenantId(),'publicStatuses',row.protocolo);batch.set(st,{status:trim(status,80),updatedAt:fs.serverTimestamp()},{merge:true});}
   await batch.commit();return{ok:true};
  });
 }
@@ -142,8 +143,8 @@ export const updateDirectRegistrationStatus=(id,status)=>updateStatus('registrat
 
 export async function publishEventDireto(evento){
  return run(async()=>{
-  await requireUser();const ctx=await db(),{fs}=ctx,id=trim(evento.id,120)||fs.doc(fs.collection(ctx.db,'tenants',tenantId(),'publicEvents')).id;
-  const doc={tenantId:tenantId(),nome:trim(evento.nome,180),tipo:trim(evento.tipo,80),status:trim(evento.status,50)||'Confirmado',dataInicio:trim(evento.dataInicio,10),dataFim:trim(evento.dataFim,10),horaInicio:trim(evento.horaInicio,5),horaFim:trim(evento.horaFim,5),local:trim(evento.local,250),vagas:Math.max(0,Number(evento.vagas)||0),checkinToken:trim(evento.checkinToken,30),inscricoesAbertas:evento.inscricoesAbertas!==false,publicadoOnline:true,dataLabel:trim(evento.dataLabel,40)||trim(evento.dataInicio,10),updatedAt:fs.serverTimestamp()};
-  await fs.setDoc(fs.doc(ctx.db,'tenants',tenantId(),'publicEvents',id),doc,{merge:true});return{ok:true,id};
+  await requireUser();const ctx=await db(),{fs}=ctx,id=trim(evento.id,120)||fs.doc(fs.collection(ctx.db,'tenants',adminTenantId(),'publicEvents')).id;
+  const doc={tenantId:adminTenantId(),nome:trim(evento.nome,180),tipo:trim(evento.tipo,80),status:trim(evento.status,50)||'Confirmado',dataInicio:trim(evento.dataInicio,10),dataFim:trim(evento.dataFim,10),horaInicio:trim(evento.horaInicio,5),horaFim:trim(evento.horaFim,5),local:trim(evento.local,250),vagas:Math.max(0,Number(evento.vagas)||0),checkinToken:trim(evento.checkinToken,30),inscricoesAbertas:evento.inscricoesAbertas!==false,publicadoOnline:true,dataLabel:trim(evento.dataLabel,40)||trim(evento.dataInicio,10),updatedAt:fs.serverTimestamp()};
+  await fs.setDoc(fs.doc(ctx.db,'tenants',adminTenantId(),'publicEvents',id),doc,{merge:true});return{ok:true,id};
  });
 }

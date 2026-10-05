@@ -1,9 +1,13 @@
+import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed} from './core/cloudAccess.js?v=1';
+import {getCloudTenantId,setCloudTenantId} from './cloudGateway.js?v=6';
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let onlineTenants=[];
 import {adminModules} from './content.js?v=68';
-import {ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser} from './modules/auth.js?v=2';
-import {canAccessModule} from './core/accessControl.js?v=1';
+import {ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser} from './modules/auth.js?v=3';
+import {canAccessModule} from './core/accessControl.js?v=2';
 import {activeTenant,installTenantWorkspaceBridge} from './core/tenantRegistry.js?v=2';
 import {adminModuleEntitlement} from './core/saasContext.js?v=2';
-import {openAdminModule} from './modules/admin.js?v=24';
+import {openAdminModule} from './modules/admin.js?v=28';
 import {cloudMe,syncCloudInbox} from './cloudGateway.js?v=6';
 import {signInCloud,cloudSessionHint} from './core/cloudAuth.js?v=3';
 
@@ -27,10 +31,9 @@ async function syncFirestore(){
  const btn=qs('#adminCloudSync');if(btn){btn.disabled=true;btn.textContent='☁️ Sincronizando...';}
  try{
   if(!cloudSessionHint()){const cred=await askFirestoreCredentials();if(!cred)return;await signInCloud(cred.email,cred.password);}
-  const me=await cloudMe();
-  if(!me.memberships?.length)throw new Error('Conta autenticada, mas sem permissão de Gestor/Proprietário no Firestore.');
-  const r=await syncCloudInbox();
-  alert('Firestore sincronizado: '+r.solicitacoes+' solicitação(ões) e '+r.inscricoes+' inscrição(ões).');
+  const result=await refreshOnlineAccess();onlineTenants=result.tenants;
+  if(!result.access.active)throw new Error('Conta sem cliente autorizado.');
+  if(permissionAllowed(result.access,'events.read')&&result.access.allSchools){const r=await syncCloudInbox();alert('Firestore sincronizado: '+r.solicitacoes+' solicitações e '+r.inscricoes+' inscrições.');}else alert('Acessos atualizados.');
   renderAuthenticated();
  }catch(e){alert(e?.code==='auth/invalid-credential'?'E-mail ou senha inválidos.':(e.message||'Não foi possível sincronizar o Firestore.'));}
  finally{if(btn){btn.disabled=false;btn.textContent='☁️ Firestore';}}
@@ -79,12 +82,12 @@ function bindModules(){
 
 function renderAuthenticated(){
   const user=getCurrentAdminUser();
-  const tenant=activeTenant();
+  const tenant=onlineTenants.find(t=>t.id===getCloudTenantId())||{name:getCloudTenantId()};
   const login=qs('#adminLoginState'),dash=qs('#adminDashboard');
   login.hidden=true;dash.hidden=false;
 
-  qs('#adminUserCard').innerHTML=`<span>👤</span><div><small>Usuário conectado</small><strong>${user?.name||user?.username||'Gestor'}</strong></div>`;
-  qs('#adminContext').innerHTML=`Organização: <strong>${tenant?.name||'Mobiliza Educa'}</strong> • usuário: <strong>${user?.username||'—'}</strong>`;
+  qs('#adminUserCard').innerHTML=`<span>👤</span><div><small>Usuário conectado</small><strong>${esc(user?.name||user?.username||'Gestor')}</strong></div>`;
+  qs('#adminContext').innerHTML=`Cliente: <select id="adminOnlineTenant">${onlineTenants.map(t=>`<option value="${esc(t.id)}" ${t.id===getCloudTenantId()?'selected':''}>${esc(t.name||t.id)}</option>`).join('')}</select> • usuário: <strong>${esc(user?.username||'—')}</strong>`;qs('#adminOnlineTenant').onchange=async e=>{qs('#adminDialog')?.close();setCloudTenantId(e.target.value);try{const result=await refreshOnlineAccess();onlineTenants=result.tenants;renderAuthenticated();}catch(error){alert(error.message);renderLoggedOut();}};
   qs('#adminProfileKpi').textContent=user?.profileId||'GESTOR';
   qs('#adminModulesKpi').textContent=String(adminModules.length);
   qs('#adminSidebarNav').innerHTML=adminModules.map(sidebarButton).join('');
@@ -102,7 +105,7 @@ function renderLoggedOut(){
 
 async function requestLogin(){
   const ok=await ensureAdminAccess(qs('#authDialog'));
-  if(ok)renderAuthenticated();else renderLoggedOut();
+  if(ok){onlineTenants=await listAccessTenants();renderAuthenticated();}else renderLoggedOut();
 }
 
 qs('#adminDialogClose')?.addEventListener('click',()=>qs('#adminDialog')?.close());
@@ -121,8 +124,10 @@ window.addEventListener('mobiliza-admin-auth',e=>{
 });
 window.addEventListener('mobiliza-tenant-change',()=>{if(isAdminUnlocked())renderAuthenticated();});
 
-if(isAdminUnlocked())renderAuthenticated();
+if(isAdminUnlocked())listAccessTenants().then(rows=>{onlineTenants=rows;renderAuthenticated();}).catch(renderLoggedOut);
 else{
   renderLoggedOut();
   setTimeout(requestLogin,80);
 }
+
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.60.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});

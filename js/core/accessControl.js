@@ -1,3 +1,4 @@
+import {onlineAccessEnabled,onlineUser,modulesForAccess} from './cloudAccess.js?v=1';
 const USERS_KEY='mobiliza.security.users';
 const PROFILES_KEY='mobiliza.security.profiles';
 const AUDIT_KEY='mobiliza.security.audit';
@@ -110,17 +111,18 @@ export async function changeCurrentPassword(password){
 }
 export function getUser(id){return listUsers().find(x=>x.id===id)||null;}
 export function currentUser(){
+ if(onlineAccessEnabled())return onlineUser();
  const s=sessionJson();if(!s)return null;
  const users=safeJson(USERS_KEY,[]),u=users.find(x=>x.id===s.userId&&x.active);return u||null;
 }
 export function currentProfile(){const u=currentUser();return u?profileById(u.profileId):null;}
 export function userModules(user){
- if(!user)return[];if(user.profileId==='GESTOR')return[...ADMIN_MODULES];if(Array.isArray(user.permissions))return user.permissions.filter(x=>ADMIN_MODULES.includes(x));
+ if(!user)return[];if(user._cloud)return modulesForAccess(user);if(user.profileId==='GESTOR')return[...ADMIN_MODULES];if(Array.isArray(user.permissions))return user.permissions.filter(x=>ADMIN_MODULES.includes(x));
  return profileById(user.profileId).modules||[];
 }
 export function canAccessModule(id,user=currentUser()){return !!user&&user.active&&userModules(user).includes(id);}
 export function sessionState(){
- const s=sessionJson(),u=currentUser();if(!s||!u)return{unlocked:false,user:null,expired:false};
+ const s=sessionJson(),u=currentUser();if(onlineAccessEnabled())return {unlocked:!!u,user:u,expired:false};if(!s||!u)return{unlocked:false,user:null,expired:false};
  const timeout=securityConfig().timeoutMinutes*60000,expired=Date.now()-Number(s.lastActivity||0)>timeout;
  return{unlocked:!expired,user,expired,loginAt:s.loginAt,lastActivity:s.lastActivity};
 }

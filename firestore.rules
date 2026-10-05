@@ -1,139 +1,57 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    function signedIn() {
-      return request.auth != null;
-    }
-
-    function platformOwner() {
-      return signedIn()
-        && exists(/databases/$(database)/documents/platformOwners/$(request.auth.uid))
-        && get(/databases/$(database)/documents/platformOwners/$(request.auth.uid)).data.active == true;
-    }
-
-    function member(tenantId) {
-      return signedIn()
-        && exists(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid))
-        && get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.active == true;
-    }
-
-    function manager(tenantId) {
-      return member(tenantId)
-        && get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role == 'GESTOR';
-    }
-
-    match /plans/{planId} {
-      allow read: if true;
-      allow write: if false;
-    }
-
-    match /publicTenants/{slug} {
-      allow read: if true;
-      allow write: if false;
-    }
-
-    match /platformOwners/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || platformOwner());
-      allow write: if false;
-    }
-
-    match /users/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || platformOwner());
-      allow write: if false;
-    }
-
-    match /memberships/{membershipId} {
-      allow read: if signedIn() && (resource.data.uid == request.auth.uid || platformOwner());
-      allow write: if false;
-    }
-
-    match /subscriptions/{tenantId} {
-      allow read: if member(tenantId) || platformOwner();
-      allow write: if false;
-    }
-
-    match /tenants/{tenantId} {
-      allow read: if member(tenantId) || platformOwner();
-      allow write: if false;
-
-      match /members/{uid} {
-        allow read: if signedIn()
-          && (request.auth.uid == uid || manager(tenantId) || platformOwner());
-        allow write: if false;
-      }
-
-      match /{collection}/{docId} {
-        function educationCollection() {
-          return collection in ['schools', 'classes', 'students', 'institutions', 'contacts', 'teachers'];
-        }
-        function educationWriter() {
-          return platformOwner() || (member(tenantId)
-            && get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role in ['GESTOR', 'OPERADOR']);
-        }
-        allow read: if educationCollection() && (member(tenantId) || platformOwner());
-        allow create: if educationCollection() && educationWriter()
-          && request.resource.data.tenantId == tenantId
-          && request.resource.data.nome is string && request.resource.data.nome.size() > 0
-          && request.resource.data.nome.size() <= 250
-          && request.resource.data.createdBy == request.auth.uid
-          && request.resource.data.updatedBy == request.auth.uid
-          && request.resource.data.createdAt == request.time
-          && request.resource.data.updatedAt == request.time;
-        allow update: if educationCollection() && educationWriter()
-          && request.resource.data.tenantId == tenantId
-          && request.resource.data.createdBy == resource.data.createdBy
-          && request.resource.data.createdAt == resource.data.createdAt
-          && request.resource.data.nome is string && request.resource.data.nome.size() > 0
-          && request.resource.data.nome.size() <= 250
-          && request.resource.data.updatedBy == request.auth.uid
-          && request.resource.data.updatedAt == request.time;
-      }
-
-      match /requests/{docId} {
-        allow read: if member(tenantId) || platformOwner();
-        allow write: if false;
-      }
-
-      match /registrations/{docId} {
-        allow read: if member(tenantId) || platformOwner();
-        allow write: if false;
-      }
-
-
-
-      match /publicEvents/{docId} {
-        allow read: if member(tenantId) || platformOwner();
-        allow write: if false;
-      }
-
-      match /certificates/{docId} {
-        allow read: if member(tenantId) || platformOwner();
-        allow write: if false;
-      }
-
-      match /auditLogs/{docId} {
-        allow read: if manager(tenantId) || platformOwner();
-        allow write: if false;
-      }
-
-      match /pushDevices/{docId} {
-        allow read: if false;
-        allow write: if false;
-      }
-
-      match /{document=**} {
-        allow read: if member(tenantId) || platformOwner();
-        allow write: if false;
-      }
-    }
-
-    match /platform/{docId} {
-      allow read: if platformOwner();
-      allow write: if false;
-    }
-
-    match /{document=**} {
-      allow read, write: if false;
-    }
+ match /databases/{database}/documents {
+  function signedIn(){return request.auth != null;}
+  function owner(){return signedIn() && exists(/databases/$(database)/documents/platformOwners/$(request.auth.uid)) && get(/databases/$(database)/documents/platformOwners/$(request.auth.uid)).data.active == true;}
+  function staff(t){return signedIn() && exists(/databases/$(database)/documents/platformStaff/$(request.auth.uid)) && get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.active == true && (get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.allClients == true || t in get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.tenantIds);}
+  function member(t){return signedIn() && exists(/databases/$(database)/documents/tenants/$(t)/members/$(request.auth.uid)) && get(/databases/$(database)/documents/tenants/$(t)/members/$(request.auth.uid)).data.active == true;}
+  function membership(t){return get(/databases/$(database)/documents/tenants/$(t)/members/$(request.auth.uid)).data;}
+  function gestor(t){return member(t) && membership(t).role == 'GESTOR';}
+  function permitted(t,p){return owner() || (staff(t) && p in get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.permissions) || (member(t) && (membership(t).role == 'GESTOR' || p in membership(t).get('permissions',[])));}
+  function allSchools(t){return owner() || staff(t) || (member(t) && (membership(t).role == 'GESTOR' || membership(t).get('allSchools',false) == true));}
+  function school(t,id){return allSchools(t) || (member(t) && id in membership(t).get('schoolIds',[]));}
+  function manage(t){return permitted(t,'users.manage') && allSchools(t);}
+  function knownPermissions(){return ['education.read','education.create','education.update','education.delete','certificates.emit','users.manage','events.read','events.manage','reports.read'];}
+  function validMember(t,uid,d){return uid != request.auth.uid && d.uid == uid && d.tenantId == t && d.active is bool && d.role in ['GESTOR','PERSONALIZADO'] && d.permissions is list && d.permissions.hasOnly(knownPermissions()) && d.allSchools is bool && d.schoolIds is list && d.schoolIds.size() <= 100 && d.name is string && d.email is string && d.updatedBy == request.auth.uid && d.updatedAt == request.time && (owner() || gestor(t) || (staff(t) && d.role == 'PERSONALIZADO' && d.permissions.hasOnly(get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.permissions)));}
+  match /platformOwners/{uid}{allow get: if signedIn() && (uid == request.auth.uid || owner());allow list: if owner();allow write: if false;}
+  match /platformStaff/{uid}{allow get: if signedIn() && (uid == request.auth.uid || owner());allow list: if owner();allow create,update: if owner() && uid != request.auth.uid && request.resource.data.uid == uid && request.resource.data.active is bool && request.resource.data.allClients is bool && request.resource.data.tenantIds is list && request.resource.data.permissions is list && request.resource.data.permissions.hasOnly(knownPermissions()) && request.resource.data.role == 'PERSONALIZADO' && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time;allow delete: if false;}
+  match /memberships/{id}{
+   allow read: if signedIn() && (resource.data.uid == request.auth.uid || owner());
+   allow create,update: if manage(request.resource.data.tenantId) && validMember(request.resource.data.tenantId,request.resource.data.uid,request.resource.data) && id == request.resource.data.uid+'_'+request.resource.data.tenantId && getAfter(/databases/$(database)/documents/tenants/$(request.resource.data.tenantId)/members/$(request.resource.data.uid)).data == request.resource.data;
+   allow delete: if false;
   }
+  match /users/{uid}{allow read: if signedIn() && (uid == request.auth.uid || owner());allow write: if false;}
+  match /plans/{id}{allow read: if true;allow write: if false;}
+  match /publicTenants/{id}{allow read: if true;allow write: if false;}
+  match /subscriptions/{t}{allow read: if owner() || staff(t) || gestor(t);allow write: if false;}
+  match /platform/{id}{allow read: if owner();allow write: if false;}
+  match /tenants/{t}{
+   allow get: if owner() || staff(t) || member(t);allow list: if owner() || (signedIn() && exists(/databases/$(database)/documents/platformStaff/$(request.auth.uid)) && get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.active == true && get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.allClients == true);allow create: if owner() && request.resource.data.name is string && request.resource.data.name.size()>0 && request.resource.data.name.size()<=180 && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;allow update,delete: if false;
+   match /members/{uid}{
+    allow get: if signedIn() && (uid == request.auth.uid || manage(t));allow list: if manage(t);
+    allow create,update: if manage(t) && validMember(t,uid,request.resource.data) && getAfter(/databases/$(database)/documents/memberships/$(uid+'_'+t)).data == request.resource.data;
+    allow delete: if false;
+   }
+   match /{collection}/{id}{
+    function education(){return collection in ['schools','classes','students','institutions','contacts','teachers'];}
+    function recordSchool(d){return collection == 'schools'?id:collection == 'students'?get(/databases/$(database)/documents/tenants/$(t)/classes/$(d.idTurma)).data.idEscola:d.get('idEscola','');}
+    function scoped(d){return allSchools(t) || (collection in ['schools','classes','students','teachers'] && school(t,recordSchool(d)));}
+    function readPerm(){return (collection == 'schools' && manage(t)) || permitted(t,'education.read') || permitted(t,'reports.read') || (collection in ['schools','classes','students'] && permitted(t,'certificates.emit'));}
+    function valid(d){return d.tenantId == t && d.nome is string && d.nome.size()>0 && d.nome.size()<=250 && d.updatedBy == request.auth.uid && d.updatedAt == request.time;}
+    allow get,list: if education() && readPerm() && scoped(resource.data);
+    allow create: if education() && permitted(t,'education.create') && scoped(request.resource.data) && valid(request.resource.data) && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time && !('deletedAt' in request.resource.data);
+    allow update: if education() && scoped(resource.data) && scoped(request.resource.data) && valid(request.resource.data) && request.resource.data.createdBy == resource.data.createdBy && request.resource.data.createdAt == resource.data.createdAt && (request.resource.data.diff(resource.data).affectedKeys().hasAny(['deletedAt']) ? permitted(t,'education.delete') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deletedAt','updatedAt','updatedBy']) && request.resource.data.deletedAt == request.time : permitted(t,'education.update'));
+    allow delete: if false;
+   }
+   match /certificateIssues/{id}{allow read: if permitted(t,'certificates.emit') && school(t,resource.data.schoolId);allow create: if permitted(t,'certificates.emit') && school(t,request.resource.data.schoolId) && request.resource.data.tenantId == t && request.resource.data.issuedBy == request.auth.uid && request.resource.data.issuedAt == request.time && request.resource.data.code == id && get(/databases/$(database)/documents/tenants/$(t)/students/$(request.resource.data.studentId)).data.idTurma == request.resource.data.classId && get(/databases/$(database)/documents/tenants/$(t)/classes/$(request.resource.data.classId)).data.idEscola == request.resource.data.schoolId;allow update,delete: if false;}
+   match /requests/{id}{allow read: if permitted(t,'events.read') && allSchools(t);allow write: if false;}
+   match /registrations/{id}{allow read: if permitted(t,'events.read') && allSchools(t);allow write: if false;}
+   match /publicEvents/{id}{allow read: if permitted(t,'events.read') && allSchools(t);allow create: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.nome is string && request.resource.data.createdBy == request.auth.uid && request.resource.data.updatedBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time && request.resource.data.publicadoOnline == false;allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','dataInicio','local','status','updatedBy','updatedAt']);allow delete: if false;}
+   match /certificates/{id}{allow read: if permitted(t,'certificates.emit') && allSchools(t);allow write: if false;}
+   match /auditLogs/{id}{allow read: if manage(t);allow write: if false;}
+   match /pushDevices/{id}{allow read,write: if false;}
+   match /{document=**}{allow read,write: if false;}
+  }
+  match /{document=**}{allow read,write: if false;}
+ }
 }
