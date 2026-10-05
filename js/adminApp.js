@@ -78,6 +78,7 @@ async function requestLogin(){
   if(ok)renderAuthenticated();else renderLoggedOut();
 }
 
+qs('#adminDialogClose')?.addEventListener('click',()=>qs('#adminDialog')?.close());
 qs('#adminLoginButton')?.addEventListener('click',requestLogin);
 qs('#adminLogout')?.addEventListener('click',()=>{
   lockAdmin();
