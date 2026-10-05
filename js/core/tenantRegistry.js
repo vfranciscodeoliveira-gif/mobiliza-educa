@@ -194,5 +194,5 @@ export function installTenantWorkspaceBridge(){
  const save=()=>snapshotActiveTenant();
  window.addEventListener('pagehide',save);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save();});
- window.addEventListener('mobiliza-data-change',()=>{clearTimeout(installTenantWorkspaceBridge._t);installTenantWorkspaceBridge._t=setTimeout(save,250);});
+ window.addEventListener('mobiliza-data-change',()=>{save();clearTimeout(installTenantWorkspaceBridge._t);installTenantWorkspaceBridge._t=setTimeout(save,500);});
 }

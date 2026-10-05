@@ -1,9 +1,9 @@
 import {adminModules} from './content.js?v=68';
 import {ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser} from './modules/auth.js?v=2';
 import {canAccessModule} from './core/accessControl.js?v=1';
-import {activeTenant,installTenantWorkspaceBridge} from './core/tenantRegistry.js?v=1';
+import {activeTenant,installTenantWorkspaceBridge} from './core/tenantRegistry.js?v=2';
 import {adminModuleEntitlement} from './core/saasContext.js?v=2';
-import {openAdminModule} from './modules/admin.js?v=20';
+import {openAdminModule} from './modules/admin.js?v=21';
 
 const qs=s=>document.querySelector(s);
 
