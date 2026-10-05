@@ -1,5 +1,5 @@
 import {parseSchoolDocxBlocks,docxXmlBlocks} from '../core/schoolDocxParser.js?v=1';
-import {educationRows,saveEducation,loadEducation} from '../core/educationRepository.js?v=1';
+import {educationRows,saveEducation,loadEducation} from '../core/educationRepository.js?v=2';
 import {getCloudTenantId} from '../cloudGateway.js?v=6';
 import {linesFromPdfItems,parseSchoolPages,normalizeSchoolText} from '../core/schoolPdfParser.js?v=1';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
