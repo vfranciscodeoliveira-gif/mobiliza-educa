@@ -132,6 +132,33 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      match /{collection}/{docId} {
+        function educationCollection() {
+          return collection in ['schools', 'classes', 'students', 'institutions', 'contacts', 'teachers'];
+        }
+        function educationWriter() {
+          return platformOwner() || (member(tenantId)
+            && get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role in ['GESTOR', 'OPERADOR']);
+        }
+        allow read: if educationCollection() && (member(tenantId) || platformOwner());
+        allow create: if educationCollection() && educationWriter()
+          && request.resource.data.tenantId == tenantId
+          && request.resource.data.nome is string && request.resource.data.nome.size() > 0
+          && request.resource.data.nome.size() <= 250
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.updatedBy == request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+        allow update: if educationCollection() && educationWriter()
+          && request.resource.data.tenantId == tenantId
+          && request.resource.data.createdBy == resource.data.createdBy
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.nome is string && request.resource.data.nome.size() > 0
+          && request.resource.data.nome.size() <= 250
+          && request.resource.data.updatedBy == request.auth.uid
+          && request.resource.data.updatedAt == request.time;
+      }
+
       match /requests/{docId} {
         allow create: if validRequestCreate(tenantId);
         allow read: if member(tenantId) || platformOwner();
