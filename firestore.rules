@@ -22,76 +22,6 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role == 'GESTOR';
     }
 
-    function directTenant(tenantId) {
-      return tenantId == 'mobiliza-educa';
-    }
-
-    function validRequestCreate(tenantId) {
-      return directTenant(tenantId)
-        && request.resource.data.tenantId == tenantId
-        && request.resource.data.status == 'Recebida'
-        && request.resource.data.protocolo is string
-        && request.resource.data.protocolo.matches('^SOL-[A-Z0-9-]+$')
-        && request.resource.data.origemNome is string
-        && request.resource.data.origemNome.size() > 0
-        && request.resource.data.origemNome.size() <= 180
-        && request.resource.data.solicitanteNome is string
-        && request.resource.data.solicitanteNome.size() > 0
-        && request.resource.data.solicitanteNome.size() <= 180
-        && request.resource.data.telefone is string
-        && request.resource.data.telefone.size() <= 40
-        && request.resource.data.email is string
-        && request.resource.data.email.size() <= 180
-        && request.resource.data.atividade is string
-        && request.resource.data.atividade.size() <= 100
-        && request.resource.data.quantidade is int
-        && request.resource.data.quantidade >= 1
-        && request.resource.data.quantidade <= 9999
-        && request.resource.data.keys().hasOnly([
-          'tenantId','protocolo','status','origemTipo','origemNome','solicitanteNome',
-          'telefone','email','atividade','dataPreferida','horaPreferida','flexibilidade',
-          'quantidade','publico','local','necessidades','createdAt','updatedAt'
-        ]);
-    }
-
-    function validRegistrationCreate(tenantId) {
-      return directTenant(tenantId)
-        && request.resource.data.tenantId == tenantId
-        && request.resource.data.status == 'Recebida'
-        && request.resource.data.protocolo is string
-        && request.resource.data.protocolo.matches('^INS-[A-Z0-9-]+$')
-        && request.resource.data.idEvento is string
-        && request.resource.data.nome is string
-        && request.resource.data.nome.size() > 0
-        && request.resource.data.nome.size() <= 180
-        && request.resource.data.telefone is string
-        && request.resource.data.telefone.size() <= 40
-        && request.resource.data.email is string
-        && request.resource.data.email.size() <= 180
-        && request.resource.data.quantidade is int
-        && request.resource.data.quantidade >= 1
-        && request.resource.data.quantidade <= 500
-        && exists(/databases/$(database)/documents/tenants/$(tenantId)/publicEvents/$(request.resource.data.idEvento))
-        && get(/databases/$(database)/documents/tenants/$(tenantId)/publicEvents/$(request.resource.data.idEvento)).data.publicadoOnline == true
-        && get(/databases/$(database)/documents/tenants/$(tenantId)/publicEvents/$(request.resource.data.idEvento)).data.status == 'Confirmado'
-        && get(/databases/$(database)/documents/tenants/$(tenantId)/publicEvents/$(request.resource.data.idEvento)).data.inscricoesAbertas == true
-        && request.resource.data.keys().hasOnly([
-          'tenantId','protocolo','status','idEvento','tipoInscricao','nome','responsavel',
-          'telefone','email','quantidade','observacao','createdAt','updatedAt'
-        ]);
-    }
-
-    function validStatusCreate(tenantId, docId) {
-      return directTenant(tenantId)
-        && request.resource.data.tenantId == tenantId
-        && request.resource.data.protocolo == docId
-        && request.resource.data.status == 'Recebida'
-        && request.resource.data.tipo in ['Solicitação','Inscrição']
-        && request.resource.data.keys().hasOnly([
-          'tenantId','protocolo','status','tipo','createdAt','updatedAt'
-        ]);
-    }
-
     match /plans/{planId} {
       allow read: if true;
       allow write: if false;
@@ -132,31 +62,48 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      match /{collection}/{docId} {
+        function educationCollection() {
+          return collection in ['schools', 'classes', 'students', 'institutions', 'contacts', 'teachers'];
+        }
+        function educationWriter() {
+          return platformOwner() || (member(tenantId)
+            && get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role in ['GESTOR', 'OPERADOR']);
+        }
+        allow read: if educationCollection() && (member(tenantId) || platformOwner());
+        allow create: if educationCollection() && educationWriter()
+          && request.resource.data.tenantId == tenantId
+          && request.resource.data.nome is string && request.resource.data.nome.size() > 0
+          && request.resource.data.nome.size() <= 250
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.updatedBy == request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+        allow update: if educationCollection() && educationWriter()
+          && request.resource.data.tenantId == tenantId
+          && request.resource.data.createdBy == resource.data.createdBy
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.nome is string && request.resource.data.nome.size() > 0
+          && request.resource.data.nome.size() <= 250
+          && request.resource.data.updatedBy == request.auth.uid
+          && request.resource.data.updatedAt == request.time;
+      }
+
       match /requests/{docId} {
-        allow create: if validRequestCreate(tenantId);
         allow read: if member(tenantId) || platformOwner();
-        allow update, delete: if manager(tenantId) || platformOwner();
+        allow write: if false;
       }
 
       match /registrations/{docId} {
-        allow create: if validRegistrationCreate(tenantId);
         allow read: if member(tenantId) || platformOwner();
-        allow update, delete: if manager(tenantId) || platformOwner();
+        allow write: if false;
       }
 
-      match /publicStatuses/{docId} {
-        allow get: if directTenant(tenantId);
-        allow list: if false;
-        allow create: if validStatusCreate(tenantId, docId);
-        allow update, delete: if manager(tenantId) || platformOwner();
-      }
+
 
       match /publicEvents/{docId} {
-        allow get: if (directTenant(tenantId) && resource.data.publicadoOnline == true)
-          || member(tenantId) || platformOwner();
-        allow list: if (directTenant(tenantId) && resource.data.publicadoOnline == true)
-          || member(tenantId) || platformOwner();
-        allow create, update, delete: if manager(tenantId) || platformOwner();
+        allow read: if member(tenantId) || platformOwner();
+        allow write: if false;
       }
 
       match /certificates/{docId} {
