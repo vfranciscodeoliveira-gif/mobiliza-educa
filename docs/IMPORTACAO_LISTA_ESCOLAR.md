@@ -11,3 +11,12 @@ São importados apenas alunos ATIVO. RA/dígito/UF identificam duplicados. Data 
 Cada registro é confirmado no servidor. A operação completa não é atômica: interrupções podem deixar escola, turmas e parte dos alunos gravados. Repetir a importação ignora os registros existentes. IDs derivados da escola/turma/RA limitam duplicação do mesmo arquivo em reenvios. Não se move automaticamente um aluno já encontrado pelo mesmo RA em outra turma; o resumo informa a contagem de conflitos para revisão manual. A detecção por RA consulta os dados carregados e ainda não impõe unicidade global por transação em importações simultâneas distintas.
 
 Verificação: 8 testes locais passaram. A extração do PDF de referência foi executada com PDF.js e conferiu 4 turmas, 102 registros e 95 ativos; nomes em duas linhas foram recompostos. O Chromium não estava instalado no ambiente, portanto a interface completa não foi exercitada em navegador nem foram feitas gravações com esse arquivo em produção. Após publicação, validar a prévia, importação, repetição e leitura em outro computador com a conta Firebase da organização.
+
+
+## DOCX e arrastar e soltar
+
+O seletor e a área de arrastar e soltar aceitam um PDF ou DOCX por vez, até 10 MB. A área também funciona por clique, Enter e Espaço. DOCX é descompactado no navegador com JSZip; o XML principal é lido sem executar macros ou carregar relacionamentos externos. São reconhecidas tabelas com coluna Nome / Nome do aluno / Nome completo, com campos opcionais RA, nascimento e situação, ou listas numeradas. Não são suportados arquivos DOC antigos, textos livres sem estrutura, nomes dentro de imagens ou tabelas com outras organizações de colunas.
+
+Turma, turno e ano letivo podem ser corrigidos na prévia. O ano letivo do DOCX é extraído do cabeçalho quando disponível; caso contrário, aparece o ano corrente para revisão. Sem escola identificada, é obrigatório escolher uma escola já cadastrada. Sem RA, a detecção de duplicados usa nome e turma; homônimos precisam de revisão. Sem coluna de situação, o aluno é tratado como ATIVO. A data de nascimento continua opcional.
+
+Verificação adicional: testes de parsing de blocos DOCX (tabelas, listas, situações, cabeçalhos repetidos e escola), clique/teclado, descarte de vários arquivos e rejeição de .doc com instrução de conversão. Total de 14 testes locais passou. A abertura de um DOCX real no navegador e a gravação no Firestore ainda exigem validação no site.
