@@ -1,4 +1,4 @@
-import {renderCustomCertificates} from './customCertificates.js?v=3';
+import {renderCustomCertificates} from './customCertificates.js?v=4';
 import {qrSvg} from '../core/qr.js?v=1';
 import {cloudConfigured,hasCloudSession,publishCertificate,revokeCertificateCloud} from '../cloudGateway.js?v=5';
 
