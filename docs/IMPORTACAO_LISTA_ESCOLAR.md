@@ -20,3 +20,9 @@ O seletor e a área de arrastar e soltar aceitam um PDF ou DOCX por vez, até 10
 Turma, turno e ano letivo podem ser corrigidos na prévia. O ano letivo do DOCX é extraído do cabeçalho quando disponível; caso contrário, aparece o ano corrente para revisão. Sem escola identificada, é obrigatório escolher uma escola já cadastrada. Sem RA, a detecção de duplicados usa nome e turma; homônimos precisam de revisão. Sem coluna de situação, o aluno é tratado como ATIVO. A data de nascimento continua opcional.
 
 Verificação adicional: testes de parsing de blocos DOCX (tabelas, listas, situações, cabeçalhos repetidos e escola), clique/teclado, descarte de vários arquivos e rejeição de .doc com instrução de conversão. Total de 14 testes locais passou. A abertura de um DOCX real no navegador e a gravação no Firestore ainda exigem validação no site.
+
+## Fila de vários arquivos
+
+O seletor aceita múltiplos arquivos e a área aceita soltar vários PDFs/DOCX ao mesmo tempo. Até 20 arquivos por lote, 10 MB por arquivo; a leitura é sequencial. Cada arquivo tem uma prévia independente de escola/turma/turno/ano. Arquivos com erro são sinalizados e não importados. Antes de começar a gravar, todas as prévias válidas e pendentes devem ter escola, turma, turno, ano e revisão confirmados. A importação é sequencial, com resumo individual e geral; arquivos já concluídos não são reexecutados pelo botão do lote. Uma falha de gravação interrompe o lote e informa o arquivo; uma tentativa seguinte usa a prevenção de duplicados existente. Fechar e reabrir o importador inicia uma nova fila.
+
+Atualização de validação: 18 testes locais passaram, incluindo fila de vários arquivos, limite do lote, preflight de todas as prévias antes da primeira gravação e execução sequencial que ignora erros de leitura. Testes de fila usam controladores simulados; lote real e gravações continuam pendentes de validação no site. O lote inteiro não é atômico.
