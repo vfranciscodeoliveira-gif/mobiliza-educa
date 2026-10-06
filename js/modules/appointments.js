@@ -1,6 +1,6 @@
 import {renderWindowsHistory} from './windowsHistory.js?v=1';
-import {renderWindowsImport} from './windowsAgendaImport.js?v=3';
-import {loadAppointments,saveAppointment,loadSchoolClasses} from '../core/appointmentRepository.js?v=5';
+import {renderWindowsImport} from './windowsAgendaImport.js?v=4';
+import {loadAppointments,saveAppointment,loadSchoolClasses} from '../core/appointmentRepository.js?v=6';
 import {APPOINTMENT_STATUSES,localDay,appointmentConflicts} from '../core/appointmentPolicy.js?v=2';
 import {permissionAllowed} from '../core/cloudAccess.js?v=1';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
