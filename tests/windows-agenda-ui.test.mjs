@@ -1,0 +1,25 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {createRequire} from 'node:module';
+import * as policy from '../js/core/windowsAgendaPolicy.js';
+import {APPOINTMENT_STATUSES,appointmentConflicts} from '../js/core/appointmentPolicy.js';
+const req=createRequire((process.env.ACL_TEST_NODE_MODULES || new URL('./node_modules',import.meta.url).pathname)+'/package.json');
+const {JSDOM}=req('jsdom');
+let source=await readFile(new URL('../js/modules/windowsAgendaImport.js',import.meta.url),'utf8');
+source=source.replace(/^import .*;\n/gm,'');
+source='const {loadAppointments,importWindowsAppointment,checkWindowsPackage,windowsDocumentId,windowsStatus,schoolSuggestion,mapWindowsAppointment,APPOINTMENT_STATUSES,appointmentConflicts}=globalThis.wiDeps;\n'+source;
+const ctx={tenantId:'t1',schools:[{id:'s1',nome:'Escola Gilza'}],classes:[],rows:[]};
+const calls=[];globalThis.wiDeps={...policy,APPOINTMENT_STATUSES,appointmentConflicts,loadAppointments:async()=>ctx,importWindowsAppointment:async(d,c,id)=>{calls.push(id);ctx.rows.push({...d,id});return true;}};
+const mod=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+test('XML export parses, school mapping and review prevent premature save; rerun skips',async()=>{
+ const dom=new JSDOM('<section id="host"></section>');globalThis.DOMParser=dom.window.DOMParser;globalThis.document=dom.window.document;dom.window.HTMLElement.prototype.scrollIntoView=function(){};
+ const xml='<mobilizaAgenda versao="1" banco="Windows"><escolas><escola><idEscola>1</idEscola><nome>Escola Gilza</nome></escola></escolas><turmas/><agendamentos><agendamento><idAgenda>1</idAgenda><idEscola>1</idEscola><titulo>Visita</titulo><dataInicio>2026-10-05T09:00:00</dataInicio><dataFim>2026-10-05T10:00:00</dataFim><status>CONFIRMADO</status><ativo>1</ativo><vinculos/></agendamento></agendamentos></mobilizaAgenda>';
+ assert.equal(mod.parseWindowsFile(xml).agendamentos.length,1);
+ const host=document.querySelector('#host');await mod.renderWindowsImport(host);
+ await host.querySelector('#wiFile').onchange({target:{files:[{size:xml.length,text:async()=>xml}]}});
+ assert.equal(host.querySelector('[data-school]').value,'s1');assert.equal(host.querySelector('[data-select]').checked,false);
+ await host.querySelector('#wiSave').onclick();assert.equal(calls.length,0);
+ host.querySelector('#wiAll').onclick();await host.querySelector('#wiSave').onclick();assert.deepEqual(calls,['windows-agenda-Windows-1']);assert.equal(host.querySelector('[data-select]').disabled,true);
+ host.querySelector('#wiAll').onclick();await host.querySelector('#wiSave').onclick();assert.equal(calls.length,1);
+});

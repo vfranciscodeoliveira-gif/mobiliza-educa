@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {checkWindowsPackage,windowsDocumentId,windowsStatus,schoolSuggestion,mapWindowsAppointment} from '../js/core/windowsAgendaPolicy.js';
+const p={versao:1,banco:'Windows',escolas:[{idEscola:1,nome:'Escola Gilza'}],turmas:[],agendamentos:[{idAgenda:1,idEscola:1,titulo:'Atendimento',dataInicio:'2026-10-05T09:00:00',dataFim:'2026-10-05T10:00:00',ativo:1,status:'REAGENDADO',quantidadeTurmas:2}]};
+const ctx={schools:[{id:'s1',nome:'Escola Gilza'}],classes:[]};
+test('package IDs unique and format valid',()=>{assert.equal(checkWindowsPackage(p),p);assert.throws(()=>checkWindowsPackage({...p,agendamentos:[p.agendamentos[0],p.agendamentos[0]]}));assert.throws(()=>checkWindowsPackage({...p,banco:'../escape'}));});
+test('same source returns deterministic document ID',()=>{assert.equal(windowsDocumentId(p,p.agendamentos[0]),'windows-agenda-Windows-1');});
+test('school suggestion exact normalized and unique',()=>{assert.equal(schoolSuggestion({nome:'ESCOLA GÍLZA'},ctx.schools),'s1');assert.equal(schoolSuggestion({nome:'Gilza'},ctx.schools),'');assert.equal(schoolSuggestion({nome:'Escola Gilza'},[...ctx.schools,...ctx.schools]),'');});
+test('no event means no invented class; status and counts preserved in note',()=>{const d=mapWindowsAppointment(p,p.agendamentos[0],'s1',windowsStatus(p.agendamentos[0]),ctx);assert.deepEqual(d.idsTurmas,[]);assert.equal(d.status,'Planejado');assert.match(d.observacao,/REAGENDADO/);assert.match(d.observacao,/Quantidade de turmas no Windows: 2/);});
+test('unmapped school and invalid dates block import',()=>{assert.throws(()=>mapWindowsAppointment(p,p.agendamentos[0],'','Planejado',ctx));assert.throws(()=>mapWindowsAppointment(p,{...p.agendamentos[0],dataFim:'2026-10-05T08:00:00'},'s1','Planejado',ctx));});
+test('ambiguous or missing class never guessed',()=>{const q={...p,turmas:[{idTurma:2,idEscola:1,nome:'2 A',anoLetivo:2026,turno:'Manhã'}]};assert.throws(()=>mapWindowsAppointment(q,{...p.agendamentos[0],idsTurmas:[2]},'s1','Planejado',ctx));const c={...ctx,classes:[{id:'c1',idEscola:'s1',nome:'2 A',anoLetivo:2026,turno:'Manhã'}]};assert.deepEqual(mapWindowsAppointment(q,{...p.agendamentos[0],idsTurmas:[2]},'s1','Planejado',c).idsTurmas,['c1']);});
