@@ -1,6 +1,7 @@
 import {accessDb,requirePermission} from './cloudAccess.js?v=1';
 import {getCloudTenantId} from '../cloudGateway.js?v=6';
 import {validateAppointment,buildOccurrences,appointmentConflicts} from './appointmentPolicy.js?v=2';
+import {windowsSchoolData,normalizeWindows} from './windowsAgendaPolicy.js?v=3';
 async function calendarContext(expectedTenant=''){
  const access=await requirePermission('events.read');if(!access.allSchools)throw new Error('Agenda exige acesso a todas as escolas do cliente.');
  const tenantId=getCloudTenantId();if(expectedTenant&&expectedTenant!==tenantId)throw new Error('Cliente alterado. Reabra a agenda.');
@@ -8,6 +9,21 @@ async function calendarContext(expectedTenant=''){
 }
 function currentCalendar(ctx){if(getCloudTenantId()!==ctx.tenantId)throw new Error('Cliente alterado. Reabra a agenda.');}
 const calendarRows=snap=>snap.docs.map(d=>({...d.data(),id:d.id})).filter(r=>!r.deletedAt);
+export async function importWindowsSchool(source,banco,context){
+ const access=await requirePermission('education.create');
+ if(!access.allSchools||getCloudTenantId()!==context.tenantId)throw new Error('Cliente alterado ou sem permissão para cadastrar escolas. Reabra a importação.');
+ const row=windowsSchoolData(source,banco),{db,fs}=await accessDb(),tenantId=context.tenantId;
+ const snap=await fs.getDocsFromServer(fs.collection(db,'tenants',tenantId,'schools'));currentCalendar(context);
+ const matches=calendarRows(snap).filter(s=>normalizeWindows(s.nome)===normalizeWindows(row.nome));
+ if(matches.length>1)throw new Error('Existem escolas com o mesmo nome. Escolha a escola correspondente no dropdown: '+row.nome);
+ if(matches.length===1)return {id:matches[0].id,created:false};
+ const ref=fs.doc(db,'tenants',tenantId,'schools',row.id);
+ return fs.runTransaction(db,async tx=>{
+  const old=await tx.get(ref);currentCalendar(context);
+  if(old.exists()){const d=old.data();if(d.deletedAt)throw new Error('Esta escola foi excluída no site. Confira o cadastro antes de importar novamente.');if(d.windowsOrigin?.banco!==banco||Number(d.windowsOrigin?.idEscola)!==Number(source.idEscola))throw new Error('Identificador de escola já utilizado. Escolha uma escola existente.');return {id:row.id,created:false};}
+  tx.set(ref,{...row,tenantId,createdBy:access.uid,updatedBy:access.uid,createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});return {id:row.id,created:true};
+ });
+}
 export async function loadAppointmentCatalog(){
  const ctx=await calendarContext();const [schools,classes]=await Promise.all(['schools','classes'].map(c=>ctx.fs.getDocsFromServer(ctx.fs.collection(ctx.db,'tenants',ctx.tenantId,c))));currentCalendar(ctx);
  return {tenantId:ctx.tenantId,access:ctx.access,schools:calendarRows(schools),classes:calendarRows(classes)};
