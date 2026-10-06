@@ -9,6 +9,11 @@ async function calendarContext(expectedTenant=''){
 }
 function currentCalendar(ctx){if(getCloudTenantId()!==ctx.tenantId)throw new Error('Cliente alterado. Reabra a agenda.');}
 const calendarRows=snap=>snap.docs.map(d=>({...d.data(),id:d.id})).filter(r=>!r.deletedAt);
+export async function loadWindowsSchoolCatalog(){
+ const access=await requirePermission('education.create');if(!access.allSchools)throw new Error('Importação de escolas exige acesso a todas as escolas do cliente.');
+ const tenantId=getCloudTenantId(),{db,fs}=await accessDb(),snap=await fs.getDocsFromServer(fs.collection(db,'tenants',tenantId,'schools'));currentCalendar({tenantId});
+ return {tenantId,access,schools:calendarRows(snap),classes:[],rows:[]};
+}
 export async function importWindowsSchool(source,banco,context){
  const access=await requirePermission('education.create');
  if(!access.allSchools||getCloudTenantId()!==context.tenantId)throw new Error('Cliente alterado ou sem permissão para cadastrar escolas. Reabra a importação.');
@@ -67,4 +72,3 @@ export async function importWindowsAppointment(data,context,id,windowsSource=nul
   tx.set(ref,{...data,...(windowsSource?{windowsSource}:{}),tenantId,serieId:'',createdBy:access.uid,updatedBy:access.uid,createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});return true;
  });
 }
-
