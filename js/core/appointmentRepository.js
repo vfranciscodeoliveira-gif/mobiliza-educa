@@ -1,6 +1,6 @@
 import {accessDb,requirePermission} from './cloudAccess.js?v=1';
 import {getCloudTenantId} from '../cloudGateway.js?v=6';
-import {validateAppointment,buildOccurrences,appointmentConflicts} from './appointmentPolicy.js?v=1';
+import {validateAppointment,buildOccurrences,appointmentConflicts} from './appointmentPolicy.js?v=2';
 async function calendarContext(expectedTenant=''){
  const access=await requirePermission('events.read');if(!access.allSchools)throw new Error('Agenda exige acesso a todas as escolas do cliente.');
  const tenantId=getCloudTenantId();if(expectedTenant&&expectedTenant!==tenantId)throw new Error('Cliente alterado. Reabra a agenda.');
@@ -38,15 +38,17 @@ export async function saveAppointment(data,context,{id='',version=null,frequency
 }
 
 // Create-only import: deterministic IDs and transaction prevent repeat/concurrent imports.
-export async function importWindowsAppointment(data,context,id){
+export async function importWindowsAppointment(data,context,id,windowsSource=null){
  const access=await requirePermission('events.manage');
  if(!access.allSchools||getCloudTenantId()!==context.tenantId)throw new Error('Cliente alterado ou sem permissão. Reabra a importação.');
  if(!/^windows-agenda-[a-zA-Z0-9_-]+-[0-9]+$/.test(id))throw new Error('Identificador de importação inválido.');
  validateAppointment(data,context.schools,context.classes);
+ if(windowsSource&&(!/^[a-f0-9]{64}$/.test(windowsSource.archiveId)||!Number.isSafeInteger(windowsSource.agendaId)||windowsSource.agendaId<1))throw new Error('Referência de histórico inválida.');
  const {db,fs}=await accessDb(),tenantId=context.tenantId,ref=fs.doc(db,'tenants',tenantId,'appointments',id);
  return fs.runTransaction(db,async tx=>{
-  const old=await tx.get(ref);if(old.exists())return false;
+  const old=await tx.get(ref);if(getCloudTenantId()!==tenantId)throw new Error('Cliente alterado. Reabra a importação.');if(old.exists()){if(windowsSource&&!old.data().windowsSource)tx.update(ref,{windowsSource,updatedBy:access.uid,updatedAt:fs.serverTimestamp()});return false;}
   if(getCloudTenantId()!==tenantId)throw new Error('Cliente alterado. Reabra a importação.');
-  tx.set(ref,{...data,tenantId,serieId:'',createdBy:access.uid,updatedBy:access.uid,createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});return true;
+  tx.set(ref,{...data,...(windowsSource?{windowsSource}:{}),tenantId,serieId:'',createdBy:access.uid,updatedBy:access.uid,createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});return true;
  });
 }
+

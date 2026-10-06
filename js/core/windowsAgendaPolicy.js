@@ -1,4 +1,4 @@
-import {validateAppointment} from './appointmentPolicy.js?v=1';
+import {validateAppointment} from './appointmentPolicy.js?v=2';
 export const normalizeWindows=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 export function checkWindowsPackage(p){
  if(!p||Number(p.versao)!==1||!Array.isArray(p.escolas)||!Array.isArray(p.turmas)||!Array.isArray(p.agendamentos))throw new Error('Arquivo de agenda do Windows inválido. Use o exportador fornecido.');
@@ -7,7 +7,7 @@ export function checkWindowsPackage(p){
  if(!/^[a-zA-Z0-9_-]{1,80}$/.test(p.banco||''))throw new Error('Identificador do banco inválido.');return p;
 }
 export function windowsDocumentId(p,row){return `windows-agenda-${p.banco}-${row.idAgenda}`;}
-export function windowsStatus(row){if(Number(row.ativo)===0)return 'Cancelado';const s=normalizeWindows(row.status);return ({solicitado:'Solicitado',planejado:'Planejado',confirmado:'Confirmado',emandamento:'Em andamento',concluido:'Concluído',cancelado:'Cancelado',reagendado:'Planejado'})[s]||'';}
+export function windowsStatus(row){if(Number(row.ativo)===0)return 'Cancelado';const s=normalizeWindows(row.status);return ({solicitado:'Solicitado',planejado:'Planejado',confirmado:'Confirmado',emandamento:'Em andamento',concluido:'Concluído',cancelado:'Cancelado',reagendado:'Reagendado',empreparacao:'Em preparação'})[s]||'';}
 export function schoolSuggestion(source,schools){const found=schools.filter(s=>normalizeWindows(s.nome)===normalizeWindows(source.nome));return found.length===1?found[0].id:'';}
 export function mapWindowsAppointment(p,row,schoolId,status,ctx){
  const school=p.escolas.find(s=>String(s.idEscola)===String(row.idEscola));

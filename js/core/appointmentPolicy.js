@@ -1,4 +1,4 @@
-export const APPOINTMENT_STATUSES=['Solicitado','Planejado','Confirmado','Em andamento','Concluído','Cancelado'];
+export const APPOINTMENT_STATUSES=['Solicitado','Planejado','Confirmado','Em preparação','Em andamento','Concluído','Cancelado','Reagendado'];
 export const APPOINTMENT_KINDS=['Escola','Demanda espontânea'];
 export const localDay=(date=new Date())=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 export function validDate(value){const d=new Date(value+'T12:00:00');return /^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(+d)&&localDay(d)===value;}
@@ -34,3 +34,4 @@ export function appointmentConflicts(candidate,rows,excluded=''){
  return rows.filter(r=>r.id!==excluded&&r.status!=='Cancelado'&&start<r.dataFim+'T'+r.horaFim&&end>r.dataInicio+'T'+r.horaInicio).map(r=>({row:r,reasons:[candidate.idEscola&&candidate.idEscola===r.idEscola?'mesma escola':'',normalize(candidate.local)&&normalize(candidate.local)===normalize(r.local)?'mesmo local':'',normalize(candidate.responsavel)&&normalize(candidate.responsavel)===normalize(r.responsavel)?'mesmo responsável':''].filter(Boolean)})).filter(c=>c.reasons.length);
 }
 export function buildOccurrences(data,frequency,until){const start=new Date(data.dataInicio+'T12:00:00'),end=new Date(data.dataFim+'T12:00:00'),duration=Math.round((end-start)/86400000);return occurrenceDates(data.dataInicio,frequency,until).map(date=>{const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+duration);return {...data,dataInicio:date,dataFim:localDay(d)};});}
+
