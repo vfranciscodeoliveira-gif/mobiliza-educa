@@ -1,5 +1,5 @@
 import {loadAppointmentCatalog,loadSchoolClasses} from '../core/appointmentRepository.js?v=2';
-import {renderAppointments} from './appointments.js?v=4';
+import {renderAppointments} from './appointments.js?v=5';
 import {renderCloudReports} from './cloudOperations.js?v=1';
 import {accessSnapshot,permissionAllowed,requirePermission,listAccessTenants} from '../core/cloudAccess.js?v=1';
 import {renderCustomCertificates} from './customCertificates.js?v=6';
@@ -704,5 +704,6 @@ export function openAdminModule(id,dialog,host,authDialog){
  else renderPlaceholder(id,host);
  dialog.showModal();
 }
+
 
 

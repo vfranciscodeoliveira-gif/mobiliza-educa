@@ -7,6 +7,13 @@ export function checkWindowsPackage(p){
  if(!/^[a-zA-Z0-9_-]{1,80}$/.test(p.banco||''))throw new Error('Identificador do banco inválido.');return p;
 }
 export function windowsDocumentId(p,row){return `windows-agenda-${p.banco}-${row.idAgenda}`;}
+export function windowsSchoolData(source,banco){
+ if(!/^[a-zA-Z0-9_-]{1,80}$/.test(banco||'')||!Number.isSafeInteger(Number(source?.idEscola))||Number(source.idEscola)<1)throw new Error('Identificador da escola de origem inválido.');
+ const nome=String(source.nome||'').trim();if(!nome||nome.length>250)throw new Error('Confira o nome da escola antes de importar.');
+ if(new TextEncoder().encode(JSON.stringify(source)).length>20000)throw new Error('Dados da escola excedem o limite de importação.');
+ const text=k=>String(source[k]??'').trim();
+ return {id:`windows-school-${banco}-${Number(source.idEscola)}`,nome,municipio:text('cidade')||text('municipio'),contato:text('responsavel')||text('diretor'),telefone:text('telefone'),email:text('email'),endereco:[text('endereco'),text('numero'),text('bairro'),text('cep')].filter(Boolean).join(', '),uf:text('uf'),rede:text('rede'),ativo:Number(source.ativo??1)!==0,windowsOrigin:{banco,idEscola:Number(source.idEscola),registro:source}};
+}
 export function windowsStatus(row){if(Number(row.ativo)===0)return 'Cancelado';const s=normalizeWindows(row.status);return ({solicitado:'Solicitado',planejado:'Planejado',confirmado:'Confirmado',emandamento:'Em andamento',concluido:'Concluído',cancelado:'Cancelado',reagendado:'Reagendado',empreparacao:'Em preparação'})[s]||'';}
 export function schoolSuggestion(source,schools){const found=schools.filter(s=>normalizeWindows(s.nome)===normalizeWindows(source.nome));return found.length===1?found[0].id:'';}
 export function mapWindowsAppointment(p,row,schoolId,status,ctx){

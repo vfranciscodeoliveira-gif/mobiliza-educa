@@ -1,6 +1,6 @@
 import {renderWindowsHistory} from './windowsHistory.js?v=1';
-import {renderWindowsImport} from './windowsAgendaImport.js?v=2';
-import {loadAppointments,saveAppointment,loadSchoolClasses} from '../core/appointmentRepository.js?v=4';
+import {renderWindowsImport} from './windowsAgendaImport.js?v=3';
+import {loadAppointments,saveAppointment,loadSchoolClasses} from '../core/appointmentRepository.js?v=5';
 import {APPOINTMENT_STATUSES,localDay,appointmentConflicts} from '../core/appointmentPolicy.js?v=2';
 import {permissionAllowed} from '../core/cloudAccess.js?v=1';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -63,5 +63,6 @@ export async function renderAppointments(host,{openLegacy}={}){
  for(const [selector,setter,event] of [['#apQuery',v=>query=v.toLocaleLowerCase('pt-BR'),'input'],['#apOrigin',v=>origin=v,'change'],['#apSchool',v=>school=v,'change'],['#apStatus',v=>status=v,'change'],['#apFrom',v=>from=v,'change'],['#apTo',v=>to=v,'change']])qs(selector).addEventListener(event,e=>{setter(e.target.value);draw();});
  host.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{view=b.dataset.view;draw();});qs('#apWindowsHistory').onclick=()=>{if(!busy)renderWindowsHistory(qs('#apWindowsBox'),ctx.tenantId);};qs('#apRefresh').onclick=()=>{if(!busy)reload();};qs('#apPrint').onclick=()=>printRows(filtered(),ctx,'Agenda de atendimentos');if(openLegacy)qs('#apLegacy').onclick=()=>{if(!busy){host._scheduleToken=null;openLegacy();}};if(canManage()){qs('#apWindows').onclick=()=>{if(!busy)renderWindowsImport(qs('#apWindowsBox'),()=>reload());};qs('#apNewSchool').onclick=()=>edit();qs('#apNewDemand').onclick=()=>edit(null,'Demanda espontânea');}draw();
 }
+
 
 
