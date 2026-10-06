@@ -12,7 +12,7 @@ import { openLearning } from './modules/learning.js?v=3';
 import { openParticipantMode } from './modules/participant.js?v=3';
 import { openExperience } from './modules/experiencias.js?v=46';
 import { SoundManager } from './core/soundManager.js?v=1';
-import { openAdminModule } from './modules/admin.js?v=36';
+import { openAdminModule } from './modules/admin.js?v=37';
 import { openEducatorModule } from './modules/educator.js?v=1';
 import { renderResultsDashboard } from './modules/results.js?v=3';
 import { ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser } from './modules/auth.js?v=3';
@@ -197,6 +197,7 @@ const plateiaJoinCode=new URLSearchParams(location.search).get('plateia');
 if(plateiaJoinCode)openParticipantMode(plateiaJoinCode);
 const atelierJoinCode=new URLSearchParams(location.search).get('atelier');
 if(atelierJoinCode)openAtelierParticipant(atelierJoinCode);
+
 
 
 
