@@ -36,3 +36,17 @@ export async function saveAppointment(data,context,{id='',version=null,frequency
  for(const d of occurrences){const ref=fs.doc(fs.collection(db,'tenants',tenantId,'appointments'));batch.set(ref,{...d,...metadata,createdBy:access.uid,createdAt:fs.serverTimestamp(),serieId:group});}
  await batch.commit();return occurrences.length;
 }
+
+// Create-only import: deterministic IDs and transaction prevent repeat/concurrent imports.
+export async function importWindowsAppointment(data,context,id){
+ const access=await requirePermission('events.manage');
+ if(!access.allSchools||getCloudTenantId()!==context.tenantId)throw new Error('Cliente alterado ou sem permissão. Reabra a importação.');
+ if(!/^windows-agenda-[a-zA-Z0-9_-]+-[0-9]+$/.test(id))throw new Error('Identificador de importação inválido.');
+ validateAppointment(data,context.schools,context.classes);
+ const {db,fs}=await accessDb(),tenantId=context.tenantId,ref=fs.doc(db,'tenants',tenantId,'appointments',id);
+ return fs.runTransaction(db,async tx=>{
+  const old=await tx.get(ref);if(old.exists())return false;
+  if(getCloudTenantId()!==tenantId)throw new Error('Cliente alterado. Reabra a importação.');
+  tx.set(ref,{...data,tenantId,serieId:'',createdBy:access.uid,updatedBy:access.uid,createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});return true;
+ });
+}
