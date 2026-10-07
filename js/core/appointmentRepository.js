@@ -1,9 +1,9 @@
-import {accessDb,requirePermission} from './cloudAccess.js?v=1';
+import {accessDb,requirePermission,schoolAllowed} from './cloudAccess.js?v=1';
 import {getCloudTenantId} from '../cloudGateway.js?v=6';
 import {validateAppointment,buildOccurrences,appointmentConflicts} from './appointmentPolicy.js?v=2';
 import {windowsSchoolData,normalizeWindows} from './windowsAgendaPolicy.js?v=4';
 async function calendarContext(expectedTenant=''){
- const access=await requirePermission('events.read');if(!access.allSchools)throw new Error('Agenda exige acesso a todas as escolas do cliente.');
+ const access=await requirePermission('events.read');if(!access.allSchools&&!access.schoolIds?.length)throw new Error('Seu acesso não possui escola vinculada.');
  const tenantId=getCloudTenantId();if(expectedTenant&&expectedTenant!==tenantId)throw new Error('Cliente alterado. Reabra a agenda.');
  return {access,tenantId,...await accessDb()};
 }
@@ -29,17 +29,28 @@ export async function importWindowsSchool(source,banco,context){
   tx.set(ref,{...row,tenantId,createdBy:access.uid,updatedBy:access.uid,createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});return {id:row.id,created:true};
  });
 }
+async function scopedCalendarRows(ctx,name){
+ const ref=ctx.fs.collection(ctx.db,'tenants',ctx.tenantId,name);
+ if(ctx.access.allSchools)return calendarRows(await ctx.fs.getDocsFromServer(ref));
+ const rows=[];
+ for(const schoolId of [...new Set(ctx.access.schoolIds||[])]){
+  if(name==='schools'){const d=await ctx.fs.getDocFromServer(ctx.fs.doc(ref,schoolId));if(d.exists()&&!d.data().deletedAt)rows.push({...d.data(),id:d.id});}
+  else rows.push(...calendarRows(await ctx.fs.getDocsFromServer(ctx.fs.query(ref,ctx.fs.where('idEscola','==',schoolId)))));
+ }
+ return rows;
+}
 export async function loadAppointmentCatalog(){
- const ctx=await calendarContext();const [schools,classes]=await Promise.all(['schools','classes'].map(c=>ctx.fs.getDocsFromServer(ctx.fs.collection(ctx.db,'tenants',ctx.tenantId,c))));currentCalendar(ctx);
- return {tenantId:ctx.tenantId,access:ctx.access,schools:calendarRows(schools),classes:calendarRows(classes)};
+ const ctx=await calendarContext();const [schools,classes]=await Promise.all(['schools','classes'].map(c=>scopedCalendarRows(ctx,c)));currentCalendar(ctx);
+ return {tenantId:ctx.tenantId,access:ctx.access,schools,classes};
 }
 export async function loadSchoolClasses(schoolId,expectedTenant){
  const ctx=await calendarContext(expectedTenant);if(!schoolId)return[];
+ if(!schoolAllowed(ctx.access,schoolId))throw new Error('Escola não autorizada.');
  const ref=ctx.fs.collection(ctx.db,'tenants',ctx.tenantId,'classes'),snap=await ctx.fs.getDocsFromServer(ctx.fs.query(ref,ctx.fs.where('idEscola','==',schoolId)));currentCalendar(ctx);return calendarRows(snap);
 }
 export async function loadAppointments(){
- const ctx=await loadAppointmentCatalog(),{db,fs}=await accessDb();const snap=await fs.getDocsFromServer(fs.collection(db,'tenants',ctx.tenantId,'appointments'));currentCalendar(ctx);
- return {...ctx,rows:calendarRows(snap)};
+ const ctx=await calendarContext(),[schools,classes,rows]=await Promise.all(['schools','classes','appointments'].map(c=>scopedCalendarRows(ctx,c)));currentCalendar(ctx);
+ return {tenantId:ctx.tenantId,access:ctx.access,schools,classes,rows};
 }
 export async function saveAppointment(data,context,{id='',version=null,frequency='Nenhuma',until='',acceptConflicts=false}={}){
  const access=await requirePermission('events.manage');if(!access.allSchools||getCloudTenantId()!==context.tenantId)throw new Error('Cliente alterado ou sem permissão. Reabra a agenda.');

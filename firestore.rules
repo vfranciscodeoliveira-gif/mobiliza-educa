@@ -36,7 +36,7 @@ service cloud.firestore {
     function education(){return collection in ['schools','classes','students','institutions','contacts','teachers'];}
     function recordSchool(d){return collection == 'schools'?id:collection == 'students'?get(/databases/$(database)/documents/tenants/$(t)/classes/$(d.idTurma)).data.idEscola:d.get('idEscola','');}
     function scoped(d){return allSchools(t) || (collection in ['schools','classes','students','teachers'] && school(t,recordSchool(d)));}
-    function readPerm(){return (collection in ['schools','classes'] && permitted(t,'events.read') && allSchools(t)) || (collection == 'schools' && manage(t)) || permitted(t,'education.read') || permitted(t,'reports.read') || (collection in ['schools','classes','students'] && permitted(t,'certificates.emit'));}
+    function readPerm(){return (collection in ['schools','classes'] && permitted(t,'events.read')) || (collection == 'schools' && manage(t)) || permitted(t,'education.read') || permitted(t,'reports.read') || (collection in ['schools','classes','students'] && permitted(t,'certificates.emit'));}
     function valid(d){return d.tenantId == t && d.nome is string && d.nome.size()>0 && d.nome.size()<=250 && d.updatedBy == request.auth.uid && d.updatedAt == request.time;}
     allow get,list: if education() && readPerm() && scoped(resource.data);
     allow create: if education() && permitted(t,'education.create') && scoped(request.resource.data) && valid(request.resource.data) && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time && !('deletedAt' in request.resource.data);
@@ -58,7 +58,7 @@ service cloud.firestore {
      && d.materiais is string && d.materiais.size()<=4000 && d.equipe is string && d.equipe.size()<=4000 && d.observacao is string && d.observacao.size()<=4000 && d.serieId is string
      && (!('windowsSource' in d) || (d.windowsSource is map && d.windowsSource.keys().hasOnly(['archiveId','agendaId']) && d.windowsSource.archiveId is string && d.windowsSource.archiveId.matches('^[a-f0-9]{64}$') && d.windowsSource.agendaId is int && d.windowsSource.agendaId>0 && exists(/databases/$(database)/documents/tenants/$(t)/windowsArchives/$(d.windowsSource.archiveId))))
      && d.updatedBy == request.auth.uid && d.updatedAt == request.time;}
-    allow read: if permitted(t,'events.read') && allSchools(t);
+    allow read: if permitted(t,'events.read') && (allSchools(t) || school(t,resource.data.idEscola));
     allow create: if permitted(t,'events.manage') && allSchools(t) && validAppointment(request.resource.data) && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
     allow update: if permitted(t,'events.manage') && allSchools(t) && validAppointment(request.resource.data) && request.resource.data.createdBy == resource.data.createdBy && request.resource.data.createdAt == resource.data.createdAt && request.resource.data.serieId == resource.data.serieId && (!('windowsSource' in resource.data) || request.resource.data.windowsSource == resource.data.windowsSource);
     allow delete: if permitted(t,'events.manage') && allSchools(t) && resource.data.tenantId == t;
