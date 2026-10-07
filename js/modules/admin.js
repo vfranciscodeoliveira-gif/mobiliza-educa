@@ -2,8 +2,8 @@ import {renderWindowsStudentImport} from './windowsStudentImport.js?v=1';
 import {renderWindowsClassImport} from './windowsClassImport.js?v=1';
 import {renderWindowsImport} from './windowsAgendaImport.js?v=6';
 import {loadAppointmentCatalog,loadSchoolClasses} from '../core/appointmentRepository.js?v=2';
-import {renderAppointments} from './appointments.js?v=7';
-import {renderCloudReports} from './cloudOperations.js?v=1';
+import {renderAppointments} from './appointments.js?v=8';
+import {renderCloudReports,renderCloudEvents} from './cloudOperations.js?v=1';
 import {accessSnapshot,permissionAllowed,requirePermission,listAccessTenants} from '../core/cloudAccess.js?v=1';
 import {renderCustomCertificates} from './customCertificates.js?v=6';
 import {openSchoolPdfImport} from './schoolPdfImport.js?v=5';
@@ -383,7 +383,7 @@ function renderDashboard(host,authDialog){
 
  const goModule=id=>{
   if(id==='admin-cadastros')renderCadastros(host);
-  else if(id==='admin-eventos'){renderAppointments(host,{openLegacy:accessSnapshot()?.owner?()=>renderEventos(host):undefined});}
+  else if(id==='admin-eventos'){if(agendaOptions.publicEvents)renderCloudEvents(host);else renderAppointments(host,{...agendaOptions,openLegacy:accessSnapshot()?.owner?()=>renderEventos(host):undefined});}
   else if(id==='admin-relatorios'){if(accessSnapshot()?.owner)renderRelatorios360(host);else renderCloudReports(host);}
   else if(id==='admin-passaporte'){if(accessSnapshot()?.owner)renderPassaporteCertificados(host);else renderCustomCertificates(host);}
   else if(id==='admin-avaliacao')renderAvaliacaoPedagogica(host);
@@ -690,14 +690,14 @@ function renderPlaceholder(id,host){
  const m=modules[id];host.innerHTML=shell(m,`<div class="admin-module-grid">${(m.sections||[]).map((s,i)=>`<article class="admin-feature"><span class="admin-feature-index">${String(i+1).padStart(2,'0')}</span><div><strong>${s}</strong><p>Fluxo preparado para implementação progressiva.</p></div><button class="btn ghost">Em breve</button></article>`).join('')}</div>`);
 }
 
-export function openAdminModule(id,dialog,host,authDialog){
+export function openAdminModule(id,dialog,host,authDialog,agendaOptions={}){
  if(!modules[id])return;
  if(!canAccessModule(id)){recordAudit('ACESSO_NEGADO','modulo',id,'Usuário tentou abrir módulo sem permissão.','', 'warn');alert('Seu perfil não possui permissão para acessar este módulo.');return;}
  const entitlement=adminModuleEntitlement(id);if(!entitlement.allowed){recordAudit('PLANO_NEGOU_RECURSO','modulo',id,entitlement.reason,'','warn');alert(entitlement.reason+'\n\nAltere o plano em Produto e assinatura. Este bloqueio é apenas uma prévia local até a ativação do backend.');return;}
  recordAudit('MODULO_ABERTO','modulo',id,modules[id].title);
  if(id==='admin-dashboard')renderDashboard(host,authDialog);
  else if(id==='admin-cadastros')renderCadastros(host);
- else if(id==='admin-eventos'){renderAppointments(host,{openLegacy:accessSnapshot()?.owner?()=>renderEventos(host):undefined});}
+ else if(id==='admin-eventos'){if(agendaOptions.publicEvents)renderCloudEvents(host);else renderAppointments(host,{...agendaOptions,openLegacy:accessSnapshot()?.owner?()=>renderEventos(host):undefined});}
  else if(id==='admin-relatorios'){if(accessSnapshot()?.owner)renderRelatorios360(host);else renderCloudReports(host);}
  else if(id==='admin-passaporte'){if(accessSnapshot()?.owner)renderPassaporteCertificados(host);else renderCustomCertificates(host);}
  else if(id==='admin-avaliacao')renderAvaliacaoPedagogica(host);
