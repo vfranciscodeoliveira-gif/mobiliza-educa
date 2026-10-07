@@ -1,3 +1,4 @@
+import {renderAgendaOverview} from './modules/agendaOverview.js?v=1';
 import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed} from './core/cloudAccess.js?v=1';
 import {getCloudTenantId,setCloudTenantId} from './cloudGateway.js?v=6';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -7,7 +8,7 @@ import {ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser} from '.
 import {canAccessModule} from './core/accessControl.js?v=2';
 import {activeTenant,installTenantWorkspaceBridge} from './core/tenantRegistry.js?v=2';
 import {adminModuleEntitlement} from './core/saasContext.js?v=2';
-import {openAdminModule} from './modules/admin.js?v=40';
+import {openAdminModule} from './modules/admin.js?v=41';
 import {cloudMe,syncCloudInbox} from './cloudGateway.js?v=6';
 import {signInCloud,cloudSessionHint} from './core/cloudAuth.js?v=3';
 
@@ -93,9 +94,12 @@ function renderAuthenticated(){
   qs('#adminSidebarNav').innerHTML=adminModules.map(sidebarButton).join('');
   qs('#adminModuleGrid').innerHTML=adminModules.map(moduleCard).join('');
   bindModules();
+  renderAgendaOverview(qs('#adminAgendaOverview'),options=>openAdminModule('admin-eventos',qs('#adminDialog'),qs('#adminHost'),qs('#authDialog'),options));
 }
 
 function renderLoggedOut(){
+  qs('#adminAgendaOverview')?._agendaCleanup?.();
+  if(qs('#adminAgendaOverview'))qs('#adminAgendaOverview').innerHTML='';
   qs('#adminDashboard').hidden=true;
   qs('#adminLoginState').hidden=false;
   qs('#adminUserCard').innerHTML='<span>🔒</span><div><small>Sessão</small><strong>Não autenticado</strong></div>';
@@ -108,6 +112,7 @@ async function requestLogin(){
   if(ok){onlineTenants=await listAccessTenants();renderAuthenticated();}else renderLoggedOut();
 }
 
+qs('#adminDialog')?.addEventListener('close',()=>{if(isAdminUnlocked())renderAuthenticated();});
 qs('#adminDialogClose')?.addEventListener('click',()=>qs('#adminDialog')?.close());
 qs('#adminCloudSync')?.addEventListener('click',syncFirestore);
 qs('#adminLoginButton')?.addEventListener('click',requestLogin);
@@ -130,7 +135,7 @@ else{
   setTimeout(requestLogin,80);
 }
 
-if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.63.7',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.63.8',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
 
 
 
