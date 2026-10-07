@@ -6,7 +6,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const dateText=d=>d.split('-').reverse().join('/');
 export async function loadAgendaOverview(){
  const ctx=await loadAppointments(),{db,fs}=await accessDb();let events=[],eventsError='';
- try{const snap=await fs.getDocsFromServer(fs.collection(db,'tenants',ctx.tenantId,'publicEvents'));events=snap.docs.map(d=>({...d.data(),id:d.id}));}catch(e){eventsError='Não foi possível carregar os eventos online. O resumo abaixo inclui os atendimentos disponíveis.';}
+ try{if(ctx.access.allSchools){const snap=await fs.getDocsFromServer(fs.collection(db,'tenants',ctx.tenantId,'publicEvents'));events=snap.docs.map(d=>({...d.data(),id:d.id}));}}catch(e){eventsError='Não foi possível carregar os eventos online. O resumo abaixo inclui os atendimentos disponíveis.';}
  if(ctx.tenantId!==getCloudTenantId())throw new Error('Cliente alterado. Atualize o painel.');
  return {ctx,events,eventsError,loadedAt:new Date()};
 }
