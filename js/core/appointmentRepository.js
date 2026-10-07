@@ -1,7 +1,7 @@
 import {accessDb,requirePermission} from './cloudAccess.js?v=1';
 import {getCloudTenantId} from '../cloudGateway.js?v=6';
 import {validateAppointment,buildOccurrences,appointmentConflicts} from './appointmentPolicy.js?v=2';
-import {windowsSchoolData,normalizeWindows} from './windowsAgendaPolicy.js?v=3';
+import {windowsSchoolData,normalizeWindows} from './windowsAgendaPolicy.js?v=4';
 async function calendarContext(expectedTenant=''){
  const access=await requirePermission('events.read');if(!access.allSchools)throw new Error('Agenda exige acesso a todas as escolas do cliente.');
  const tenantId=getCloudTenantId();if(expectedTenant&&expectedTenant!==tenantId)throw new Error('Cliente alterado. Reabra a agenda.');
@@ -70,5 +70,23 @@ export async function importWindowsAppointment(data,context,id,windowsSource=nul
   const old=await tx.get(ref);if(getCloudTenantId()!==tenantId)throw new Error('Cliente alterado. Reabra a importação.');if(old.exists()){if(windowsSource&&!old.data().windowsSource)tx.update(ref,{windowsSource,updatedBy:access.uid,updatedAt:fs.serverTimestamp()});return false;}
   if(getCloudTenantId()!==tenantId)throw new Error('Cliente alterado. Reabra a importação.');
   tx.set(ref,{...data,...(windowsSource?{windowsSource}:{}),tenantId,serieId:'',createdBy:access.uid,updatedBy:access.uid,createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});return true;
+ });
+}
+
+// Complete empty class links without replacing appointment details.
+export async function completeWindowsAppointmentClasses(id,idsTurmas,context,expected){
+ const access=await requirePermission('events.manage');
+ if(!access.allSchools||getCloudTenantId()!==context.tenantId)throw new Error('Cliente alterado ou sem permissão. Reabra a importação.');
+ if(!/^windows-agenda-[a-zA-Z0-9_-]+-[0-9]+$/.test(id)||!expected||!idsTurmas.length)throw new Error('Confira o agendamento e as turmas.');
+ const {db,fs}=await accessDb(),ref=fs.doc(db,'tenants',context.tenantId,'appointments',id);
+ return fs.runTransaction(db,async tx=>{
+  const snap=await tx.get(ref);currentCalendar(context);
+  if(!snap.exists())throw new Error('Agendamento não encontrado. Reabra a importação.');
+  const old=snap.data(),stamp=old.updatedAt,version=expected.updatedAt;
+  if(old.deletedAt||old.idEscola!==expected.idEscola||!stamp||!version||stamp.seconds!==version.seconds||stamp.nanoseconds!==version.nanoseconds)throw new Error('Este atendimento foi alterado. Reabra o arquivo e confira novamente.');
+  if(old.idsTurmas?.length)throw new Error('O atendimento já possui turmas. Os vínculos existentes foram preservados.');
+  validateAppointment({...old,idsTurmas},context.schools,context.classes);
+  for(const classId of idsTurmas){const c=await tx.get(fs.doc(db,'tenants',context.tenantId,'classes',classId));if(!c.exists()||c.data().deletedAt||c.data().idEscola!==old.idEscola)throw new Error('Turma alterada ou excluída. Confira novamente.');}
+  currentCalendar(context);tx.update(ref,{idsTurmas,updatedBy:access.uid,updatedAt:fs.serverTimestamp()});return true;
  });
 }

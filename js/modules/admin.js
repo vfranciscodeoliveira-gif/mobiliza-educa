@@ -1,6 +1,6 @@
 import {renderWindowsStudentImport} from './windowsStudentImport.js?v=1';
 import {renderWindowsClassImport} from './windowsClassImport.js?v=1';
-import {renderWindowsImport} from './windowsAgendaImport.js?v=4';
+import {renderWindowsImport} from './windowsAgendaImport.js?v=5';
 import {loadAppointmentCatalog,loadSchoolClasses} from '../core/appointmentRepository.js?v=2';
 import {renderAppointments} from './appointments.js?v=6';
 import {renderCloudReports} from './cloudOperations.js?v=1';
