@@ -61,7 +61,7 @@ service cloud.firestore {
     allow read: if permitted(t,'events.read') && allSchools(t);
     allow create: if permitted(t,'events.manage') && allSchools(t) && validAppointment(request.resource.data) && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
     allow update: if permitted(t,'events.manage') && allSchools(t) && validAppointment(request.resource.data) && request.resource.data.createdBy == resource.data.createdBy && request.resource.data.createdAt == resource.data.createdAt && request.resource.data.serieId == resource.data.serieId && (!('windowsSource' in resource.data) || request.resource.data.windowsSource == resource.data.windowsSource);
-    allow delete: if false;
+    allow delete: if permitted(t,'events.manage') && allSchools(t) && resource.data.tenantId == t;
    }
    match /windowsArchives/{id}{
     allow read: if permitted(t,'events.read') && allSchools(t);
