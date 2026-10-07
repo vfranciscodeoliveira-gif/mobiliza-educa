@@ -8,7 +8,7 @@ import {ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser} from '.
 import {canAccessModule} from './core/accessControl.js?v=2';
 import {activeTenant,installTenantWorkspaceBridge} from './core/tenantRegistry.js?v=2';
 import {adminModuleEntitlement} from './core/saasContext.js?v=2';
-import {openAdminModule} from './modules/admin.js?v=41';
+import {openAdminModule} from './modules/admin.js?v=42';
 import {cloudMe,syncCloudInbox} from './cloudGateway.js?v=6';
 import {signInCloud,cloudSessionHint} from './core/cloudAuth.js?v=3';
 
@@ -135,7 +135,7 @@ else{
   setTimeout(requestLogin,80);
 }
 
-if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.63.8',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.63.9',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
 
 
 
