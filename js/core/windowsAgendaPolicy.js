@@ -1,5 +1,12 @@
 import {validateAppointment} from './appointmentPolicy.js?v=2';
 export const normalizeWindows=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+export function windowsClassSuggestion(row,schoolId,classes){
+ const year=String(row.dataInicio||'').slice(0,4),shift=normalizeWindows(row.turno);
+ if(!schoolId||!/^20\d{2}$/.test(year)||!shift)return {candidates:[],suggested:[]};
+ const candidates=classes.filter(c=>c.idEscola===schoolId&&!c.deletedAt&&c.ativo!==false&&Number(c.ativo??1)!==0&&String(c.anoLetivo)===year&&normalizeWindows(c.turno)===shift);
+ const count=Number(row.quantidadeTurmas);
+ return {candidates,suggested:Number.isSafeInteger(count)&&count>0&&count<=5&&candidates.length===count?candidates.map(c=>c.id):[]};
+}
 export function checkWindowsPackage(p){
  if(!p||Number(p.versao)!==1||!Array.isArray(p.escolas)||!Array.isArray(p.turmas)||!Array.isArray(p.agendamentos))throw new Error('Arquivo de agenda do Windows inválido. Use o exportador fornecido.');
  if(!p.agendamentos.length||p.agendamentos.length>2000)throw new Error('Importe de 1 a 2000 agendamentos por arquivo.');
