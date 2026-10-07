@@ -90,3 +90,17 @@ export async function completeWindowsAppointmentClasses(id,idsTurmas,context,exp
   currentCalendar(context);tx.update(ref,{idsTurmas,updatedBy:access.uid,updatedAt:fs.serverTimestamp()});return true;
  });
 }
+
+export async function deleteAppointment(id,context,version){
+ const access=await requirePermission('events.manage');
+ if(!access.allSchools||getCloudTenantId()!==context.tenantId)throw new Error('Cliente alterado ou sem permissão. Reabra a agenda.');
+ if(!id||id.includes('/'))throw new Error('Agendamento inválido.');
+ const {db,fs}=await accessDb(),ref=fs.doc(db,'tenants',context.tenantId,'appointments',id);
+ return fs.runTransaction(db,async tx=>{
+  const snap=await tx.get(ref);currentCalendar(context);
+  if(!snap.exists())throw new Error('Este atendimento já foi excluído. Atualize a agenda.');
+  const stamp=snap.data().updatedAt;
+  if(!stamp||!version||stamp.seconds!==version.seconds||stamp.nanoseconds!==version.nanoseconds)throw new Error('Outro usuário alterou este atendimento. Atualize a agenda antes de excluir.');
+  tx.delete(ref);return true;
+ });
+}

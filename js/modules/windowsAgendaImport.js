@@ -1,7 +1,7 @@
 import {permissionAllowed} from '../core/cloudAccess.js?v=1';
 import {normalizeIntegral} from '../core/windowsIntegralPolicy.js?v=1';
 import {saveWindowsArchive} from '../core/windowsArchiveRepository.js?v=1';
-import {loadAppointments,completeWindowsAppointmentClasses,importWindowsAppointment,importWindowsSchool,loadWindowsSchoolCatalog} from '../core/appointmentRepository.js?v=7';
+import {loadAppointments,completeWindowsAppointmentClasses,importWindowsAppointment,importWindowsSchool,loadWindowsSchoolCatalog} from '../core/appointmentRepository.js?v=8';
 import {checkWindowsPackage,windowsDocumentId,windowsStatus,schoolSuggestion,windowsClassSuggestion,mapWindowsAppointment} from '../core/windowsAgendaPolicy.js?v=4';
 import {APPOINTMENT_STATUSES,appointmentConflicts} from '../core/appointmentPolicy.js?v=2';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
