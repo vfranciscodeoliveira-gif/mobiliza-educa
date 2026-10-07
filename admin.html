@@ -7,7 +7,7 @@
   <meta name="description" content="Centro de Gestão online do Mobiliza Educa." />
   <link rel="icon" type="image/webp" sizes="32x32" href="assets/icon-32.webp?v=9" />
   <link rel="stylesheet" href="assets/app.css?v=46" />
-  <link rel="stylesheet" href="assets/admin-online.css?v=2" />
+  <link rel="stylesheet" href="assets/admin-online.css?v=3" />
   <title>Gestão • Mobiliza Educa</title>
 </head>
 <body class="admin-online-body">
@@ -32,7 +32,7 @@
         <div>
           <p class="eyebrow">GESTÃO ONLINE • MOBILIZA EDUCA</p>
           <h1>Ambiente administrativo</h1>
-          <p class="eyebrow" id="adminRelease">Versão 0.63.7 • exclusão de atendimentos agendados</p>
+          <p class="eyebrow" id="adminRelease">Versão 0.63.8 • resumo diário e semanal da agenda</p>
           <p id="adminContext">Carregando organização e permissões...</p>
         </div>
         <div class="admin-online-top-actions">
@@ -54,17 +54,18 @@
       </section>
 
       <section id="adminDashboard" hidden>
-        <div class="admin-online-kpis">
+        <div class="admin-online-kpis" style="display:none">
           <article><span>Ambiente</span><strong>Online</strong><small>GitHub Pages</small></article>
           <article><span>Perfil</span><strong id="adminProfileKpi">Gestor</strong><small>Sessão ativa</small></article>
           <article><span>Módulos</span><strong id="adminModulesKpi">12</strong><small>gestão completa</small></article>
           <article><span>Dados</span><strong>Navegador</strong><small>Firestore direto disponível</small></article>
         </div>
 
+        <section id="adminAgendaOverview" aria-label="Resumo da agenda"></section>
         <section class="admin-online-welcome">
           <div>
             <p class="eyebrow">PAINEL CENTRAL</p>
-            <h2>O que você precisa fazer agora?</h2>
+            <h2>Módulos de gestão</h2>
             <p>Abra qualquer módulo para operar cadastros, agenda, avaliações, evidências, relatórios, usuários, assinatura e administração da plataforma.</p>
           </div>
         </section>
@@ -83,11 +84,11 @@
   </dialog>
 
   <footer class="admin-online-footer">
-    <span>Mobiliza Educa • Gestão Online • versão 0.63.7</span>
-    <span>Sem Firebase Emulator</span>
+    <span>Mobiliza Educa • Gestão Online • versão 0.63.8</span>
+    <span>Mobiliza Educa</span>
   </footer>
 
-  <script type="module" src="js/adminApp.js?v=21"></script>
+  <script type="module" src="js/adminApp.js?v=22"></script>
 </body>
 </html>
 
