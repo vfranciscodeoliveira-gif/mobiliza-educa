@@ -27,6 +27,6 @@ jobs:
       - name: Instalar Firebase CLI no runner
         run: npm install --global firebase-tools
       - name: Instalar SDK de teste no runner
-        run: npm install --no-save --package-lock=false firebase@10.14.1 @firebase/rules-unit-testing@4.0.1
+        run: npm install --no-save --package-lock=false firebase@11.10.0 @firebase/rules-unit-testing@4.0.1
       - name: Exercitar regras no emulador com quatro identidades
         run: firebase emulators:exec --project demo-mobiliza-educa --only firestore 'node --test tests/sparkFirestore.emulator.test.cjs'
