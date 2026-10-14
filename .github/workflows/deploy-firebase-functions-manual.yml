@@ -1,0 +1,54 @@
+name: Implantar Cloud Functions - Mobiliza Educa
+run-name: "Cloud Functions - ${{ inputs.confirm_project }}"
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_project:
+        description: 'Digite mobiliza-educa para confirmar o projeto Firebase de destino'
+        type: string
+        required: true
+      deploy_functions:
+        description: 'Implantar as Cloud Functions do backend público'
+        type: boolean
+        required: true
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: mobiliza-firebase-functions-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: ${{ inputs.confirm_project == 'mobiliza-educa' && inputs.deploy_functions }}
+    runs-on: ubuntu-latest
+    environment: firebase-production
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+      - name: Node.js 22 no ambiente GitHub
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: firebase/functions/package-lock.json
+      - name: Conferir sintaxe do backend
+        run: npm run check
+        working-directory: firebase/functions
+      - name: Instalar dependências das funções
+        run: npm ci
+        working-directory: firebase/functions
+      - name: Verificar credencial de implantação
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MOBILIZA_EDUCA }}
+        run: |
+          if [ -z "$FIREBASE_SA" ]; then
+            echo "::error::Configure o secret FIREBASE_SERVICE_ACCOUNT_MOBILIZA_EDUCA no repositório."
+            exit 1
+          fi
+          printf '%s' "$FIREBASE_SA" > "$RUNNER_TEMP/firebase-service-account.json"
+          chmod 600 "$RUNNER_TEMP/firebase-service-account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
+      - name: Instalar Firebase CLI no runner
+        run: npm install --global firebase-tools
+      - name: Implantar Cloud Functions na região configurada pelo código
+        run: firebase deploy --project mobiliza-educa --only functions --non-interactive
