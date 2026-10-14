@@ -1,4 +1,4 @@
-import {mountProtocolCenter,unmountProtocolCenter} from './modules/protocolCenter.js?v=1';
+import {mountProtocolCenter,unmountProtocolCenter,openUnreadNotifications} from './modules/protocolCenter.js?v=2';
 import {renderAgendaOverview} from './modules/agendaOverview.js?v=1';
 import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed} from './core/cloudAccess.js?v=1';
 import {getCloudTenantId,setCloudTenantId} from './cloudGateway.js?v=6';
@@ -123,7 +123,7 @@ qs('#adminLogout')?.addEventListener('click',()=>{
   lockAdmin();
   renderLoggedOut();
 });
-qs('#adminNotifications')?.addEventListener('click',()=>{const h=qs('#adminProtocolCenter');if(h&&!h.hidden){h.scrollIntoView({behavior:'smooth',block:'start'});h.querySelector('[data-cp-filter="pending"]')?.click();}});
+qs('#adminNotifications')?.addEventListener('click',()=>{const h=qs('#adminProtocolCenter');if(h&&!h.hidden){h.scrollIntoView({behavior:'smooth',block:'start'});openUnreadNotifications();}});
 qs('#adminRefresh')?.addEventListener('click',()=>{
   if(isAdminUnlocked())renderAuthenticated();else renderLoggedOut();
 });
@@ -139,7 +139,7 @@ else{
   setTimeout(requestLogin,80);
 }
 
-if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.65.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.65.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
 
 
 
