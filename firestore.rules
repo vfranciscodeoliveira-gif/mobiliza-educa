@@ -155,12 +155,14 @@ service cloud.firestore {
    match /requests/{id}{
     allow read: if permitted(t,'events.read') && allSchools(t);
     allow create: if intakeId(id) && validPublicRequest(request.resource.data);
-    allow update,delete: if false;
+    allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt']) && request.resource.data.status is string && request.resource.data.status.size() <= 80 && request.resource.data.updatedAt == request.time;
+    allow delete: if false;
    }
    match /registrations/{id}{
     allow read: if permitted(t,'events.read') && allSchools(t);
     allow create: if intakeId(id) && validPublicRegistration(request.resource.data);
-    allow update,delete: if false;
+    allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt']) && request.resource.data.status is string && request.resource.data.status.size() <= 80 && request.resource.data.updatedAt == request.time;
+    allow delete: if false;
    }
    match /publicStatuses/{id}{
     allow get: if (signedIn() && resource.data.ownerUid == request.auth.uid) || (permitted(t,'events.read') && allSchools(t));
@@ -187,7 +189,8 @@ service cloud.firestore {
      && (request.resource.data.tipo == 'Solicitação'
        ? getAfter(/databases/$(database)/documents/tenants/$(t)/requests/$(request.auth.uid + '_' + string(int(request.time.toMillis() / 86400000)))).data.protocolo == id
        : getAfter(/databases/$(database)/documents/tenants/$(t)/registrations/$(request.auth.uid + '_' + string(int(request.time.toMillis() / 86400000)))).data.protocolo == id);
-    allow update,delete: if false;
+    allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt']) && request.resource.data.status is string && request.resource.data.status.size()<=80 && request.resource.data.updatedAt == request.time;
+    allow delete: if false;
    }
    match /publicEvents/{id}{
     allow get,list: if (permitted(t,'events.read') && allSchools(t)) || (signedIn() && resource.data.publicadoOnline == true);
