@@ -123,6 +123,7 @@ qs('#adminLogout')?.addEventListener('click',()=>{
   lockAdmin();
   renderLoggedOut();
 });
+qs('#adminNotifications')?.addEventListener('click',()=>{const h=qs('#adminProtocolCenter');if(h&&!h.hidden){h.scrollIntoView({behavior:'smooth',block:'start'});h.querySelector('[data-cp-filter="pending"]')?.click();}});
 qs('#adminRefresh')?.addEventListener('click',()=>{
   if(isAdminUnlocked())renderAuthenticated();else renderLoggedOut();
 });
