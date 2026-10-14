@@ -124,6 +124,30 @@ export async function consultarProtocoloDireto(protocolo){
  });
 }
 
+export async function listarMensagensProtocoloDireto(protocolo){
+ return run(async()=>{
+  const p=trim(protocolo,96).toUpperCase();if(!p)throw new Error('Informe o protocolo.');
+  await intakeUser();const ctx=await db(),{fs}=ctx;
+  // A consulta do documento pai prova a titularidade da sessão antes de ler as mensagens.
+  const parent=await fs.getDoc(fs.doc(ctx.db,'tenants',tenantId(),'publicStatuses',p));
+  if(!parent.exists())throw new Error('Protocolo não encontrado.');
+  const snap=await fs.getDocs(fs.query(fs.collection(ctx.db,'tenants',tenantId(),'publicStatuses',p,'messages'),fs.limit(100)));
+  const mensagens=snap.docs.map(d=>({id:d.id,...d.data(),createdAt:d.data().createdAt?.toDate?.()?.toISOString()||''})).sort((a,b)=>String(a.createdAt).localeCompare(String(b.createdAt)));
+  return{ok:true,mensagens};
+ });
+}
+export async function responderProtocoloDireto(protocolo,texto){
+ return run(async()=>{
+  const p=trim(protocolo,96).toUpperCase(),msg=trim(texto,2001);
+  if(!p||msg.length<1||msg.length>2000)throw new Error('Escreva uma mensagem de até 2.000 caracteres.');
+  const user=await intakeUser(),ctx=await db(),{fs}=ctx;
+  const parent=await fs.getDoc(fs.doc(ctx.db,'tenants',tenantId(),'publicStatuses',p));
+  if(!parent.exists()||parent.data().ownerUid!==user.uid)throw new Error('Você não possui acesso a esse protocolo.');
+  await fs.addDoc(fs.collection(ctx.db,'tenants',tenantId(),'publicStatuses',p,'messages'),{tenantId:tenantId(),protocolo:p,authorUid:user.uid,authorRole:'solicitante',text:msg,createdAt:fs.serverTimestamp()});
+  return{ok:true};
+ });
+}
+
 const adminTenantId=()=>localStorage.getItem(cloudStoragePrefix()+'.tenantId')||tenantId();
 async function requireUser(){
  const user=await getCloudUser();if(!user)throw new Error('Conecte sua conta Firebase na Gestão para sincronizar.');

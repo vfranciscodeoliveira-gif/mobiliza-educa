@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const {initializeTestEnvironment,assertSucceeds,assertFails}=require('@firebase/rules-unit-testing');
-const {doc,setDoc,getDoc,updateDoc,writeBatch,serverTimestamp,collection,query,where,getDocs}=require('firebase/firestore');
+const {doc,setDoc,getDoc,updateDoc,writeBatch,serverTimestamp,collection,query,where,getDocs,addDoc}=require('firebase/firestore');
 let env;
 const tenant='mobiliza-educa';
 const pathFor=(col,id)=>'tenants/'+tenant+'/'+col+'/'+id;
@@ -56,4 +56,19 @@ test('somente eventos publicados aparecem para visitante autenticado',async()=>{
  const db=env.authenticatedContext('visitor4').firestore();
  await assertSucceeds(getDocs(query(collection(db,'tenants',tenant,'publicEvents'),where('publicadoOnline','==',true))));
  await assertFails(getDocs(collection(db,'tenants',tenant,'publicEvents')));
+});
+
+test('mensagens do protocolo visíveis somente ao titular e gestor',async()=>{
+ const url='tenants/'+tenant+'/publicStatuses/'+p+'/messages';
+ const owner=env.authenticatedContext('visitor1').firestore();
+ const manager=env.authenticatedContext('gestor1').firestore();
+ const outsider=env.authenticatedContext('visitor2').firestore();
+ await assertSucceeds(addDoc(collection(owner,url),{tenantId:tenant,protocolo:p,authorUid:'visitor1',authorRole:'solicitante',text:'Precisamos de mais orientações',createdAt:serverTimestamp()}));
+ await assertSucceeds(addDoc(collection(manager,url),{tenantId:tenant,protocolo:p,authorUid:'gestor1',authorRole:'gestor',text:'Estamos analisando sua solicitação',createdAt:serverTimestamp()}));
+ const list=await assertSucceeds(getDocs(collection(owner,url)));
+ assert.equal(list.size,2);
+ await assertFails(getDocs(collection(outsider,url)));
+ await assertFails(addDoc(collection(outsider,url),{tenantId:tenant,protocolo:p,authorUid:'visitor2',authorRole:'solicitante',text:'Tentativa externa',createdAt:serverTimestamp()}));
+ await assertFails(addDoc(collection(owner,url),{tenantId:tenant,protocolo:p,authorUid:'visitor1',authorRole:'gestor',text:'Impersonando gestor',createdAt:serverTimestamp()}));
+ await assertFails(updateDoc(list.docs[0].ref,{text:'Alterada'}));
 });
