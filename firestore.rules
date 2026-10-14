@@ -150,6 +150,27 @@ service cloud.firestore {
       && request.resource.data.updatedAt == request.time;
     allow delete: if false;
    }
+   // Conversas vinculadas a protocolos; mensagens imutáveis e acesso só das partes.
+   match /publicStatuses/{protocolo}/messages/{messageId} {
+    function participant() {
+     return signedIn() && get(/databases/$(database)/documents/tenants/$(t)/publicStatuses/$(protocolo)).data.ownerUid == request.auth.uid;
+    }
+    function protocolManager() {
+     return permitted(t,'events.read') && allSchools(t);
+    }
+    allow get,list: if participant() || protocolManager();
+    allow create: if (participant() || (protocolManager() && permitted(t,'events.manage')))
+      && request.resource.data.keys().hasOnly(['tenantId','protocolo','authorUid','authorRole','text','createdAt'])
+      && request.resource.data.tenantId == t
+      && request.resource.data.protocolo == protocolo
+      && request.resource.data.authorUid == request.auth.uid
+      && request.resource.data.authorRole == (participant() ? 'solicitante' : 'gestor')
+      && request.resource.data.text is string
+      && request.resource.data.text.size() >= 1
+      && request.resource.data.text.size() <= 2000
+      && request.resource.data.createdAt == request.time;
+    allow update,delete: if false;
+   }
    match /publicEvents/{id}{
     allow get,list: if (permitted(t,'events.read') && allSchools(t)) || (signedIn() && resource.data.publicadoOnline == true);
     allow create: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.nome is string && request.resource.data.createdBy == request.auth.uid && request.resource.data.updatedBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time && request.resource.data.publicadoOnline == false;
