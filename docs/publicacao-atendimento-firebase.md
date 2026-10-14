@@ -1,18 +1,38 @@
-# Publicação sem instalar Node.js no computador
+# Implantação das Cloud Functions via GitHub OIDC — Mobiliza Educa
 
-O PR #34 corrige o **frontend**, mas o envio só funciona quando as Cloud Functions estiverem implantadas.
+A autenticação foi atualizada para **Workload Identity Federation**, sem arquivo JSON de chave privada e sem necessidade de instalar Node.js no computador.
 
-## Pré-requisitos da implantação
-1. Ativar faturamento/projeto Firebase compatível com Cloud Functions v2 e conferir limites de custo.
-2. Criar credencial de serviço de implantação com permissões mínimas necessárias, sem enviá-la ao chat ou versioná-la no Git.
-3. Cadastrar seu JSON como **GitHub Actions secret** `FIREBASE_SERVICE_ACCOUNT_MOBILIZA_EDUCA`. Avaliar como alternativa recomendada a autenticação por Workload Identity Federation antes de produção.
-4. Criar ambiente GitHub `firebase-production` com revisores obrigatórios.
-5. Confirmar que existem `publicTenants/mobiliza-educa`, a assinatura do tenant e as funcionalidades públicas ativas.
-6. Verificar que `firebase/functions/package-lock.json` existe e é compatível com `npm ci`.
+## Identidade federada
+- Projeto Firebase: `mobiliza-educa`
+- Número do projeto: `39731938550`
+- Pool: `mobiliza-github`
+- Provedor OIDC: `github-actions`
+- Conta de serviço: `mobiliza-educa-github-deploy@mobiliza-educa.iam.gserviceaccount.com`
+- Provedor completo: `projects/39731938550/locations/global/workloadIdentityPools/mobiliza-github/providers/github-actions`
 
-## Fluxo de implantação
-Após incorporar a branch à main, no GitHub vá em **Actions → Implantar Cloud Functions - Mobiliza Educa → Run workflow**. Digite o identificador de projeto e marque a confirmação. O workflow só executa se ambos estiverem corretos. **Não há implantação automática a cada push**.
+O provedor deve restringir a emissão a `assertion.repository == 'vfranciscodeoliveira-gif/mobiliza-educa' && assertion.ref == 'refs/heads/main'`. Recomenda-se reforçar também com `repository_id` numérico e `repository_owner_id` após confirmados os IDs.
 
-Depois confira os endpoints `submitSolicitacao`, `submitInscricao`, `publicEvents`, `consultarProtocolo` e teste com solicitação de homologação autorizada, validando o protocolo na gestão e o status. O frontend também precisa ser publicado na main (GitHub Pages).
+## Permissões necessárias antes de implantar
+A política `roles/iam.workloadIdentityUser` permite à identidade federada assumir a conta, mas **não concede por si só acesso de implantação**.
 
-Não afrouxar `firestore.rules` para escrita anônima de pedidos. Ativar proteção contra abusos e monitoramento de custos antes de uso público em larga escala.
+Configure privilégios adequados para Cloud Functions v2, Cloud Run/Artifact Registry, Cloud Build e leitura da conta de runtime. As atribuições devem ser feitas com o menor privilégio possível e verificadas na documentação do projeto; nunca atribuir Proprietário ou Editor por conveniência. As permissões para agir como conta de serviço de runtime devem ser concedidas somente na conta específica.
+
+Conferir faturamento, APIs habilitadas, cota de implantação e cobranças antes de iniciar qualquer deploy.
+
+## Workflow
+O arquivo `.github/workflows/deploy-firebase-functions-manual.yml` requer:
+1. Branch `main`, pois o provedor OIDC não autentica outras branches.
+2. Ambiente GitHub `firebase-production` com revisores aprovadores e branch `main` permitida.
+3. Acionamento manual em Actions: confirmação textual `mobiliza-educa` e confirmação booleana de implantação.
+4. Revisão da versão de Firebase CLI, dependências e das funções existentes antes de executar.
+
+**Não criar o antigo secret `FIREBASE_SERVICE_ACCOUNT_MOBILIZA_EDUCA`**. O fluxo usa credenciais efêmeras de OIDC.
+
+## Verificação após implantação
+- Verificar endpoints `submitSolicitacao`, `submitInscricao`, `publicEvents` e `consultarProtocolo`.
+- Validar `publicTenants/mobiliza-educa` e as configurações de assinatura/recursos correspondentes.
+- Fazer teste autorizado de solicitação e consulta de protocolo; verificar registro administrativo e evitar dados pessoais reais nos logs de CI.
+- Configurar proteção antiabuso e monitorar orçamento antes de grande uso público.
+- Publicar frontend em GitHub Pages separadamente após verificar a API.
+
+**Estado: apenas automação preparada, sem implantação realizada.**
