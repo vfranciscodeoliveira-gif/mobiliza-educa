@@ -72,7 +72,7 @@ async function intakeUser(){
  }
 }
 function publicSubmissionId(uid){
- return uid+'_'+String(Math.floor(Date.now()/86400000));
+ return uid;
 }
 
 
@@ -86,7 +86,7 @@ export async function submitSolicitacaoDireta(data){
   batch.set(reqRef,{...requestDoc(data,p),ownerUid:user.uid,createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
   batch.set(stRef,{...statusDoc(p,'Solicitação',user.uid),createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
   try{await batch.commit();}catch(err){
-   if(err?.code==='permission-denied')throw new Error('Não foi possível registrar. Confira se a autenticação anônima está habilitada e se as regras do Firestore foram publicadas. É permitido um pedido por conta e por dia.');
+   if(err?.code==='permission-denied')throw new Error('Não foi possível registrar. Confira se a autenticação anônima está habilitada e se as regras do Firestore foram publicadas. É permitido um pedido por identidade Firebase nesta versão inicial.');
    throw err;
   }
   return{ok:true,id:reqRef.id,protocolo:p,status:'Recebida'};
@@ -109,7 +109,7 @@ export async function submitInscricaoDireta(data){
   batch.set(regRef,{...registrationDoc(data,p),ownerUid:user.uid,createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
   batch.set(stRef,{...statusDoc(p,'Inscrição',user.uid),createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
   try{await batch.commit();}catch(err){
-   if(err?.code==='permission-denied')throw new Error('Inscrição não registrada. Confira as regras e a autenticação anônima; é permitida uma inscrição por conta e por dia.');
+   if(err?.code==='permission-denied')throw new Error('Inscrição não registrada. Confira as regras e a autenticação anônima; é permitida uma inscrição por identidade Firebase nesta versão inicial.');
    throw err;
   }
   return{ok:true,id:regRef.id,protocolo:p,status:'Recebida'};
