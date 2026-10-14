@@ -1,5 +1,5 @@
 import {cloudConfigured,submitSolicitacao,submitInscricao,consultarProtocolo,listPublicEvents,isCloudEmulatorMode} from '../cloudGateway.js?v=6';
-import {directFirestoreConfigured,submitSolicitacaoDireta,submitInscricaoDireta,consultarProtocoloDireto,listPublicEventsDireto} from '../directFirestore.js?v=3';
+import {directFirestoreConfigured,submitSolicitacaoDireta,submitInscricaoDireta,consultarProtocoloDireto,listPublicEventsDireto,listarMensagensProtocoloDireto,responderProtocoloDireto} from '../directFirestore.js?v=4';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const phone=v=>String(v||'').replace(/\D/g,'').replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d{4}).*/,'$1-$2');
@@ -10,6 +10,7 @@ function css(){
  .ps{max-width:1160px;margin:auto}.ps-hero{padding:24px;border-radius:22px;background:linear-gradient(135deg,#073d68,#087fac);color:#fff;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
  .ps-hero h2{margin:4px 0;font-size:1.55rem}.ps-hero p{margin:4px 0;color:#d9f3ff}.ps-state{padding:8px 12px;border-radius:999px;background:#fff;color:#0d4c70;font-weight:900;font-size:.78rem}
  .ps-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.ps-tab{border:1px solid #c8dce7;background:#fff;padding:10px 14px;border-radius:12px;font-weight:900;color:#174766;cursor:pointer}.ps-tab.active{background:#0a6fa4;color:#fff;border-color:#0a6fa4}
+ .ps-message{padding:12px;border:1px solid #d7e6ed;background:#f7fbfe;border-radius:12px;margin:8px 0}.ps-message p{white-space:pre-wrap;margin:6px 0 0;overflow-wrap:anywhere}.ps-message small{color:#657d8a;font-size:.76rem}
  .ps-panel{background:#fff;border:1px solid #d9e7ef;border-radius:18px;padding:18px;box-shadow:0 10px 32px rgba(17,55,80,.08)}.ps-panel h3{margin-top:0}
  .ps-alert{padding:12px 14px;border-radius:12px;background:#fff8df;border-left:4px solid #f0b429;color:#59440c;margin-bottom:14px}.ps-offline{background:#ffecec;border-color:#d64545;color:#6d2222}
  .ps-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ps-grid label,.ps-panel>form>label{display:grid;gap:5px;font-weight:800;color:#214c67;font-size:.86rem}.ps input,.ps select,.ps textarea{width:100%;padding:10px 11px;border:1px solid #c9dbe6;border-radius:10px;background:#fff;color:#173f60;font:inherit}.ps textarea{resize:vertical}.ps .span2{grid-column:1/-1}.ps-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}.ps-result{margin-top:14px;padding:16px;border-radius:14px;background:#edf9f1;border:1px solid #b8e5c7}.ps-result strong{display:block;font-size:1.1rem}.ps-protocol{font-size:1.25rem;font-weight:1000;color:#096a3a;margin:4px 0}.ps-status{display:inline-block;padding:5px 9px;border-radius:999px;background:#e7f4fb;color:#0c5f88;font-weight:900}
@@ -53,7 +54,18 @@ export async function renderPublicService(host){
  function consultar(){
   const contactField=directMode()?'':'<label>E-mail ou telefone informado no envio<input name="contato" required></label>';
   panel.innerHTML=`<section class="ps-panel"><h3>Consultar andamento</h3>${availability()}<div class="ps-alert"><strong>Guarde seu protocolo.</strong> Na modalidade gratuita, você precisa manter o mesmo navegador e a mesma sessão para consultar o protocolo. O número, sozinho, não libera acesso a dados pessoais.</div><form id="psLookup"><div class="ps-grid"><label>Protocolo<input name="protocolo" required placeholder="SOL-... ou INS-..."></label>${contactField}</div><div class="ps-actions"><button class="btn primary" ${publicConfigured()?'':'disabled'}>Consultar</button></div></form><div id="psResult"></div></section>`;
-  const f=panel.querySelector('#psLookup');f.onsubmit=async e=>{e.preventDefault();const out=panel.querySelector('#psResult');try{const d=Object.fromEntries(new FormData(f).entries()),r=await lookupProtocol(d.protocolo.trim(),(d.contato||'').trim());out.innerHTML=`<div class="ps-result"><strong>${esc(r.tipoLabel||'Protocolo')}</strong><div class="ps-protocol">${esc(r.protocolo)}</div><p>Status atual: <span class="ps-status">${esc(r.status)}</span></p><p>${esc(r.mensagem||'')}</p></div>`;}catch(err){out.innerHTML=`<div class="ps-alert ps-offline">${esc(err.message)}</div>`;}};
+  const f=panel.querySelector('#psLookup');f.onsubmit=async e=>{e.preventDefault();const out=panel.querySelector('#psResult');try{const d=Object.fromEntries(new FormData(f).entries()),r=await lookupProtocol(d.protocolo.trim(),(d.contato||'').trim());out.innerHTML=`<div class="ps-result"><strong>${esc(r.tipoLabel||'Protocolo')}</strong><div class="ps-protocol">${esc(r.protocolo)}</div><p>Status atual: <span class="ps-status">${esc(r.status)}</span></p><p>${esc(r.mensagem||'')}</p></div>`;
+  if(directMode()){
+   const section=document.createElement('section');section.className='ps-panel';section.style.marginTop='14px';out.appendChild(section);
+   const loadMessages=async()=>{
+    const response=await listarMensagensProtocoloDireto(r.protocolo);
+    const items=response.mensagens||[];
+    section.innerHTML=`<h3>Histórico e mensagens</h3><p>As respostas do gestor ficam registradas neste protocolo.</p><div class="ps-messages">${items.length?items.map(m=>`<article class="ps-message"><strong>${m.authorRole==='gestor'?'Equipe de atendimento':'Solicitante'}</strong><small> • ${m.createdAt?esc(new Date(m.createdAt).toLocaleString('pt-BR')):'Agora'}</small><p>${esc(m.text)}</p></article>`).join(''):'<p>Nenhuma mensagem ainda. Acompanhe a análise por aqui.</p>'}</div><form id="psReply"><label>Enviar mensagem ao gestor<textarea name="mensagem" maxlength="2000" rows="3" required placeholder="Escreva sua dúvida ou informação complementar"></textarea></label><div class="ps-actions"><button class="btn primary">Enviar mensagem</button></div></form><div id="psReplyResult"></div>`;
+    const form=section.querySelector('#psReply');form.onsubmit=async ev=>{ev.preventDefault();const button=form.querySelector('button');button.disabled=true;try{await responderProtocoloDireto(r.protocolo,form.elements.mensagem.value);await loadMessages();}catch(e){section.querySelector('#psReplyResult').textContent=e.message||'Não foi possível enviar.';button.disabled=false;}};
+   };
+   try{await loadMessages();}catch(e){section.textContent='Não foi possível carregar as mensagens: '+e.message;}
+  }
+ }catch(err){out.innerHTML=`<div class="ps-alert ps-offline">${esc(err.message)}</div>`;}};
  }
  host.querySelectorAll('[data-ps]').forEach(b=>b.onclick=()=>{tab=b.dataset.ps;draw();});draw();
 }
