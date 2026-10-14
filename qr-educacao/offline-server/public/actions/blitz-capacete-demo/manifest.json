@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "actionId": "blitz-capacete-demo",
+  "revision": 1,
+  "title": "Blitz Educativa — Motociclista Seguro",
+  "description": "Material educativo demonstrativo da ação. Substitua por conteúdo aprovado da SEMOB antes de uso público.",
+  "materials": [
+    {
+      "id": "orientacoes",
+      "title": "Orientações educativas — exemplo",
+      "type": "html",
+      "path": "assets/orientacoes.html"
+    }
+  ],
+  "quiz": null
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "actionId": "blitz-capacete-demo",
+  "revision": 1,
+  "title": "Blitz Educativa — Motociclista Seguro",
+  "description": "Orientações de segurança para motociclistas",
+  "materials": [
+    {
+      "id": "cartilha-capacete",
+      "title": "Cartilha educativa",
+      "type": "pdf",
+      "path": "assets/cartilha-exemplo.pdf"
+    }
+  ],
+  "quiz": null
+}

@@ -82,6 +82,34 @@ service cloud.firestore {
    match /pushDevices/{id}{allow read,write: if false;}
    match /{document=**}{allow read,write: if false;}
   }
+  // Publicação QR: somente conteúdo aprovado, sem dados pessoais do cadastro de eventos.
+  match /qrPublic/{code}{
+   function canReadTenant(d){return signedIn() && permitted(d.tenantId,'events.read');}
+   function canManageTenant(d){return signedIn() && permitted(d.tenantId,'events.manage') && allSchools(d.tenantId);}
+   function validQr(d){
+    return d.keys().hasOnly(['tenantId','actionId','title','description','materials','published','updatedBy','updatedAt'])
+      && d.tenantId is string && d.tenantId.size()>0 && d.tenantId.size()<=120
+      && d.actionId is string && d.actionId.size()>0 && d.actionId.size()<=180
+      && d.title is string && d.title.size()>0 && d.title.size()<=120
+      && d.description is string && d.description.size()<=600
+      && d.materials is list && d.materials.size()>0 && d.materials.size()<=20
+      && d.published is bool
+      && d.updatedBy == request.auth.uid && d.updatedAt == request.time
+      && exists(/databases/$(database)/documents/tenants/$(d.tenantId)/appointments/$(d.actionId))
+      && get(/databases/$(database)/documents/tenants/$(d.tenantId)/appointments/$(d.actionId)).data.tenantId == d.tenantId;
+   }
+   allow get: if resource.data.published == true || canReadTenant(resource.data);
+   allow list: if canReadTenant(resource.data);
+   allow create: if code.matches('^[a-f0-9]{20}
+
+
+) && canManageTenant(request.resource.data) && validQr(request.resource.data);
+   allow update: if canManageTenant(resource.data) && validQr(request.resource.data)
+      && request.resource.data.tenantId == resource.data.tenantId
+      && request.resource.data.actionId == resource.data.actionId
+      && request.resource.data.updatedBy == request.auth.uid;
+   allow delete: if false;
+  }
   match /{document=**}{allow read,write: if false;}
  }
 }

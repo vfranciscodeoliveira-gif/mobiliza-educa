@@ -1,4 +1,5 @@
 import {renderAgendaOverview} from './modules/agendaOverview.js?v=1';
+import {renderQREducacao} from './modules/qrEducacao.js?v=1';
 import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed} from './core/cloudAccess.js?v=1';
 import {getCloudTenantId,setCloudTenantId} from './cloudGateway.js?v=6';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -93,6 +94,12 @@ function renderAuthenticated(){
   qs('#adminModulesKpi').textContent=String(adminModules.length);
   qs('#adminSidebarNav').innerHTML=adminModules.map(sidebarButton).join('');
   qs('#adminModuleGrid').innerHTML=adminModules.map(moduleCard).join('');
+  const qrAllowed=moduleState('admin-eventos').allowed;
+  qs('#adminModuleGrid').insertAdjacentHTML('beforeend',`<article class="admin-online-module ${qrAllowed?'':'disabled'}"><div class="admin-online-module-icon">📱</div><div class="admin-online-module-copy"><h3>QR Educação 360</h3><p>Distribuição digital de materiais educativos nas blitz e ações: online e Wi-Fi local.</p><div class="module-meta"><span class="chip">QR Code</span><span class="chip">Blitz educativa</span></div></div><button class="btn primary" id="adminQrEducacao" ${qrAllowed?'':'disabled'}>Abrir</button></article>`);
+  qs('#adminSidebarNav').insertAdjacentHTML('beforeend',`<button class="admin-online-nav-item" id="adminQrEducacaoNav" ${qrAllowed?'':'disabled'}><span>📱</span><b>QR Educação 360</b></button>`);
+  const openQr=()=>{if(!moduleState('admin-eventos').allowed)return;renderQREducacao(qs('#adminHost'));qs('#adminDialog').showModal();};
+  qs('#adminQrEducacao').onclick=openQr;
+  qs('#adminQrEducacaoNav').onclick=openQr;
   bindModules();
   renderAgendaOverview(qs('#adminAgendaOverview'),options=>openAdminModule('admin-eventos',qs('#adminDialog'),qs('#adminHost'),qs('#authDialog'),options));
 }
@@ -135,7 +142,7 @@ else{
   setTimeout(requestLogin,80);
 }
 
-if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.63.9',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.64.0-qr',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
 
 
 
