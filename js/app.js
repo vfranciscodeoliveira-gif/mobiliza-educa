@@ -42,7 +42,7 @@ function installEmulatorBadge(){
 }
 
 const premiumCovers={milhao:'quiz-do-milhao',trilha:'trilha-do-transito',memoria:'jogo-da-memoria',cruzadas:'palavras-cruzadas'};
-const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image||'';const visual=item.visual||'';const premium=premiumCovers[item.id];const premiumURL=premium?`assets/visual-2026/${premium}.webp?v=1`:'';const cover=image?`${image}?v=24`:'';return `
+const moduleCard=(item,actionLabel='Abrir')=>{const image=item.cover||item.image||'';const visual=item.visual||'';const premium=premiumCovers[item.id];const premiumURL=premium?`visual-2026/${premium}.webp?v=1`:'';const cover=image?`${image}?v=24`:'';return `
 <article class="module-card card ${(image||visual)?'illustrated visual-card':''} ${item.accent?'accent-'+item.accent:''}">
   ${visual?`<div class="module-cover sprite-cover ${visual}" role="img" aria-label="${item.title}">${premiumURL?`<img class="premium-cover-img" src="${premiumURL}" alt="${item.title}" loading="eager" decoding="async" onerror="this.remove()" />`:``}<span class="cover-shine"></span><span class="module-cover-title">${item.icon||'🎮'} ${item.title}</span></div>`:image?`<div class="module-cover" style="--cover-image:url('${cover}')"><img src="${cover}" alt="${item.title}" loading="eager" decoding="async" onload="this.closest('.module-cover')?.classList.add('loaded')" onerror="this.closest('.module-cover')?.classList.add('cover-error')"><span class="cover-shine"></span><span class="module-cover-title">${item.icon||'🎮'} ${item.title}</span></div>`:`<div class="module-icon" aria-hidden="true">${item.icon}</div>`}
   <div class="module-card-body">
