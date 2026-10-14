@@ -14,6 +14,7 @@ on:
         default: false
 permissions:
   contents: read
+  id-token: write
 concurrency:
   group: mobiliza-firebase-functions-production
   cancel-in-progress: false
@@ -37,17 +38,17 @@ jobs:
       - name: Instalar dependências das funções
         run: npm ci
         working-directory: firebase/functions
-      - name: Verificar credencial de implantação
-        env:
-          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MOBILIZA_EDUCA }}
+      - name: Autenticar pelo GitHub OIDC no Google Cloud (sem chave privada)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/39731938550/locations/global/workloadIdentityPools/mobiliza-github/providers/github-actions'
+          service_account: 'mobiliza-educa-github-deploy@mobiliza-educa.iam.gserviceaccount.com'
+          create_credentials_file: true
+          export_environment_variables: true
+      - name: Confirmar identidade do projeto
         run: |
-          if [ -z "$FIREBASE_SA" ]; then
-            echo "::error::Configure o secret FIREBASE_SERVICE_ACCOUNT_MOBILIZA_EDUCA no repositório."
-            exit 1
-          fi
-          printf '%s' "$FIREBASE_SA" > "$RUNNER_TEMP/firebase-service-account.json"
-          chmod 600 "$RUNNER_TEMP/firebase-service-account.json"
-          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
+          test -n "$GOOGLE_APPLICATION_CREDENTIALS"
+          echo "Credenciais temporárias OIDC configuradas."
       - name: Instalar Firebase CLI no runner
         run: npm install --global firebase-tools
       - name: Implantar Cloud Functions na região configurada pelo código
