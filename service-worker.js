@@ -6,7 +6,7 @@ const ASSETS=[
  './js/modules/windowsClassImport.js?v=1','./js/core/windowsClassPolicy.js?v=1','./js/core/windowsClassRepository.js?v=1',
  './js/core/windowsIntegralPolicy.js?v=1','./js/core/windowsArchiveRepository.js?v=1','./js/modules/windowsHistory.js?v=1',
  './js/modules/windowsAgendaImport.js?v=6','./js/core/windowsAgendaPolicy.js?v=4',
- './','./index.html','./admin.html','./assets/admin-online.css?v=3','./assets/app.css?v=46','./assets/showcase.css?v=15',
+ './visual-2026/mobiliza-educa-hero.webp','./visual-2026/quiz-do-milhao.webp','./visual-2026/trilha-do-transito.webp','./visual-2026/jogo-da-memoria.webp','./visual-2026/palavras-cruzadas.webp','./visual-2026/cidade-mirim.webp','./','./index.html','./admin.html','./assets/admin-online.css?v=3','./assets/app.css?v=46','./assets/showcase.css?v=15',
  './assets/icon.svg','./assets/ai/hero_area_escolar.webp?v=2','./assets/ai/publicos_sprite.webp?v=2','./assets/ai/jogos_experiencias_sprite.webp?v=2','./assets/mobiliza_educa_caminhos_para_a_vida.webp','./assets/icon-32.webp','./assets/icon-192.webp','./assets/brand-cover.webp',
  './assets/games/quiz_do_milhao_do_transito.svg',
  './assets/games/trilha_do_transito_agentes_mirins.svg',
