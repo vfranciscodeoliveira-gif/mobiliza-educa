@@ -7,30 +7,40 @@
 <main><p class="pill">MATERIAL EDUCATIVO DIGITAL</p><h2 id="actionTitle">Carregando ação...</h2><p id="actionDescription"></p><div id="notice" role="status">Buscando conteúdo publicado...</div><section id="materials" aria-label="Materiais publicados"></section><section id="quiz"></section></main>
 <footer>Educação para o trânsito • Material gratuito • Sem cadastro</footer>
 <script type="module">
+import {cloudConfig} from './js/cloudConfig.js?v=3';
 const qs=s=>document.querySelector(s);
 const id=new URLSearchParams(location.search).get('acao')||'';
-const goodId=/^[a-zA-Z0-9_-]{1,80}$/.test(id);
-const root='./qr-educacao/offline-server/public/actions/';
-const escape=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const validId=/^[a-f0-9]{20}$/.test(id);
+const safeUrl=value=>{try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}};
+async function load(){
+ if(!validId)throw Error('O código do QR Code não é válido.');
+ const [app,firestore]=await Promise.all([
+  import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
+  import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')
+ ]);
+ const client=app.getApps().length?app.getApp():app.initializeApp(cloudConfig.firebaseWebConfig);
+ const db=firestore.getFirestore(client);
+ const result=await firestore.getDoc(firestore.doc(db,'qrPublic',id));
+ if(!result.exists())throw Error('Este conteúdo não está publicado ou não está mais disponível.');
+ const data=result.data();
+ if(data.published!==true||!Array.isArray(data.materials))throw Error('Conteúdo indisponível.');
+ return data;
+}
 async function start(){
- if(!goodId){qs('#actionTitle').textContent='Ação não encontrada';qs('#notice').textContent='Escaneie o QR Code fornecido pela equipe.';return;}
  try{
-  const response=await fetch(root+encodeURIComponent(id)+'/manifest.json',{cache:'no-store'});
-  if(!response.ok)throw new Error('Conteúdo indisponível');
-  const data=await response.json();
-  if(data.actionId!==id||!Array.isArray(data.materials))throw new Error('Publicação inválida');
-  qs('#actionTitle').textContent=data.title||'Ação educativa';qs('#actionDescription').textContent=data.description||'';
-  qs('#notice').textContent=data.materials.length?'Selecione um material para visualizar ou salvar.':'Ainda não há materiais publicados.';
-  for(const item of data.materials){
-   if(!/^assets\/[a-zA-Z0-9/_-]+\.[a-zA-Z0-9]+$/.test(item.path)||item.path.includes('..'))continue;
-   const link=document.createElement('a');link.className='material';
-   link.href=root+encodeURIComponent(id)+'/'+item.path.split('/').map(encodeURIComponent).join('/');
-   link.target='_blank';link.rel='noopener noreferrer';link.textContent=item.title||'Material educativo';
-   qs('#materials').append(link);
+  const data=await load();
+  qs('#actionTitle').textContent=data.title||'Ação educativa';
+  qs('#actionDescription').textContent=data.description||'';
+  const allowed=data.materials.filter(x=>x && typeof x.title==='string' && safeUrl(x.url));
+  qs('#notice').textContent=allowed.length?'Selecione um material para visualizar ou salvar.':'Esta ação não possui materiais públicos disponíveis.';
+  for(const item of allowed){
+   const a=document.createElement('a');a.className='material';a.href=item.url;a.rel='noopener noreferrer';a.target='_blank';
+   a.textContent=item.title;qs('#materials').appendChild(a);
   }
-  if(data.quiz?.url && /^https:\/\//.test(data.quiz.url)){
-   const link=document.createElement('a');link.href=data.quiz.url;link.className='material';link.textContent='🧠 Testar meus conhecimentos';link.rel='noopener noreferrer';qs('#quiz').append(link);
-  }
- }catch(e){qs('#actionTitle').textContent='Conteúdo temporariamente indisponível';qs('#notice').textContent='Solicite orientação à equipe da ação educativa.';}
-}start();
+ }catch(e){
+  qs('#actionTitle').textContent='Conteúdo indisponível';
+  qs('#notice').textContent=e.message||'Consulte a equipe da ação educativa.';
+ }
+}
+start();
 </script></body></html>
