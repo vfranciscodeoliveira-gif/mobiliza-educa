@@ -1,6 +1,6 @@
-const CACHE='mobiliza-educa-v0.64.1';
+const CACHE='mobiliza-educa-v0.65.0';
 const ASSETS=[
- './js/modules/agendaOverview.js?v=1','./js/core/agendaSummary.js?v=1',
+ './js/modules/protocolCenter.js?v=1','./js/modules/agendaOverview.js?v=1','./js/core/agendaSummary.js?v=1',
  './js/core/schoolScanParser.js?v=1','./js/core/schoolPdfOcr.js?v=1',
  './js/modules/windowsStudentImport.js?v=1','./js/core/windowsStudentPolicy.js?v=1','./js/core/windowsStudentRepository.js?v=1',
  './js/modules/windowsClassImport.js?v=1','./js/core/windowsClassPolicy.js?v=1','./js/core/windowsClassRepository.js?v=1',
