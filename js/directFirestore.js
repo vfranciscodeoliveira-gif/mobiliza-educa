@@ -94,7 +94,7 @@ export async function submitSolicitacaoDireta(data){
 }
 export async function listPublicEventsDireto(){
  return run(async()=>{
-  const ctx=await db(),{fs}=ctx,today=new Date().toISOString().slice(0,10),q=fs.query(fs.collection(ctx.db,'tenants',tenantId(),'publicEvents'),fs.where('publicadoOnline','==',true),fs.limit(100)),snap=await fs.getDocs(q),eventos=[];
+  await intakeUser();const ctx=await db(),{fs}=ctx,today=new Date().toISOString().slice(0,10),q=fs.query(fs.collection(ctx.db,'tenants',tenantId(),'publicEvents'),fs.where('publicadoOnline','==',true),fs.limit(100)),snap=await fs.getDocs(q),eventos=[];
   snap.forEach(d=>{const e=d.data();if(e.status!=='Confirmado'||!e.inscricoesAbertas||String(e.dataInicio||'')<today)return;eventos.push({id:d.id,nome:e.nome||'Atividade',dataInicio:e.dataInicio||'',horaInicio:e.horaInicio||'',horaFim:e.horaFim||'',local:e.local||'',vagas:Number(e.vagas)||0,dataLabel:e.dataLabel||e.dataInicio||'',vagasInfo:e.vagas?'até '+e.vagas+' vagas':'vagas sob confirmação'});});
   eventos.sort((a,b)=>String(a.dataInicio).localeCompare(String(b.dataInicio)));return{ok:true,eventos};
  });
@@ -163,8 +163,8 @@ export async function syncDirectInbox(){
 async function updateStatus(collection,id,status,extra={}){
  return run(async()=>{
   await requireUser();const ctx=await db(),{fs}=ctx,ref=fs.doc(ctx.db,'tenants',adminTenantId(),collection,id),snap=await fs.getDoc(ref);if(!snap.exists())throw new Error('Registro online não encontrado.');
-  const row=snap.data(),batch=fs.writeBatch(ctx.db),patch={status:trim(status,80),updatedAt:fs.serverTimestamp(),...extra};batch.update(ref,patch);
-  if(row.protocolo){const st=fs.doc(ctx.db,'tenants',adminTenantId(),'publicStatuses',row.protocolo);batch.set(st,{status:trim(status,80),updatedAt:fs.serverTimestamp()},{merge:true});}
+  const row=snap.data(),batch=fs.writeBatch(ctx.db),patch={status:trim(status,80),updatedAt:fs.serverTimestamp()};batch.update(ref,patch);
+  if(row.protocolo){const st=fs.doc(ctx.db,'tenants',adminTenantId(),'publicStatuses',row.protocolo);batch.update(st,{status:trim(status,80),updatedAt:fs.serverTimestamp()});}
   await batch.commit();return{ok:true};
  });
 }
