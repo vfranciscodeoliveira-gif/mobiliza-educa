@@ -1,3 +1,4 @@
+import {mountProtocolCenter,unmountProtocolCenter} from './modules/protocolCenter.js?v=1';
 import {renderAgendaOverview} from './modules/agendaOverview.js?v=1';
 import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed} from './core/cloudAccess.js?v=1';
 import {getCloudTenantId,setCloudTenantId} from './cloudGateway.js?v=6';
@@ -94,10 +95,12 @@ function renderAuthenticated(){
   qs('#adminSidebarNav').innerHTML=adminModules.map(sidebarButton).join('');
   qs('#adminModuleGrid').innerHTML=adminModules.map(moduleCard).join('');
   bindModules();
+  mountProtocolCenter();
   renderAgendaOverview(qs('#adminAgendaOverview'),options=>openAdminModule('admin-eventos',qs('#adminDialog'),qs('#adminHost'),qs('#authDialog'),options));
 }
 
 function renderLoggedOut(){
+  unmountProtocolCenter();
   qs('#adminAgendaOverview')?._agendaCleanup?.();
   if(qs('#adminAgendaOverview'))qs('#adminAgendaOverview').innerHTML='';
   qs('#adminDashboard').hidden=true;
@@ -135,7 +138,7 @@ else{
   setTimeout(requestLogin,80);
 }
 
-if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.64.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.65.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
 
 
 
