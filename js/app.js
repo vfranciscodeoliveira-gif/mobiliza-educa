@@ -20,7 +20,7 @@ import { canAccessModule,installSecurityGuards } from './core/accessControl.js?v
 import { installTenantWorkspaceBridge,activeTenant } from './core/tenantRegistry.js?v=2';
 import { adminModuleEntitlement } from './core/saasContext.js?v=2';
 import { renderHomeNotifications } from './modules/notifications.js?v=12';
-import { renderPublicService } from './modules/publicService.js?v=8';
+import { renderPublicService } from './modules/publicService.js?v=9';
 import { syncCloudInbox,isCloudEmulatorMode } from './cloudGateway.js?v=6';
 import { openPublicCheckin } from './modules/checkinPublic.js?v=3';
 import { openCertificateValidation } from './modules/certValidation.js?v=3';
@@ -183,7 +183,7 @@ qs('#closeGameDialog')?.addEventListener('click',e=>{e.preventDefault();e.stopPr
 gameDialog?.addEventListener('cancel',e=>{e.preventDefault();});
 gameDialog?.addEventListener('click',e=>{e.stopPropagation();});
 gameHost?.addEventListener('click',e=>e.stopPropagation());
-if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.66.0',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
+if('serviceWorker'in navigator)window.addEventListener('load',async()=>{try{if(isCloudEmulatorMode()){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));return;}const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.66.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn('Service Worker:',e);}});
 const cloudRefresh=()=>syncCloudInbox().catch(()=>{});window.addEventListener('focus',cloudRefresh);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudRefresh();});
 installEmulatorBadge();
 render();
