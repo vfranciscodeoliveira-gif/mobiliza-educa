@@ -1,5 +1,5 @@
 import {cloudConfig} from './cloudConfig.js?v=3';
-import {getCloudUser,cloudStoragePrefix} from './core/cloudAuth.js?v=3';
+import {getCloudAuth,getCloudUser,cloudStoragePrefix} from './core/cloudAuth.js?v=3';
 
 let dbPromise=null;
 const trim=(v,n=500)=>String(v??'').trim().slice(0,n);
@@ -56,38 +56,68 @@ function requestDoc(x,p){
 function registrationDoc(x,p){
   return{tenantId:tenantId(),protocolo:p,status:'Recebida',idEvento:trim(x.idEvento,120),tipoInscricao:trim(x.tipoInscricao,60),nome:trim(x.nome,180),responsavel:trim(x.responsavel,180),telefone:trim(x.telefone,40),email:trim(x.email,180).toLowerCase(),quantidade:Math.max(1,Math.min(500,Number(x.quantidade)||1)),observacao:trim(x.observacao,1000)};
 }
-function statusDoc(p,type){
-  return{tenantId:tenantId(),protocolo:p,status:'Recebida',tipo:type};
+function statusDoc(p,type,uid){
+  return{tenantId:tenantId(),protocolo:p,status:'Recebida',tipo:type,ownerUid:uid};
 }
+// A conta anônima persiste no navegador. Não trocamos uma sessão administrativa existente.
+async function intakeUser(){
+ const auth=await getCloudAuth();
+ const sdk=await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js');
+ const current=await getCloudUser();
+ if(current)return current;
+ try{return(await sdk.signInAnonymously(auth)).user;}
+ catch(e){
+  if(e?.code==='auth/operation-not-allowed')throw new Error('A autenticação anônima precisa ser habilitada no Firebase Authentication para receber solicitações.');
+  throw e;
+ }
+}
+function publicSubmissionId(uid){
+ return uid;
+}
+
 
 export async function submitSolicitacaoDireta(data){
  return run(async()=>{
-  validateRequest(data);const p=protocol('SOL'),ctx=await db(),{fs}=ctx,reqRef=fs.doc(fs.collection(ctx.db,'tenants',tenantId(),'requests')),stRef=fs.doc(ctx.db,'tenants',tenantId(),'publicStatuses',p),batch=fs.writeBatch(ctx.db);
-  batch.set(reqRef,{...requestDoc(data,p),createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
-  batch.set(stRef,{...statusDoc(p,'Solicitação'),createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
-  await batch.commit();return{ok:true,id:reqRef.id,protocolo:p,status:'Recebida'};
+  validateRequest(data);
+  const user=await intakeUser(),p=protocol('SOL'),ctx=await db(),{fs}=ctx;
+  const requestId=publicSubmissionId(user.uid),reqRef=fs.doc(ctx.db,'tenants',tenantId(),'requests',requestId);
+  const stRef=fs.doc(ctx.db,'tenants',tenantId(),'publicStatuses',p);
+  const batch=fs.writeBatch(ctx.db);
+  batch.set(reqRef,{...requestDoc(data,p),ownerUid:user.uid,createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
+  batch.set(stRef,{...statusDoc(p,'Solicitação',user.uid),createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
+  try{await batch.commit();}catch(err){
+   if(err?.code==='permission-denied')throw new Error('Não foi possível registrar. Confira se a autenticação anônima está habilitada e se as regras do Firestore foram publicadas. É permitido um pedido por identidade Firebase nesta versão inicial.');
+   throw err;
+  }
+  return{ok:true,id:reqRef.id,protocolo:p,status:'Recebida'};
  });
 }
 export async function listPublicEventsDireto(){
  return run(async()=>{
-  const ctx=await db(),{fs}=ctx,today=new Date().toISOString().slice(0,10),q=fs.query(fs.collection(ctx.db,'tenants',tenantId(),'publicEvents'),fs.where('publicadoOnline','==',true),fs.limit(100)),snap=await fs.getDocs(q),eventos=[];
+  await intakeUser();const ctx=await db(),{fs}=ctx,today=new Date().toISOString().slice(0,10),q=fs.query(fs.collection(ctx.db,'tenants',tenantId(),'publicEvents'),fs.where('publicadoOnline','==',true),fs.limit(100)),snap=await fs.getDocs(q),eventos=[];
   snap.forEach(d=>{const e=d.data();if(e.status!=='Confirmado'||!e.inscricoesAbertas||String(e.dataInicio||'')<today)return;eventos.push({id:d.id,nome:e.nome||'Atividade',dataInicio:e.dataInicio||'',horaInicio:e.horaInicio||'',horaFim:e.horaFim||'',local:e.local||'',vagas:Number(e.vagas)||0,dataLabel:e.dataLabel||e.dataInicio||'',vagasInfo:e.vagas?'até '+e.vagas+' vagas':'vagas sob confirmação'});});
   eventos.sort((a,b)=>String(a.dataInicio).localeCompare(String(b.dataInicio)));return{ok:true,eventos};
  });
 }
 export async function submitInscricaoDireta(data){
  return run(async()=>{
-  validateRegistration(data);const ctx=await db(),{fs}=ctx,evRef=fs.doc(ctx.db,'tenants',tenantId(),'publicEvents',trim(data.idEvento,120)),ev=await fs.getDoc(evRef);
-  if(!ev.exists())throw new Error('Atividade não encontrada.');const e=ev.data();if(!e.publicadoOnline||e.status!=='Confirmado'||!e.inscricoesAbertas)throw new Error('As inscrições não estão abertas para esta atividade.');
-  const p=protocol('INS'),regRef=fs.doc(fs.collection(ctx.db,'tenants',tenantId(),'registrations')),stRef=fs.doc(ctx.db,'tenants',tenantId(),'publicStatuses',p),batch=fs.writeBatch(ctx.db);
-  batch.set(regRef,{...registrationDoc(data,p),createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
-  batch.set(stRef,{...statusDoc(p,'Inscrição'),createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
-  await batch.commit();return{ok:true,id:regRef.id,protocolo:p,status:'Recebida'};
+  validateRegistration(data);
+  const user=await intakeUser(),ctx=await db(),{fs}=ctx,evRef=fs.doc(ctx.db,'tenants',tenantId(),'publicEvents',trim(data.idEvento,120)),ev=await fs.getDoc(evRef);
+  if(!ev.exists())throw new Error('Atividade não encontrada.');
+  const e=ev.data();if(!e.publicadoOnline||e.status!=='Confirmado'||!e.inscricoesAbertas)throw new Error('As inscrições não estão abertas para esta atividade.');
+  const p=protocol('INS'),regRef=fs.doc(ctx.db,'tenants',tenantId(),'registrations',publicSubmissionId(user.uid)),stRef=fs.doc(ctx.db,'tenants',tenantId(),'publicStatuses',p),batch=fs.writeBatch(ctx.db);
+  batch.set(regRef,{...registrationDoc(data,p),ownerUid:user.uid,createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
+  batch.set(stRef,{...statusDoc(p,'Inscrição',user.uid),createdAt:fs.serverTimestamp(),updatedAt:fs.serverTimestamp()});
+  try{await batch.commit();}catch(err){
+   if(err?.code==='permission-denied')throw new Error('Inscrição não registrada. Confira as regras e a autenticação anônima; é permitida uma inscrição por identidade Firebase nesta versão inicial.');
+   throw err;
+  }
+  return{ok:true,id:regRef.id,protocolo:p,status:'Recebida'};
  });
 }
 export async function consultarProtocoloDireto(protocolo){
  return run(async()=>{
-  const p=trim(protocolo,96).toUpperCase();if(!p)throw new Error('Informe o protocolo.');
+  const p=trim(protocolo,96).toUpperCase();if(!p)throw new Error('Informe o protocolo.');await intakeUser();
   const ctx=await db(),{fs}=ctx,snap=await fs.getDoc(fs.doc(ctx.db,'tenants',tenantId(),'publicStatuses',p));if(!snap.exists())throw new Error('Protocolo não encontrado.');
   const d=snap.data(),confirmed=['Agendada','Confirmada','Concluída','Presente'].includes(d.status);
   return{ok:true,protocolo:p,status:d.status||'Recebida',tipoLabel:d.tipo||'Protocolo',mensagem:confirmed?'Há confirmação registrada pelo gestor.':'O registro foi recebido, mas ainda não representa atendimento ou vaga garantida.'};
@@ -133,8 +163,8 @@ export async function syncDirectInbox(){
 async function updateStatus(collection,id,status,extra={}){
  return run(async()=>{
   await requireUser();const ctx=await db(),{fs}=ctx,ref=fs.doc(ctx.db,'tenants',adminTenantId(),collection,id),snap=await fs.getDoc(ref);if(!snap.exists())throw new Error('Registro online não encontrado.');
-  const row=snap.data(),batch=fs.writeBatch(ctx.db),patch={status:trim(status,80),updatedAt:fs.serverTimestamp(),...extra};batch.update(ref,patch);
-  if(row.protocolo){const st=fs.doc(ctx.db,'tenants',adminTenantId(),'publicStatuses',row.protocolo);batch.set(st,{status:trim(status,80),updatedAt:fs.serverTimestamp()},{merge:true});}
+  const row=snap.data(),batch=fs.writeBatch(ctx.db),patch={status:trim(status,80),updatedAt:fs.serverTimestamp()};batch.update(ref,patch);
+  if(row.protocolo){const st=fs.doc(ctx.db,'tenants',adminTenantId(),'publicStatuses',row.protocolo);batch.update(st,{status:trim(status,80),updatedAt:fs.serverTimestamp()});}
   await batch.commit();return{ok:true};
  });
 }
