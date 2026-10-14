@@ -1,6 +1,8 @@
 import {cloudConfigured,submitSolicitacao,submitInscricao,consultarProtocolo,listPublicEvents,isCloudEmulatorMode} from '../cloudGateway.js?v=6';
 import {directFirestoreConfigured,submitSolicitacaoDireta,submitInscricaoDireta,consultarProtocoloDireto,listPublicEventsDireto,listarMensagensProtocoloDireto,responderProtocoloDireto} from '../directFirestore.js?v=4';
 
+import {renderApplicantAccount} from './publicAccount.js?v=1';
+
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const phone=v=>String(v||'').replace(/\D/g,'').replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d{4}).*/,'$1-$2');
 
@@ -24,12 +26,15 @@ const sendRequest=data=>directMode()?submitSolicitacaoDireta(data):submitSolicit
 const sendRegistration=data=>directMode()?submitInscricaoDireta(data):submitInscricao(data);
 const lookupProtocol=(p,c)=>directMode()?consultarProtocoloDireto(p,c):consultarProtocolo(p,c);
 const loadEvents=()=>directMode()?listPublicEventsDireto():listPublicEvents();
-function availability(){if(isCloudEmulatorMode())return '<div class="ps-alert"><strong>Emulador local ativo.</strong> Solicitações e inscrições serão gravadas somente no ambiente Firebase local desta máquina.</div>';return directMode()?'<div class="ps-alert"><strong>Envio pelo Firebase (plano gratuito).</strong> A confirmação de recebimento aparece somente após a gravação. Nesta versão inicial, cada identidade Firebase pode enviar um pedido e uma inscrição; mantenha o mesmo navegador para consultar o protocolo.</div>':(cloudConfigured()?'<div class="ps-alert"><strong>Envio online ativo.</strong> Solicitações e inscrições são encaminhadas à área do gestor para análise.</div>':'<div class="ps-alert ps-offline"><strong>Integração online indisponível.</strong> O envio está temporariamente bloqueado.</div>');}
+function availability(){if(isCloudEmulatorMode())return '<div class="ps-alert"><strong>Emulador local ativo.</strong> Solicitações e inscrições serão gravadas somente no ambiente Firebase local desta máquina.</div>';return directMode()?'<div class="ps-alert"><strong>Envio pelo Firebase (plano gratuito).</strong> A confirmação de recebimento aparece somente após a gravação. Nesta versão inicial, cada identidade Firebase pode enviar um pedido e uma inscrição; cadastre uma conta de acompanhamento antes do pedido ou vincule sua identidade anônima depois, para consultar em outro dispositivo.</div>':(cloudConfigured()?'<div class="ps-alert"><strong>Envio online ativo.</strong> Solicitações e inscrições são encaminhadas à área do gestor para análise.</div>':'<div class="ps-alert ps-offline"><strong>Integração online indisponível.</strong> O envio está temporariamente bloqueado.</div>');}
 
 export async function renderPublicService(host){
  if(!host)return;css();let tab='solicitar',events=[];
- host.innerHTML=`<div class="ps"><div class="ps-hero"><div><p class="eyebrow">ATENDIMENTO • MOBILIZA EDUCA</p><h2>Solicite uma ação ou inscreva-se em uma atividade</h2><p>Todo pedido passa por análise do gestor. Protocolo de recebimento não significa atendimento ou vaga confirmada.</p></div><div class="ps-state">SOB APROVAÇÃO DO GESTOR</div></div><div class="ps-tabs"><button class="ps-tab active" data-ps="solicitar">📥 Solicitar atendimento</button><button class="ps-tab" data-ps="inscrever">📝 Inscrição</button><button class="ps-tab" data-ps="consultar">🔎 Consultar protocolo</button></div><div id="psPanel"></div></div>`;
+ host.innerHTML=`<div class="ps"><div class="ps-hero"><div><p class="eyebrow">ATENDIMENTO • MOBILIZA EDUCA</p><h2>Solicite uma ação ou inscreva-se em uma atividade</h2><p>Todo pedido passa por análise do gestor. Protocolo de recebimento não significa atendimento ou vaga confirmada.</p></div><div class="ps-state">SOB APROVAÇÃO DO GESTOR</div></div><div class="ps-tabs"><button class="ps-tab active" data-ps="solicitar">📥 Solicitar atendimento</button><button class="ps-tab" data-ps="inscrever">📝 Inscrição</button><button class="ps-tab" data-ps="consultar">🔎 Consultar protocolo</button></div><div id="psAccount"></div><div id="psPanel"></div></div>`;
  const panel=host.querySelector('#psPanel');
+ const account=host.querySelector('#psAccount');
+ const refreshAccount=()=>renderApplicantAccount(account,refreshAccount);
+ await refreshAccount();
  const draw=async()=>{host.querySelectorAll('[data-ps]').forEach(b=>b.classList.toggle('active',b.dataset.ps===tab));if(tab==='solicitar')solicitar();else if(tab==='inscrever')await inscrever();else consultar();};
  function bindPhone(root){root.querySelectorAll('[data-phone]').forEach(i=>i.oninput=()=>i.value=phone(i.value));}
  function solicitar(){
@@ -54,7 +59,7 @@ export async function renderPublicService(host){
  }
  function consultar(){
   const contactField=directMode()?'':'<label>E-mail ou telefone informado no envio<input name="contato" required></label>';
-  panel.innerHTML=`<section class="ps-panel"><h3>Consultar andamento</h3>${availability()}<div class="ps-alert"><strong>Guarde seu protocolo.</strong> Na modalidade gratuita, você precisa manter o mesmo navegador e a mesma sessão para consultar o protocolo. O número, sozinho, não libera acesso a dados pessoais.</div><form id="psLookup"><div class="ps-grid"><label>Protocolo<input name="protocolo" required placeholder="SOL-... ou INS-..."></label>${contactField}</div><div class="ps-actions"><button class="btn primary" ${publicConfigured()?'':'disabled'}>Consultar</button></div></form><div id="psResult"></div></section>`;
+  panel.innerHTML=`<section class="ps-panel"><h3>Consultar andamento</h3>${availability()}<div class="ps-alert"><strong>Guarde seu protocolo.</strong> Se você criou uma conta vinculada à solicitação, entre com seu e-mail e senha em qualquer dispositivo. Pedidos anônimos ainda exigem a identidade original do navegador. O número, sozinho, não libera acesso a dados pessoais.</div><form id="psLookup"><div class="ps-grid"><label>Protocolo<input name="protocolo" required placeholder="SOL-... ou INS-..."></label>${contactField}</div><div class="ps-actions"><button class="btn primary" ${publicConfigured()?'':'disabled'}>Consultar</button></div></form><div id="psResult"></div></section>`;
   const f=panel.querySelector('#psLookup');f.onsubmit=async e=>{e.preventDefault();const out=panel.querySelector('#psResult');try{const d=Object.fromEntries(new FormData(f).entries()),r=await lookupProtocol(d.protocolo.trim(),(d.contato||'').trim());out.innerHTML=`<div class="ps-result"><strong>${esc(r.tipoLabel||'Protocolo')}</strong><div class="ps-protocol">${esc(r.protocolo)}</div><p>Status atual: <span class="ps-status">${esc(r.status)}</span></p><p>${esc(r.mensagem||'')}</p></div>`;
   if(directMode()){
    const section=document.createElement('section');section.className='ps-panel';section.style.marginTop='14px';section.innerHTML='<h3>💬 Acompanhamento e mensagens</h3><p>Carregando respostas do gestor...</p>';out.appendChild(section);
