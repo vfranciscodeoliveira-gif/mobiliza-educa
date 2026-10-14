@@ -18,13 +18,13 @@ export const games=[
 
 export const learning=[
 {id:'pedestre',icon:'🚶',cover:'visual-2026/travessia-e-prioridade.webp',title:'Travessia e prioridade',description:'Visibilidade, faixa, semáforo, atenção e convivência entre os diferentes usuários da via.',tags:['universal','5 min'],ready:true},
-{id:'distracao',icon:'📱',cover:'assets/games/cidade_mirim_realista_ai_v35.webp',title:'Distração no trânsito',description:'Celular, atenção dividida, tempo de reação e escolhas que aumentam o risco.',tags:['adolescentes','adultos'],ready:true},
+{id:'distracao',icon:'📱',cover:'visual-2026/distracao-no-transito.webp',title:'Distração no trânsito',description:'Celular, atenção dividida, tempo de reação e escolhas que aumentam o risco.',tags:['adolescentes','adultos'],ready:true},
 {id:'velocidade',icon:'🛑',cover:'visual-2026/velocidade-e-risco.webp',title:'Velocidade e risco',description:'Como a velocidade interfere na percepção, reação, distância de parada e gravidade das consequências.',tags:['adolescentes','adultos'],ready:true},
-{id:'protecao',icon:'🛡️',cover:'assets/ai/hero_area_escolar.webp',title:'Proteção dos ocupantes',description:'Cinto, transporte de crianças, capacete e atitudes que reduzem consequências em uma ocorrência.',tags:['famílias','adultos'],ready:true},
-{id:'bike',icon:'🚲',cover:'assets/games/trilha.webp',title:'Bicicleta e micromobilidade',description:'Visibilidade, equipamentos, circulação, cruzamentos e convivência segura.',tags:['9+','mobilidade'],ready:true},
+{id:'protecao',icon:'🛡️',cover:'visual-2026/protecao-dos-ocupantes.webp',title:'Proteção dos ocupantes',description:'Cinto, transporte de crianças, capacete e atitudes que reduzem consequências em uma ocorrência.',tags:['famílias','adultos'],ready:true},
+{id:'bike',icon:'🚲',cover:'visual-2026/bicicleta-e-micromobilidade.webp',title:'Bicicleta e micromobilidade',description:'Visibilidade, equipamentos, circulação, cruzamentos e convivência segura.',tags:['9+','mobilidade'],ready:true},
 {id:'moto',icon:'🏍️',cover:'visual-2026/motociclista-seguro.webp',title:'Motociclista seguro',description:'Visibilidade, distância, pontos cegos, cruzamentos, frenagem e comportamento preventivo.',tags:['adultos','motociclistas'],ready:true},
 {id:'familia',icon:'👨‍👩‍👧',cover:'visual-2026/transito-comeca-em-casa.webp',title:'Trânsito começa em casa',description:'Conversas rápidas para pais, responsáveis e filhos sobre exemplos, hábitos e escolhas seguras.',tags:['famílias','5 min'],ready:true},
-{id:'empresa',icon:'🏢',cover:'assets/games/cidade_mirim_realista_ai_v35.webp',title:'Segurança no deslocamento',description:'Conteúdo rápido para colaboradores, equipes externas, motoristas e deslocamentos a trabalho.',tags:['empresas','treinamento'],ready:true}
+{id:'empresa',icon:'🏢',cover:'visual-2026/seguranca-no-deslocamento.webp',title:'Segurança no deslocamento',description:'Conteúdo rápido para colaboradores, equipes externas, motoristas e deslocamentos a trabalho.',tags:['empresas','treinamento'],ready:true}
 ];
 
 
@@ -76,21 +76,21 @@ adultos:{
 };
 
 export const experiences=[
-{id:'mito-verdade',icon:'⚖️',visual:'exp-mito',title:'Mito ou Verdade?',description:'Afirmações rápidas para provocar discussão e corrigir percepções equivocadas.',audiences:['adolescentes','adultos','educadores-empresas'],format:'60–90 s',status:'ativo',ready:true},
-{id:'desafio-60',icon:'⏱️',cover:'assets/ai/hero_area_escolar.webp',title:'Desafio 60 segundos',description:'Uma situação, uma pergunta e uma explicação curta. Ideal para celular, telão e ações rápidas.',audiences:['criancas','adolescentes','adultos'],format:'1 min',status:'ativo',ready:true},
-{id:'prioridade',icon:'🔀',cover:'assets/games/cidade_mirim_realista_ai_v35.webp',title:'Quem tem prioridade?',description:'Situações interativas para raciocinar sobre convivência, atenção, previsibilidade e tomada de decisão.',audiences:['adolescentes','adultos'],format:'interativo',status:'ativo',ready:true},
-{id:'percepcao',icon:'👁️',visual:'exp-percepcao',title:'Teste sua percepção',description:'Mostra elementos de uma cena por poucos segundos e depois testa o que ficou na memória visual.',audiences:['adolescentes','adultos'],format:'visual',status:'ativo',ready:true},
+{id:'mito-verdade',icon:'⚖️',cover:'visual-2026/mito-ou-verdade.webp',title:'Mito ou Verdade?',description:'Afirmações rápidas para provocar discussão e corrigir percepções equivocadas.',audiences:['adolescentes','adultos','educadores-empresas'],format:'60–90 s',status:'ativo',ready:true},
+{id:'desafio-60',icon:'⏱️',cover:'visual-2026/desafio-60-segundos.webp',title:'Desafio 60 segundos',description:'Uma situação, uma pergunta e uma explicação curta. Ideal para celular, telão e ações rápidas.',audiences:['criancas','adolescentes','adultos'],format:'1 min',status:'ativo',ready:true},
+{id:'prioridade',icon:'🔀',cover:'visual-2026/quem-tem-prioridade.webp',title:'Quem tem prioridade?',description:'Situações interativas para raciocinar sobre convivência, atenção, previsibilidade e tomada de decisão.',audiences:['adolescentes','adultos'],format:'interativo',status:'ativo',ready:true},
+{id:'percepcao',icon:'👁️',cover:'visual-2026/teste-sua-percepcao.webp',title:'Teste sua percepção',description:'Mostra elementos de uma cena por poucos segundos e depois testa o que ficou na memória visual.',audiences:['adolescentes','adultos'],format:'visual',status:'ativo',ready:true},
 {id:'historia',icon:'📖',cover:'visual-2026/historias-dicas-do-chico.webp',title:'Histórias do Dicas do Chico',description:'Narrativas curtas com escolhas, feedback e pontuação para crianças.',audiences:['criancas'],format:'história',status:'ativo',ready:true},
-{id:'arraste',icon:'🧩',visual:'exp-arraste',title:'Arraste para o lugar certo',description:'Associe capacete, cinto, faixa e bicicleta às situações correspondentes, com feedback imediato.',audiences:['criancas'],format:'atividade',status:'ativo',ready:true},
-{id:'familia-5',icon:'🏠',cover:'assets/hero-ai.webp',title:'5 minutos em família',description:'Perguntas, conversas guiadas e combinados práticos para responsáveis e crianças.',audiences:['criancas','adultos'],format:'família',status:'ativo',ready:true},
-{id:'empresa-rapido',icon:'💼',visual:'exp-pausa',title:'Pausa de Segurança',description:'Microtreinamento para colaboradores com conteúdo, checagem final e registro local de conclusão.',audiences:['adultos','educadores-empresas'],format:'empresa',status:'ativo',ready:true}
+{id:'arraste',icon:'🧩',cover:'visual-2026/arraste-lugar-certo.webp',title:'Arraste para o lugar certo',description:'Associe capacete, cinto, faixa e bicicleta às situações correspondentes, com feedback imediato.',audiences:['criancas'],format:'atividade',status:'ativo',ready:true},
+{id:'familia-5',icon:'🏠',cover:'visual-2026/cinco-minutos-em-familia.webp',title:'5 minutos em família',description:'Perguntas, conversas guiadas e combinados práticos para responsáveis e crianças.',audiences:['criancas','adultos'],format:'família',status:'ativo',ready:true},
+{id:'empresa-rapido',icon:'💼',cover:'visual-2026/pausa-de-seguranca.webp',title:'Pausa de Segurança',description:'Microtreinamento para colaboradores com conteúdo, checagem final e registro local de conclusão.',audiences:['adultos','educadores-empresas'],format:'empresa',status:'ativo',ready:true}
 ];
 
 export const educatorModules=[
 {id:'agenda',icon:'📅',cover:'visual-2026/agenda-eventos.webp',title:'Agenda e eventos',description:'Planejamento da ação, local, público, equipe, materiais, metas e alarmes.',tags:['planejar'],ready:true},
 {id:'conteudo',icon:'✍️',cover:'visual-2026/centro-editorial.webp',title:'Centro editorial',description:'Banco de perguntas, revisão pedagógica, categorias, dificuldade e homologação.',tags:['conteúdo'],ready:true},
 {id:'avaliacao',icon:'📈',cover:'visual-2026/avaliacao-pedagogica.webp',title:'Avaliação pedagógica',description:'Pré-teste, pós-teste, participação, evolução e indicadores de aprendizagem.',tags:['avaliar'],ready:true},
-{id:'evidencias',icon:'📷',cover:'assets/games/cidade_mirim_realista_ai_v35.webp',title:'Evidências e impacto',description:'Registro de atividades, materiais distribuídos, fotos autorizadas e relatório final.',tags:['comprovar'],ready:true},
+{id:'evidencias',icon:'📷',cover:'visual-2026/evidencias-impacto.webp',title:'Evidências e impacto',description:'Registro de atividades, materiais distribuídos, fotos autorizadas e relatório final.',tags:['comprovar'],ready:true},
 {id:'certificados',icon:'🎓',cover:'visual-2026/certificados-passaporte.webp',title:'Certificados e passaporte',description:'Progresso, participação, certificados digitais e validação.',tags:['reconhecimento'],ready:true},
 {id:'acessibilidade',icon:'♿',cover:'visual-2026/acessibilidade.webp',title:'Acessibilidade',description:'Contraste, tamanho de texto, navegação por teclado e futura leitura assistida.',tags:['inclusão'],ready:true}
 ];
