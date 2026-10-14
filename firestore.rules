@@ -74,127 +74,84 @@ service cloud.firestore {
     allow update,delete: if false;
    }
    match /certificateIssues/{id}{allow read: if permitted(t,'certificates.emit') && school(t,resource.data.schoolId);allow create: if permitted(t,'certificates.emit') && school(t,request.resource.data.schoolId) && request.resource.data.tenantId == t && request.resource.data.issuedBy == request.auth.uid && request.resource.data.issuedAt == request.time && request.resource.data.code == id && get(/databases/$(database)/documents/tenants/$(t)/students/$(request.resource.data.studentId)).data.idTurma == request.resource.data.classId && get(/databases/$(database)/documents/tenants/$(t)/classes/$(request.resource.data.classId)).data.idEscola == request.resource.data.schoolId;allow update,delete: if false;}
-   // Spark: gravações de visitantes autenticados anonimamente ou por conta regular.
-   // Uma gravação por UID e por dia UTC, em cada coleção. Isso não substitui App Check
-   // ou limitação de IP: um agente malicioso pode criar várias contas anônimas.
-   function intakeId(id) {
-    return signedIn() && id == request.auth.uid + '_' + string(int(request.time.toMillis() / 86400000));
+   // Recepção Spark. Uma solicitação e uma inscrição por conta Firebase.
+   // Para nova solicitação, o visitante deve manter sua identidade autenticada.
+   function publicBase(d) {
+    return signedIn() && d.tenantId == t && d.ownerUid == request.auth.uid
+      && d.status == 'Recebida' && d.protocolo is string
+      && d.createdAt == request.time && d.updatedAt == request.time
+      && d.email is string && d.email.size() >= 5 && d.email.size() <= 180
+      && d.telefone is string && d.telefone.size() >= 8 && d.telefone.size() <= 40
+      && d.quantidade is int && d.quantidade >= 1;
    }
-   function validIntakeBase(d) {
-    return signedIn()
-     && d.tenantId == t && d.ownerUid == request.auth.uid
-     && d.status == 'Recebida' && d.protocolo is string
-     && d.protocolo.matches('^(SOL|INS)-[0-9]{8}-[A-F0-9]{24} if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.nome is string && request.resource.data.createdBy == request.auth.uid && request.resource.data.updatedBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time && request.resource.data.publicadoOnline == false;allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','dataInicio','local','status','updatedBy','updatedAt']);allow delete: if false;}
-   match /certificates/{id}{allow read: if permitted(t,'certificates.emit') && allSchools(t);allow write: if false;}
-   match /auditLogs/{id}{allow read: if manage(t);allow write: if false;}
-   match /pushDevices/{id}{allow read,write: if false;}
-   match /{document=**}{allow read,write: if false;}
-  }
-  match /{document=**}{allow read,write: if false;}
- }
-}
-
-
-)
-     && d.createdAt == request.time && d.updatedAt == request.time
-     && d.email is string && d.email.size() > 3 && d.email.size() <= 180
-     && d.telefone is string && d.telefone.size() >= 8 && d.telefone.size() <= 40
-     && d.quantidade is int && d.quantidade >= 1;
-   }
-   function validPublicRequest(d) {
-    return validIntakeBase(d)
-     && d.keys().hasOnly(['tenantId','ownerUid','protocolo','status','origemTipo','origemNome','solicitanteNome','telefone','email','atividade','dataPreferida','horaPreferida','flexibilidade','quantidade','publico','local','necessidades','createdAt','updatedAt'])
-     && d.protocolo.matches('^SOL-[0-9]{8}-[A-F0-9]{24} if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.nome is string && request.resource.data.createdBy == request.auth.uid && request.resource.data.updatedBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time && request.resource.data.publicadoOnline == false;allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','dataInicio','local','status','updatedBy','updatedAt']);allow delete: if false;}
-   match /certificates/{id}{allow read: if permitted(t,'certificates.emit') && allSchools(t);allow write: if false;}
-   match /auditLogs/{id}{allow read: if manage(t);allow write: if false;}
-   match /pushDevices/{id}{allow read,write: if false;}
-   match /{document=**}{allow read,write: if false;}
-  }
-  match /{document=**}{allow read,write: if false;}
- }
-}
-
-
-)
-     && d.origemTipo is string && d.origemTipo.size() <= 80
-     && d.origemNome is string && d.origemNome.size()>0 && d.origemNome.size()<=180
-     && d.solicitanteNome is string && d.solicitanteNome.size()>0 && d.solicitanteNome.size()<=180
-     && d.atividade is string && d.atividade.size()>0 && d.atividade.size()<=100
-     && d.dataPreferida is string && d.dataPreferida.size()<=10
-     && d.horaPreferida is string && d.horaPreferida.size()<=5
-     && d.flexibilidade is string && d.flexibilidade.size()<=100
-     && d.quantidade<=9999 && d.publico is string && d.publico.size()<=180
-     && d.local is string && d.local.size()<=250
-     && d.necessidades is string && d.necessidades.size()<=1500;
-   }
-   function validPublicRegistration(d) {
-    return validIntakeBase(d)
-     && d.keys().hasOnly(['tenantId','ownerUid','protocolo','status','idEvento','tipoInscricao','nome','responsavel','telefone','email','quantidade','observacao','createdAt','updatedAt'])
-     && d.protocolo.matches('^INS-[0-9]{8}-[A-F0-9]{24} if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.nome is string && request.resource.data.createdBy == request.auth.uid && request.resource.data.updatedBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time && request.resource.data.publicadoOnline == false;allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','dataInicio','local','status','updatedBy','updatedAt']);allow delete: if false;}
-   match /certificates/{id}{allow read: if permitted(t,'certificates.emit') && allSchools(t);allow write: if false;}
-   match /auditLogs/{id}{allow read: if manage(t);allow write: if false;}
-   match /pushDevices/{id}{allow read,write: if false;}
-   match /{document=**}{allow read,write: if false;}
-  }
-  match /{document=**}{allow read,write: if false;}
- }
-}
-
-
-)
-     && d.idEvento is string && d.idEvento.size()>0 && d.idEvento.size()<=120
-     && exists(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(d.idEvento))
-     && get(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(d.idEvento)).data.publicadoOnline == true
-     && get(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(d.idEvento)).data.status == 'Confirmado'
-     && get(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(d.idEvento)).data.inscricoesAbertas == true
-     && d.tipoInscricao is string && d.tipoInscricao.size()<=60
-     && d.nome is string && d.nome.size()>0 && d.nome.size()<=180
-     && d.responsavel is string && d.responsavel.size()<=180
-     && d.quantidade<=500 && d.observacao is string && d.observacao.size()<=1000;
-   }
-   match /requests/{id}{
+   match /requests/{id} {
     allow read: if permitted(t,'events.read') && allSchools(t);
-    allow create: if intakeId(id) && validPublicRequest(request.resource.data);
-    allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt']) && request.resource.data.status is string && request.resource.data.status.size() <= 80 && request.resource.data.updatedAt == request.time;
+    allow create: if id == request.auth.uid && publicBase(request.resource.data)
+      && request.resource.data.protocolo.matches('^SOL-[0-9]{8}-[A-F0-9]{24}$')
+      && request.resource.data.keys().hasOnly(['tenantId','ownerUid','protocolo','status','origemTipo','origemNome','solicitanteNome','telefone','email','atividade','dataPreferida','horaPreferida','flexibilidade','quantidade','publico','local','necessidades','createdAt','updatedAt'])
+      && request.resource.data.origemTipo is string && request.resource.data.origemTipo.size() <= 80
+      && request.resource.data.origemNome is string && request.resource.data.origemNome.size() > 0 && request.resource.data.origemNome.size() <= 180
+      && request.resource.data.solicitanteNome is string && request.resource.data.solicitanteNome.size() > 0 && request.resource.data.solicitanteNome.size() <= 180
+      && request.resource.data.atividade is string && request.resource.data.atividade.size() > 0 && request.resource.data.atividade.size() <= 100
+      && request.resource.data.dataPreferida is string && request.resource.data.dataPreferida.size() <= 10
+      && request.resource.data.horaPreferida is string && request.resource.data.horaPreferida.size() <= 5
+      && request.resource.data.flexibilidade is string && request.resource.data.flexibilidade.size() <= 100
+      && request.resource.data.quantidade <= 9999
+      && request.resource.data.publico is string && request.resource.data.publico.size() <= 180
+      && request.resource.data.local is string && request.resource.data.local.size() <= 250
+      && request.resource.data.necessidades is string && request.resource.data.necessidades.size() <= 1500;
+    allow update: if permitted(t,'events.manage') && allSchools(t)
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+      && request.resource.data.status is string && request.resource.data.status.size() <= 80
+      && request.resource.data.updatedAt == request.time;
     allow delete: if false;
    }
-   match /registrations/{id}{
+   match /registrations/{id} {
     allow read: if permitted(t,'events.read') && allSchools(t);
-    allow create: if intakeId(id) && validPublicRegistration(request.resource.data);
-    allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt']) && request.resource.data.status is string && request.resource.data.status.size() <= 80 && request.resource.data.updatedAt == request.time;
+    allow create: if id == request.auth.uid && publicBase(request.resource.data)
+      && request.resource.data.protocolo.matches('^INS-[0-9]{8}-[A-F0-9]{24}$')
+      && request.resource.data.keys().hasOnly(['tenantId','ownerUid','protocolo','status','idEvento','tipoInscricao','nome','responsavel','telefone','email','quantidade','observacao','createdAt','updatedAt'])
+      && request.resource.data.idEvento is string && request.resource.data.idEvento.size() > 0 && request.resource.data.idEvento.size() <= 120
+      && exists(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(request.resource.data.idEvento))
+      && get(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(request.resource.data.idEvento)).data.publicadoOnline == true
+      && get(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(request.resource.data.idEvento)).data.status == 'Confirmado'
+      && get(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(request.resource.data.idEvento)).data.inscricoesAbertas == true
+      && request.resource.data.tipoInscricao is string && request.resource.data.tipoInscricao.size() <= 60
+      && request.resource.data.nome is string && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 180
+      && request.resource.data.responsavel is string && request.resource.data.responsavel.size() <= 180
+      && request.resource.data.quantidade <= 500 && request.resource.data.observacao is string && request.resource.data.observacao.size() <= 1000;
+    allow update: if permitted(t,'events.manage') && allSchools(t)
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+      && request.resource.data.status is string && request.resource.data.status.size() <= 80
+      && request.resource.data.updatedAt == request.time;
     allow delete: if false;
    }
-   match /publicStatuses/{id}{
-    allow get: if (signedIn() && resource.data.ownerUid == request.auth.uid) || (permitted(t,'events.read') && allSchools(t));
+   match /publicStatuses/{id} {
+    allow get: if signedIn() && resource.data.ownerUid == request.auth.uid
+      || (permitted(t,'events.read') && allSchools(t));
     allow list: if permitted(t,'events.read') && allSchools(t);
     allow create: if signedIn()
-     && request.resource.data.keys().hasOnly(['tenantId','ownerUid','protocolo','status','tipo','createdAt','updatedAt'])
-     && id == request.resource.data.protocolo && request.resource.data.tenantId == t
-     && request.resource.data.ownerUid == request.auth.uid
-     && request.resource.data.protocolo.matches('^(SOL|INS)-[0-9]{8}-[A-F0-9]{24} if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.nome is string && request.resource.data.createdBy == request.auth.uid && request.resource.data.updatedBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time && request.resource.data.publicadoOnline == false;allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','dataInicio','local','status','updatedBy','updatedAt']);allow delete: if false;}
-   match /certificates/{id}{allow read: if permitted(t,'certificates.emit') && allSchools(t);allow write: if false;}
-   match /auditLogs/{id}{allow read: if manage(t);allow write: if false;}
-   match /pushDevices/{id}{allow read,write: if false;}
-   match /{document=**}{allow read,write: if false;}
-  }
-  match /{document=**}{allow read,write: if false;}
- }
-}
-
-
-)
-     && request.resource.data.status == 'Recebida'
-     && request.resource.data.tipo in ['Solicitação','Inscrição']
-     && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time
-     && (request.resource.data.tipo == 'Solicitação'
-       ? getAfter(/databases/$(database)/documents/tenants/$(t)/requests/$(request.auth.uid + '_' + string(int(request.time.toMillis() / 86400000)))).data.protocolo == id
-       : getAfter(/databases/$(database)/documents/tenants/$(t)/registrations/$(request.auth.uid + '_' + string(int(request.time.toMillis() / 86400000)))).data.protocolo == id);
-    allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt']) && request.resource.data.status is string && request.resource.data.status.size()<=80 && request.resource.data.updatedAt == request.time;
+      && request.resource.data.keys().hasOnly(['tenantId','ownerUid','protocolo','status','tipo','createdAt','updatedAt'])
+      && id == request.resource.data.protocolo && request.resource.data.tenantId == t
+      && request.resource.data.ownerUid == request.auth.uid
+      && request.resource.data.protocolo.matches('^(SOL|INS)-[0-9]{8}-[A-F0-9]{24}$')
+      && request.resource.data.status == 'Recebida' && request.resource.data.tipo in ['Solicitação','Inscrição']
+      && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time
+      && (request.resource.data.tipo == 'Solicitação'
+        ? getAfter(/databases/$(database)/documents/tenants/$(t)/requests/$(request.auth.uid)).data.protocolo == id
+        : getAfter(/databases/$(database)/documents/tenants/$(t)/registrations/$(request.auth.uid)).data.protocolo == id);
+    allow update: if permitted(t,'events.manage') && allSchools(t)
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+      && request.resource.data.status is string && request.resource.data.status.size() <= 80
+      && request.resource.data.updatedAt == request.time;
     allow delete: if false;
    }
    match /publicEvents/{id}{
     allow get,list: if (permitted(t,'events.read') && allSchools(t)) || (signedIn() && resource.data.publicadoOnline == true);
-    allow create: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.nome is string && request.resource.data.createdBy == request.auth.uid && request.resource.data.updatedBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time && request.resource.data.publicadoOnline == false;allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','dataInicio','local','status','updatedBy','updatedAt']);allow delete: if false;}
+    allow create: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.nome is string && request.resource.data.createdBy == request.auth.uid && request.resource.data.updatedBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time && request.resource.data.publicadoOnline == false;
+    allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','dataInicio','local','status','updatedBy','updatedAt']);
+    allow delete: if false;
+   }
    match /certificates/{id}{allow read: if permitted(t,'certificates.emit') && allSchools(t);allow write: if false;}
    match /auditLogs/{id}{allow read: if manage(t);allow write: if false;}
    match /pushDevices/{id}{allow read,write: if false;}
