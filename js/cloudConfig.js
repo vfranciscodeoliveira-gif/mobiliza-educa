@@ -2,7 +2,7 @@
 // Os identificadores abaixo pertencem ao App Web do Firebase e não são segredos privados.
 export const cloudConfig=Object.freeze({
   enabled:true,
-  functionsBaseUrl:'',
+  functionsBaseUrl:'https://southamerica-east1-mobiliza-educa.cloudfunctions.net',
   publicTenantSlug:'mobiliza-educa',
   firebaseWebConfig:Object.freeze({
     apiKey:'AIzaSyA-ue1Y-1d_U35_iAr4lHm5ZskVQTfyK2U',
