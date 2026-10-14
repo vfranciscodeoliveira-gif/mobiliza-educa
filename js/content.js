@@ -1,19 +1,19 @@
 export const audiences=[
-{id:'criancas',icon:'🧒',visual:'aud-criancas',title:'Crianças',description:'Aprender brincando com jogos, histórias, desafios visuais e missões adequadas à idade.',tags:['5–12 anos','gamificação'],ready:true},
-{id:'adolescentes',icon:'🧑',visual:'aud-adolescentes',title:'Adolescentes',description:'Situações do cotidiano, escolhas, percepção de risco, bicicleta, celular, carona e convivência segura.',tags:['13–17 anos','vida real'],ready:true},
-{id:'adultos',icon:'🚘',visual:'aud-adultos',title:'Adultos',description:'Conteúdos objetivos para condutores, motociclistas, ciclistas, pedestres e famílias.',tags:['18+','prevenção'],ready:true},
-{id:'educadores-empresas',icon:'👩‍🏫',visual:'aud-educadores-empresas',title:'Educadores e empresas',description:'Trilhas prontas para escola, ações públicas, SIPAT, equipes, frotas e formação continuada.',tags:['escola','empresa'],ready:true}
+{id:'criancas',icon:'🧒',cover:'visual-2026/publico-criancas.webp',visual:'aud-criancas',title:'Crianças',description:'Aprender brincando com jogos, histórias, desafios visuais e missões adequadas à idade.',tags:['5–12 anos','gamificação'],ready:true},
+{id:'adolescentes',icon:'🧑',cover:'visual-2026/publico-adolescentes.webp',visual:'aud-adolescentes',title:'Adolescentes',description:'Situações do cotidiano, escolhas, percepção de risco, bicicleta, celular, carona e convivência segura.',tags:['13–17 anos','vida real'],ready:true},
+{id:'adultos',icon:'🚘',cover:'visual-2026/publico-adultos.webp',visual:'aud-adultos',title:'Adultos',description:'Conteúdos objetivos para condutores, motociclistas, ciclistas, pedestres e famílias.',tags:['18+','prevenção'],ready:true},
+{id:'educadores-empresas',icon:'👩‍🏫',cover:'visual-2026/publico-educadores-empresas.webp',visual:'aud-educadores-empresas',title:'Educadores e empresas',description:'Trilhas prontas para escola, ações públicas, SIPAT, equipes, frotas e formação continuada.',tags:['escola','empresa'],ready:true}
 ];
 
 export const games=[
-{id:'quiz',icon:'⚡',cover:'assets/ai/hero_area_escolar.webp',title:'Quiz Relâmpago',description:'Escolha público, dificuldade, quantidade e tempo. Perguntas variadas, imagens, combos, sons e explicações.',tags:['níveis','cronômetro','offline'],ready:true},
+{id:'quiz',icon:'⚡',cover:'visual-2026/quiz-relampago.webp',title:'Quiz Relâmpago',description:'Escolha público, dificuldade, quantidade e tempo. Perguntas variadas, imagens, combos, sons e explicações.',tags:['níveis','cronômetro','offline'],ready:true},
 {id:'milhao',icon:'💡',visual:'game-milhao',title:'Show do Milhão do Trânsito',description:'Perguntas, cronômetro, pulos, cartas e Plateia Conectada por QR Code, com fallback simulado.',tags:['plateia ao vivo','QR Code','telão'],ready:true},
 {id:'trilha',icon:'🎲',visual:'game-trilha',title:'Trilha do Trânsito',description:'Tabuleiro, dado animado, peões, casas especiais e desafios educativos.',tags:['jogar agora','multijogador'],ready:true},
 {id:'memoria',icon:'🧠',visual:'game-memoria',title:'Jogo da Memória',description:'Cartas animadas, pares de sinais e situações seguras, tempo e pontuação.',tags:['jogar agora','atenção'],ready:true},
 {id:'cruzadas',icon:'✏️',visual:'game-cruzadas',title:'Palavras Cruzadas do Trânsito',description:'Pistas educativas, validação das respostas, tentativas e pontuação.',tags:['jogar agora','vocabulário'],ready:true},
-{id:'eagora',icon:'🎬',cover:'assets/ai/hero_area_escolar.webp',title:'E Agora? — Decisões no Trânsito',description:'Cinco situações em movimento: observe, antecipe o risco, escolha a atitude e veja a consequência com explicação educativa.',tags:['5 situações','simulação','percepção de risco'],ready:true},
-{id:'plateia',icon:'📱',cover:'assets/games/plateia_conectada.svg',title:'Plateia Conectada',description:'QR Code, participantes pelo próprio celular, uma resposta por aparelho, votação e resultado sincronizados no telão.',tags:['QR Code','multijogador','telão'],ready:true},
-{id:'atelier',icon:'🎨',cover:'assets/brand-cover.webp',title:'Ateliê do Trânsito',description:'Desenho livre e colagem pelo celular com QR Code, galeria moderada, avaliação pedagógica e destaque no telão.',tags:['desenho','colagem','QR Code','telão'],ready:true}
+{id:'eagora',icon:'🎬',cover:'visual-2026/e-agora-decisoes-no-transito.webp',title:'E Agora? — Decisões no Trânsito',description:'Cinco situações em movimento: observe, antecipe o risco, escolha a atitude e veja a consequência com explicação educativa.',tags:['5 situações','simulação','percepção de risco'],ready:true},
+{id:'plateia',icon:'📱',cover:'visual-2026/plateia-conectada.webp',title:'Plateia Conectada',description:'QR Code, participantes pelo próprio celular, uma resposta por aparelho, votação e resultado sincronizados no telão.',tags:['QR Code','multijogador','telão'],ready:true},
+{id:'atelier',icon:'🎨',cover:'visual-2026/atelie-do-transito.webp',title:'Ateliê do Trânsito',description:'Desenho livre e colagem pelo celular com QR Code, galeria moderada, avaliação pedagógica e destaque no telão.',tags:['desenho','colagem','QR Code','telão'],ready:true}
 ];
 
 export const learning=[
