@@ -9,3 +9,8 @@
 .hero-brand{overflow:hidden;border-radius:20px}
 .hero-brand img{width:100%;height:100%;aspect-ratio:16/9;object-fit:cover;object-position:center;display:block;image-rendering:auto}
 @media(max-width:700px){.module-cover{aspect-ratio:4/3!important}.module-card.illustrated{min-height:0}.hero-brand img{aspect-ratio:16/9}}
+
+/* Capas premium: texto já fica abaixo da imagem no corpo do card; preservar sprite como alternativa. */
+.module-cover.hd-cover.loaded .module-cover-title{display:none!important}
+.module-cover.hd-cover img{object-position:center;image-rendering:auto}
+.module-cover.hd-cover.cover-error .module-cover-title{display:block!important}
