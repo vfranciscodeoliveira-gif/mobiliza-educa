@@ -20,7 +20,7 @@ import { canAccessModule,installSecurityGuards } from './core/accessControl.js?v
 import { installTenantWorkspaceBridge,activeTenant } from './core/tenantRegistry.js?v=2';
 import { adminModuleEntitlement } from './core/saasContext.js?v=2';
 import { renderHomeNotifications } from './modules/notifications.js?v=12';
-import { renderPublicService } from './modules/publicService.js?v=5';
+import { renderPublicService } from './modules/publicService.js?v=6';
 import { syncCloudInbox,isCloudEmulatorMode } from './cloudGateway.js?v=6';
 import { openPublicCheckin } from './modules/checkinPublic.js?v=3';
 import { openCertificateValidation } from './modules/certValidation.js?v=3';
