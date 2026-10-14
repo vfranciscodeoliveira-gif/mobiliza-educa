@@ -1,0 +1,24 @@
+name: Conta do solicitante
+on:
+  pull_request:
+    paths:
+      - 'js/modules/publicAccount.js'
+      - 'js/modules/publicService.js'
+      - 'tests/applicantAccount.test.cjs'
+      - '.github/workflows/applicant-account.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Sintaxe JavaScript
+        run: |
+          node --check js/modules/publicAccount.js
+          node --check js/modules/publicService.js
+      - name: Testes de contrato
+        run: node --test tests/applicantAccount.test.cjs
