@@ -1,4 +1,4 @@
-const CACHE='mobiliza-educa-v0.64.0-spark';
+const CACHE='mobiliza-educa-v0.64.1';
 const ASSETS=[
  './js/modules/agendaOverview.js?v=1','./js/core/agendaSummary.js?v=1',
  './js/core/schoolScanParser.js?v=1','./js/core/schoolPdfOcr.js?v=1',
