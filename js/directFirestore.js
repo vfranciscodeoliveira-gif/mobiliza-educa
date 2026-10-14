@@ -117,10 +117,10 @@ export async function submitInscricaoDireta(data){
 }
 export async function consultarProtocoloDireto(protocolo){
  return run(async()=>{
-  const p=trim(protocolo,96).toUpperCase();if(!p)throw new Error('Informe o protocolo.');await intakeUser();
+  const p=trim(protocolo,96).toUpperCase();if(!p)throw new Error('Informe o protocolo.');const viewer=await intakeUser();
   const ctx=await db(),{fs}=ctx,snap=await fs.getDoc(fs.doc(ctx.db,'tenants',tenantId(),'publicStatuses',p));if(!snap.exists())throw new Error('Protocolo não encontrado.');
   const d=snap.data(),confirmed=['Agendada','Confirmada','Concluída','Presente'].includes(d.status);
-  return{ok:true,protocolo:p,status:d.status||'Recebida',tipoLabel:d.tipo||'Protocolo',mensagem:confirmed?'Há confirmação registrada pelo gestor.':'O registro foi recebido, mas ainda não representa atendimento ou vaga garantida.'};
+  return{ok:true,protocolo:p,status:d.status||'Recebida',tipoLabel:d.tipo||'Protocolo',canReply:d.ownerUid===viewer.uid,viewerIsAnonymous:viewer.isAnonymous===true,mensagem:confirmed?'Há confirmação registrada pelo gestor.':'O registro foi recebido, mas ainda não representa atendimento ou vaga garantida.'};
  });
 }
 
@@ -142,7 +142,7 @@ export async function responderProtocoloDireto(protocolo,texto){
   if(!p||msg.length<1||msg.length>2000)throw new Error('Escreva uma mensagem de até 2.000 caracteres.');
   const user=await intakeUser(),ctx=await db(),{fs}=ctx;
   const parent=await fs.getDoc(fs.doc(ctx.db,'tenants',tenantId(),'publicStatuses',p));
-  if(!parent.exists()||parent.data().ownerUid!==user.uid)throw new Error('Você não possui acesso a esse protocolo.');
+  if(!parent.exists()||parent.data().ownerUid!==user.uid)throw new Error('Esta sessão não é a mesma que enviou a solicitação. Se você entrou na Gestão Online com uma conta administrativa, a identidade anônima original foi substituída. Para responder como solicitante, use a sessão original; gestores devem responder na Central de Protocolos.');
   await fs.addDoc(fs.collection(ctx.db,'tenants',tenantId(),'publicStatuses',p,'messages'),{tenantId:tenantId(),protocolo:p,authorUid:user.uid,authorRole:'solicitante',text:msg,createdAt:fs.serverTimestamp()});
   return{ok:true};
  });
