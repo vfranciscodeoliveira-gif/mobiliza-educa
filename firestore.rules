@@ -87,6 +87,8 @@ service cloud.firestore {
    match /requests/{id} {
     allow read: if permitted(t,'events.read') && allSchools(t);
     allow create: if id == request.auth.uid && publicBase(request.resource.data)
+      && getAfter(/databases/$(database)/documents/tenants/$(t)/publicStatuses/$(request.resource.data.protocolo)).data.ownerUid == request.auth.uid
+      && getAfter(/databases/$(database)/documents/tenants/$(t)/publicStatuses/$(request.resource.data.protocolo)).data.protocolo == request.resource.data.protocolo
       && request.resource.data.protocolo.matches('^SOL-[0-9]{8}-[A-F0-9]{24}$')
       && request.resource.data.keys().hasOnly(['tenantId','ownerUid','protocolo','status','origemTipo','origemNome','solicitanteNome','telefone','email','atividade','dataPreferida','horaPreferida','flexibilidade','quantidade','publico','local','necessidades','createdAt','updatedAt'])
       && request.resource.data.origemTipo is string && request.resource.data.origemTipo.size() <= 80
@@ -109,6 +111,8 @@ service cloud.firestore {
    match /registrations/{id} {
     allow read: if permitted(t,'events.read') && allSchools(t);
     allow create: if id == request.auth.uid && publicBase(request.resource.data)
+      && getAfter(/databases/$(database)/documents/tenants/$(t)/publicStatuses/$(request.resource.data.protocolo)).data.ownerUid == request.auth.uid
+      && getAfter(/databases/$(database)/documents/tenants/$(t)/publicStatuses/$(request.resource.data.protocolo)).data.protocolo == request.resource.data.protocolo
       && request.resource.data.protocolo.matches('^INS-[0-9]{8}-[A-F0-9]{24}$')
       && request.resource.data.keys().hasOnly(['tenantId','ownerUid','protocolo','status','idEvento','tipoInscricao','nome','responsavel','telefone','email','quantidade','observacao','createdAt','updatedAt'])
       && request.resource.data.idEvento is string && request.resource.data.idEvento.size() > 0 && request.resource.data.idEvento.size() <= 120
