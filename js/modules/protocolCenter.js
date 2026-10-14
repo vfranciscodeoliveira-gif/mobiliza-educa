@@ -35,7 +35,16 @@ function css(){if(byId('central-protocolos-style'))return;const el=document.crea
 .cp-row strong,.cp-row small{display:block}.cp-row strong{font-size:.9rem}.cp-row small{color:#597381;margin-top:3px;font-size:.75rem;overflow-wrap:anywhere}.cp-chip{border-radius:999px;background:#d9eef7;color:#075878;font-weight:800;padding:6px 9px;font-size:.73rem;display:inline-block}.cp-chip.pending{background:#fff0ca;color:#795100}.cp-chip.done{background:#dff5e8;color:#17673a}
 .cp-note{font-size:.81rem;color:#577281;padding:3px 22px 16px}.cp-empty{padding:25px;text-align:center;color:#516a79}.cp-error{color:#8c2626;background:#fff1f1;padding:12px;border-radius:9px;margin:12px 20px}
 .cp-details{border-top:1px solid #d7e5ed;padding:19px 22px;background:#f9fcff}.cp-details h3{margin:0 0 12px;color:#123f5a}.cp-details-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.cp-detail{padding:9px 12px;border:1px solid #e1e9ef;border-radius:9px;background:#fff;min-width:0}.cp-detail b{display:block;font-size:.71rem;color:#547184;margin-bottom:3px}.cp-detail span{overflow-wrap:anywhere;font-size:.85rem}.cp-detail.wide{grid-column:1/-1}.cp-status-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:15px}
-.cp-status-bar select{border:1px solid #c7d9e5;border-radius:9px;padding:10px}.cp-bell{font-weight:800;white-space:nowrap}.cp-bell strong{display:inline-grid;place-items:center;background:#fff0cc;color:#6a4400;border-radius:40px;min-width:23px;margin-left:6px}
+.cp-status-bar select{border:1px solid #c7d9e5;border-radius:9px;padding:10px}.cp-bell{font-weight:800;white-space:nowrap}.cp-conversation{margin-top:20px;padding:20px;border:1px solid #cbdce7;background:#f3f9fc;border-radius:14px}
+.cp-conversation h3{margin:0 0 12px;color:#0c4469;font-size:1.12rem}
+.cp-conversation form{margin-top:15px;padding:16px;border:1px solid #cee2ec;border-radius:12px;background:white}
+.cp-conversation label{display:block;font-weight:800;color:#25475d;font-size:.92rem}
+.cp-conversation textarea{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:135px!important;margin:10px 0!important;padding:13px!important;resize:vertical!important;font:inherit!important;font-size:1rem!important;line-height:1.5!important;border:1px solid #aac8d7!important;border-radius:11px!important;background:#fff!important;color:#163f58!important;box-sizing:border-box!important}
+.cp-conversation form button{margin-top:8px;min-height:42px}
+.cp-message{padding:12px 14px;margin:10px 0;border:1px solid #d4e4ee;border-left:4px solid #197eaf;border-radius:11px;background:#fff}
+.cp-message p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;margin:8px 0 0}
+.cp-message small{font-size:.78rem;color:#637b88}
+.cp-bell strong{display:inline-grid;place-items:center;background:#fff0cc;color:#6a4400;border-radius:40px;min-width:23px;margin-left:6px}
 @media(max-width:760px){.cp-stats{grid-template-columns:repeat(2,1fr)}.cp-row{grid-template-columns:1fr auto}.cp-row>span:nth-child(2){display:none}.cp-details-grid{grid-template-columns:1fr}.cp-toolbar input{width:100%}}
 `;document.head.appendChild(el);}
 function rows(){const seen=readNotices();const q=state.search.toLocaleLowerCase('pt-BR').trim();return state.records.filter(r=>(state.filter==='all'||state.filter==='unread'&&!seen.has(itemKey(r))||state.filter==='pending'&&pending(r.status)||state.filter==='requests'&&r.kind==='Solicitação'||state.filter==='registrations'&&r.kind==='Inscrição'||state.filter==='completed'&&!pending(r.status))&&(!q||fields.some(f=>String(r[f]||'').toLocaleLowerCase('pt-BR').includes(q))));}
@@ -63,7 +72,8 @@ async function mountConversation(root,r,editAllowed){
     const a=await loadAccess(tenant);
     if(!canRead(a)||!permissionAllowed(a,'events.manage'))throw Error('Sem permissão de responder.');
     const {db,fs}=await accessDb(),collection=fs.collection(db,'tenants',tenant,'publicStatuses',r.protocolo,'messages');
-    await fs.addDoc(collection,{tenantId:tenant,protocolo:r.protocolo,authorUid:a.uid,authorRole:'gestor',text,createdAt:fs.serverTimestamp()});
+    const saved=await fs.addDoc(collection,{tenantId:tenant,protocolo:r.protocolo,authorUid:a.uid,authorRole:'gestor',text,createdAt:fs.serverTimestamp()});
+    await fs.getDocFromServer(saved);
     await show();
    }catch(error){alert('Não foi possível enviar a resposta: '+error.message);btn.disabled=false;}
   };
