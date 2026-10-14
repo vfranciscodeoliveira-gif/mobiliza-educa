@@ -1,0 +1,55 @@
+name: Implantar Cloud Functions - Mobiliza Educa
+run-name: "Cloud Functions - ${{ inputs.confirm_project }}"
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_project:
+        description: 'Digite mobiliza-educa para confirmar o projeto Firebase de destino'
+        type: string
+        required: true
+      deploy_functions:
+        description: 'Implantar as Cloud Functions do backend público'
+        type: boolean
+        required: true
+        default: false
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: mobiliza-firebase-functions-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: ${{ inputs.confirm_project == 'mobiliza-educa' && inputs.deploy_functions }}
+    runs-on: ubuntu-latest
+    environment: firebase-production
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+      - name: Node.js 22 no ambiente GitHub
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: firebase/functions/package-lock.json
+      - name: Conferir sintaxe do backend
+        run: npm run check
+        working-directory: firebase/functions
+      - name: Instalar dependências das funções
+        run: npm ci
+        working-directory: firebase/functions
+      - name: Autenticar pelo GitHub OIDC no Google Cloud (sem chave privada)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/39731938550/locations/global/workloadIdentityPools/mobiliza-github/providers/github-actions'
+          service_account: 'mobiliza-educa-github-deploy@mobiliza-educa.iam.gserviceaccount.com'
+          create_credentials_file: true
+          export_environment_variables: true
+      - name: Confirmar identidade do projeto
+        run: |
+          test -n "$GOOGLE_APPLICATION_CREDENTIALS"
+          echo "Credenciais temporárias OIDC configuradas."
+      - name: Instalar Firebase CLI no runner
+        run: npm install --global firebase-tools
+      - name: Implantar Cloud Functions na região configurada pelo código
+        run: firebase deploy --project mobiliza-educa --only functions --non-interactive

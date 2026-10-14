@@ -17,12 +17,15 @@ function css(){
  `;document.head.appendChild(s);
 }
 const directMode=()=>!isCloudEmulatorMode()&&directFirestoreConfigured();
-const publicConfigured=()=>isCloudEmulatorMode()?cloudConfigured():(directMode()||cloudConfigured());
-const sendRequest=data=>directMode()?submitSolicitacaoDireta(data):submitSolicitacao(data);
-const sendRegistration=data=>directMode()?submitInscricaoDireta(data):submitInscricao(data);
-const lookupProtocol=(p,c)=>directMode()?consultarProtocoloDireto(p,c):consultarProtocolo(p,c);
-const loadEvents=()=>directMode()?listPublicEventsDireto():listPublicEvents();
-function availability(){if(isCloudEmulatorMode())return '<div class="ps-alert"><strong>Emulador local ativo.</strong> Solicitações e inscrições serão gravadas somente no ambiente Firebase local desta máquina.</div>';return directMode()?'<div class="ps-alert"><strong>Envio online ativo pelo Firestore.</strong> Solicitações e inscrições são registradas na nuvem e ficam disponíveis para análise do gestor autenticado.</div>':(cloudConfigured()?'<div class="ps-alert"><strong>Envio online ativo.</strong> Solicitações e inscrições são encaminhadas à área do gestor para análise.</div>':'<div class="ps-alert ps-offline"><strong>Integração online indisponível.</strong> O envio está temporariamente bloqueado.</div>');}
+const publicConfigured=()=>cloudConfigured();
+const sendRequest=data=>submitSolicitacao(data);
+const sendRegistration=data=>submitInscricao(data);
+const lookupProtocol=(p,c)=>consultarProtocolo(p,c);
+const loadEvents=()=>listPublicEvents();
+function availability(){
+ if(isCloudEmulatorMode())return '<div class="ps-alert"><strong>Ambiente de testes.</strong> As solicitações serão processadas somente no emulador local.</div>';
+ return cloudConfigured()?'<div class="ps-alert"><strong>Envio protegido pelo servidor.</strong> O protocolo só será apresentado depois da confirmação de gravação. Se o serviço ainda não estiver publicado, você receberá uma mensagem de indisponibilidade.</div>':'<div class="ps-alert ps-offline"><strong>Envio indisponível.</strong> O servidor de recebimento não está configurado. Não envie dados até a publicação do serviço.</div>';
+}
 
 export async function renderPublicService(host){
  if(!host)return;css();let tab='solicitar',events=[];

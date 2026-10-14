@@ -1,0 +1,26 @@
+name: Atendimento publico - regressao
+on:
+  pull_request:
+    paths:
+      - 'js/**'
+      - 'index.html'
+      - 'firestore.rules'
+      - 'service-worker.js'
+      - 'firebase/functions/**'
+      - 'tests/publicServiceRouting.test.cjs'
+      - '.github/workflows/public-service-check.yml'
+  workflow_dispatch:
+jobs:
+  static-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar contrato de atendimento
+        run: node --test tests/publicServiceRouting.test.cjs
+      - name: Conferir sintaxe do backend
+        run: |
+          cd firebase/functions
+          npm run check
