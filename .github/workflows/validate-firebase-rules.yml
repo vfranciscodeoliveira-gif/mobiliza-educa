@@ -6,6 +6,7 @@ on:
       - 'storage.rules'
       - 'tests/lorenaFirestore.emulator.test.cjs'
       - '.github/workflows/validate-firebase-rules.yml'
+      - '.github/workflows/deploy-security-rules-manual.yml'
   workflow_dispatch:
 permissions:
   contents: read
