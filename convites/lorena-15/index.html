@@ -23,7 +23,7 @@ body.effects-off .sky{display:none}
 </style></head><body>
 <div class="sky" id="sky" aria-hidden="true"></div>
 <button class="float-music" id="music" aria-pressed="false">♫ Tocar música</button>
-<main class="wrap"><header class="hero" id="inicio">
+<main class="wrap" data-estilo="encantado" data-fundo="estrelas" data-fonte="caligrafia"><header class="hero" id="inicio">
 <div class="portrait" id="portrait" role="img" aria-label="Capa do convite de Lorena usando vestido lilás"></div>
 <div class="placeholder" aria-hidden="true"><svg viewBox="0 0 280 420" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="dress" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e9bee9"/><stop offset=".5" stop-color="#a763bf"/><stop offset="1" stop-color="#5c327e"/></linearGradient></defs><path d="M105 109Q140 130 175 109L186 186Q245 225 280 406H0Q36 222 94 186Z" fill="url(#dress)" stroke="#e7c1ff" stroke-width="3"/><ellipse cx="140" cy="71" rx="41" ry="53" fill="#dca79b"/><path d="M98 76Q78 -2 139 6Q209 -1 185 88L174 110Q183 50 166 41Q118 23 100 83Z" fill="#22162b"/><path d="M106 10L121 -6L139 6L155 -8L174 11L154 21L122 21Z" fill="#e7c77c"/><path d="M96 178Q141 210 184 176" fill="none" stroke="#f3d3e7" stroke-width="4"/><g fill="#fff3f2" opacity=".75"><circle cx="94" cy="290" r="2"/><circle cx="170" cy="330" r="2"/><circle cx="207" cy="265" r="2"/><circle cx="64" cy="376" r="2"/><circle cx="231" cy="360" r="2"/></g></svg></div>
 <div class="headline"><div class="eyebrow">Uma noite encantada</div><h1>Lorena</h1><div class="age">15 <em>anos</em></div><p>Você é nosso convidado para celebrar um momento cheio de sonhos e magia!</p><a class="scroll" href="#detalhes">✧ Descubra o convite ↓</a></div></header>
@@ -54,7 +54,7 @@ try{
   const wrap=document.querySelector('.wrap');
   const allowedStyle=['encantado','moderno','floral','noite'],allowedBg=['degrade','estrelas','luzes','solido'],allowedFont=['caligrafia','classica','moderna'];
   wrap.dataset.estilo=allowedStyle.includes(data.estilo)?data.estilo:'encantado';
-  wrap.dataset.fundo=allowedBg.includes(data.fundo)?data.fundo:'degrade';
+  wrap.dataset.fundo=allowedBg.includes(data.fundo)?data.fundo:'estrelas';
   wrap.dataset.fonte=allowedFont.includes(data.fonte)?data.fonte:'caligrafia';
   const validHex=v=>typeof v==='string'&&/^#[0-9a-fA-F]{6}$/.test(v);
   wrap.style.setProperty('--custom-bg',validHex(data.corFundo)?data.corFundo:'#20163b');
