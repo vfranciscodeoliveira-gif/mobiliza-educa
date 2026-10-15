@@ -2,7 +2,14 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const editor=read('convites/lorena-15/editor.html'),invite=read('convites/lorena-15/index.html'),rules=read('firestore.rules'),storage=read('storage.rules');
 test('frontend scripts can be parsed',()=>{for(const html of [editor,invite])for(const m of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)){const code=m[2].replace(/^import[^\n]*;\s*$/gm,'');assert.doesNotThrow(()=>new Function('return (async()=>{'+code+'})'), 'Invalid JavaScript inside HTML')}});
 test('publisher has authentication, role check and no anonymous edits',()=>{assert.match(editor,/signInWithEmailAndPassword/);assert.match(editor,/platformOwners/);assert.match(editor,/owner\.data\(\)\.active!==true/);assert.match(rules,/match \/publicInvites\/\{inviteId\}/);assert.match(rules,/allow create,update: if owner\(\)/);assert.match(rules,/allow list: if false/);assert.match(storage,/public-invites\/lorena-15/);assert.match(storage,/request\.resource\.size < 5 \* 1024 \* 1024/)});
-test('images delete only after successful Firestore save',()=>{const savePos=editor.indexOf('await setDoc(dataRef'),deletePos=editor.indexOf('await deleteObject(ref(storage,path))');assert.ok(savePos>=0&&deletePos>savePos);assert.match(editor,/pendingDeletes\.push\(p\.path\)/)});
+test('gallery uses public GitHub Pages links without browser GitHub tokens',()=>{
+ assert.match(editor,/const photoUrl=name/);
+ assert.match(editor,/addGithubPhoto/);
+ assert.doesNotMatch(editor,/getStorage\(/);
+ assert.doesNotMatch(editor,/uploadBytes\(/);
+ assert.doesNotMatch(editor,/deleteObject\(/);
+ assert.doesNotMatch(editor,/GITHUB_TOKEN|ghp_/);
+});
 test('public page uses published document, countdown and safe dialog output',()=>{assert.match(invite,/snap\.data\(\)\.publicado===true/);assert.match(invite,/eventDate=data\.data/);assert.match(invite,/container\.replaceChildren\(\)/);assert.ok(invite.indexOf('id="galeria"')<invite.indexOf('</main>'))});
 test('public invitation has no active RSVP until secure backend exists',()=>{assert.match(invite,/Confirmações ainda não habilitadas/);assert.doesNotMatch(invite,/collection\(db,\s*['"]confirmacoes/);});
 
