@@ -10,7 +10,7 @@ const fixture=(pub=false,uid='owner-test')=>({
  local:'',endereco:'',dressCode:'',presentes:'',presentesUrl:'',encerramento:'Obrigada',
  habilitarRsvp:false,publicado:pub,cover:'',photos:[],estilo:'encantado',paleta:'lilas',
  corFundo:'#20163b',corDestaque:'#f7ce87',corTitulo:'#ffbce9',
- fundo:'estrelas',fonte:'caligrafia',animacoes:true,musicaAtiva:false,musicaArquivo:'',musicaVolume:35,abrirEnvelope:true,mostrarContador:true,mostrarGaleria:true,mostrarPresentes:true,updatedBy:uid,updatedAt:serverTimestamp()
+ fundo:'estrelas',fonte:'caligrafia',animacoes:true,musicaAtiva:false,musicaArquivo:'',musicaVolume:35,abrirEnvelope:true,mostrarContador:true,mostrarGaleria:true,mostrarPresentes:true,rsvpWhatsapp:'',rsvpPrazo:'',galeriaAutomatica:true,intervaloGaleria:5,updatedBy:uid,updatedAt:serverTimestamp()
 });
 before(async()=>{
  env=await initializeTestEnvironment({
@@ -61,3 +61,5 @@ test('proprietario pode recolher convite publicado e leitura publica cessa',asyn
 });
 
 test('musica invalida nao pode ser publicada',async()=>{const db=env.authenticatedContext('owner-test').firestore();await assertFails(updateDoc(doc(db,eventPath),{musicaAtiva:true,musicaArquivo:'../secreto.mp3',updatedBy:'owner-test',updatedAt:serverTimestamp()}));});
+
+test('WhatsApp invalido nao permite ativar RSVP',async()=>{const db=env.authenticatedContext('owner-test').firestore();await assertFails(updateDoc(doc(db,eventPath),{habilitarRsvp:true,rsvpWhatsapp:'551899',updatedBy:'owner-test',updatedAt:serverTimestamp()}));});
