@@ -16,7 +16,7 @@ service cloud.firestore {
   // Convite público da Lorena: leitura pública somente quando publicado;
   // escrita exclusivamente por proprietário ativo da plataforma.
   match /publicInvites/{inviteId}{
-    allow get: if (resource.data.publicado == true) || owner();
+    allow get: if owner() || (resource != null && resource.data.publicado == true);
     allow list: if false;
     allow create,update: if owner() && inviteId == 'lorena-15'
       && request.resource.data.keys().hasOnly(['titulo','mensagem','data','horario','local','endereco','dressCode','presentes','presentesUrl','encerramento','habilitarRsvp','publicado','cover','photos','estilo','paleta','corFundo','corDestaque','corTitulo','fundo','fonte','animacoes','updatedAt','updatedBy'])
