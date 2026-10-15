@@ -120,3 +120,19 @@ test('Gestor v4 contém navegação responsiva, pesquisa e gráficos locais',asy
  const r=await fetch(ROOT+'/admin');assert.equal(r.status,200);const html=await r.text();
  for(const target of ['data-nav="dashboard"','data-nav="blitzes"','data-nav="biblioteca"','data-nav="relatorios"','id="searchBlitz"','id="filterStatus"','id="chartActions"','id="reportVisual"','function showPage','function applyBlitzFilter','function renderOverview'])assert.ok(html.includes(target),'Elemento ausente: '+target);
 });
+
+test('Quiz de blitz existente usa confirmação da versão atual e registra conclusão',async()=>{
+ const auth={'X-Admin-Token':'test-admin-secret','Content-Type':'application/json'};
+ const response=await fetch(ROOT+'/admin/actions',{method:'POST',headers:auth,body:JSON.stringify({title:'Blitz confirmação quiz',date:'',description:'',materials:['quiz-motociclista']})});
+ assert.equal(response.status,201);const id=(await response.json()).actionId;
+ const quiz=await fetch(ROOT+'/actions/'+id+'/assets/quiz-motociclista.html');
+ assert.equal(quiz.status,200);const html=await quiz.text();
+ assert.match(html,/Resultado registrado com sucesso/);
+ assert.match(html,/Reenviar resultado/);
+ assert.ok(html.includes('actionId:'+JSON.stringify(id)+',revision:1'));
+ const event={eventId:randomUUID(),sessionId:randomUUID(),actionId:id,revision:1,type:'quiz_finish',score:8};
+ const opts={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)};
+ let r=await fetch(ROOT+'/api/events',opts);assert.equal(r.status,202);assert.equal((await r.json()).recorded,true);
+ r=await fetch(ROOT+'/api/events',opts);assert.equal((await r.json()).recorded,false);
+ r=await fetch(ROOT+'/admin/stats',{headers:auth});assert.ok((await r.json()).porAcao[id].quizzesConcluidos>=1);
+});
