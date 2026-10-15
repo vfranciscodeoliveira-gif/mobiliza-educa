@@ -39,7 +39,10 @@ service cloud.firestore {
       && request.resource.data.paleta in ['lilas','rosa','azul','verde','vinho']
       && request.resource.data.fundo in ['degrade','estrelas','luzes','solido']
       && request.resource.data.fonte in ['caligrafia','classica','moderna']
-      && request.resource.data.corFundo is string && request.resource.data.corFundo.matches('^#[A-Fa-f0-9]{6}
+      && request.resource.data.corFundo is string && request.resource.data.corFundo.matches('^#[A-Fa-f0-9]{6}$')
+      && request.resource.data.corDestaque is string && request.resource.data.corDestaque.matches('^#[A-Fa-f0-9]{6}$')
+      && request.resource.data.corTitulo is string && request.resource.data.corTitulo.matches('^#[A-Fa-f0-9]{6}$')
+      && request.resource.data.animacoes is bool;
     allow delete: if false;
   }
   match /platformOwners/{uid}{allow get: if signedIn() && (uid == request.auth.uid || owner());allow list: if owner();allow write: if false;}
