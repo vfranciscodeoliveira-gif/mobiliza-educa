@@ -1,0 +1,42 @@
+name: Firebase - publicar regras de acesso
+on:
+  workflow_dispatch:
+    inputs:
+      project_confirmation:
+        description: "Digite mobiliza-educa para confirmar o projeto"
+        required: true
+        type: string
+      publish_rules:
+        description: "Confirmo que revisei as regras Firestore e Storage e quero publicá-las"
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: mobiliza-firebase-security-rules
+  cancel-in-progress: false
+jobs:
+  security-rules:
+    if: ${{ github.ref == 'refs/heads/main' && inputs.project_confirmation == 'mobiliza-educa' && inputs.publish_rules }}
+    environment: firebase-production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Autenticação OIDC sem chave privada
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/39731938550/locations/global/workloadIdentityPools/mobiliza-github/providers/github-actions'
+          service_account: 'mobiliza-educa-github-deploy@mobiliza-educa.iam.gserviceaccount.com'
+          create_credentials_file: true
+          export_environment_variables: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Conferir testes do convite
+        run: node --test tests/lorenaInvite.test.cjs
+      - name: Instalar Firebase CLI no runner
+        run: npm install --global firebase-tools
+      - name: Publicar regras do Firestore e Storage
+        run: firebase deploy --project mobiliza-educa --only firestore:rules,storage --non-interactive
