@@ -1,4 +1,5 @@
 const {before,after,test}=require('node:test');
+const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const {initializeTestEnvironment,assertSucceeds,assertFails}=require('@firebase/rules-unit-testing');
 const {doc,getDoc,setDoc,updateDoc,serverTimestamp}=require('firebase/firestore');
