@@ -19,7 +19,7 @@ service cloud.firestore {
     allow get: if owner() || (resource != null && resource.data.publicado == true);
     allow list: if false;
     allow create,update: if owner() && inviteId == 'lorena-15'
-      && request.resource.data.keys().hasOnly(['titulo','mensagem','data','horario','local','endereco','dressCode','presentes','presentesUrl','encerramento','habilitarRsvp','publicado','cover','photos','estilo','paleta','corFundo','corDestaque','corTitulo','fundo','fonte','animacoes','musicaAtiva','musicaArquivo','musicaVolume','abrirEnvelope','mostrarContador','mostrarGaleria','mostrarPresentes','updatedAt','updatedBy'])
+      && request.resource.data.keys().hasOnly(['titulo','mensagem','data','horario','local','endereco','dressCode','presentes','presentesUrl','encerramento','habilitarRsvp','publicado','cover','photos','estilo','paleta','corFundo','corDestaque','corTitulo','fundo','fonte','animacoes','musicaAtiva','musicaArquivo','musicaVolume','abrirEnvelope','mostrarContador','mostrarGaleria','mostrarPresentes','rsvpWhatsapp','rsvpPrazo','galeriaAutomatica','intervaloGaleria','updatedAt','updatedBy'])
       && request.resource.data.updatedBy == request.auth.uid
       && request.resource.data.updatedAt == request.time
       && request.resource.data.titulo is string && request.resource.data.titulo.size() <= 90
@@ -50,7 +50,14 @@ service cloud.firestore {
       && request.resource.data.abrirEnvelope is bool
       && request.resource.data.mostrarContador is bool
       && request.resource.data.mostrarGaleria is bool
-      && request.resource.data.mostrarPresentes is bool;
+      && request.resource.data.mostrarPresentes is bool
+      && request.resource.data.galeriaAutomatica is bool
+      && request.resource.data.intervaloGaleria in [3,5,8,12]
+      && request.resource.data.rsvpWhatsapp is string
+      && request.resource.data.rsvpWhatsapp.size() <= 15
+      && (!request.resource.data.habilitarRsvp || request.resource.data.rsvpWhatsapp.matches('55[1-9][0-9]{9,10}'))
+      && request.resource.data.rsvpPrazo is string
+      && request.resource.data.rsvpPrazo.size() <= 10;
     allow delete: if false;
   }
   match /platformOwners/{uid}{allow get: if signedIn() && (uid == request.auth.uid || owner());allow list: if owner();allow write: if false;}
