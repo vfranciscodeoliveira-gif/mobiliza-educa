@@ -23,6 +23,11 @@ before(async()=>{
  });
 });
 after(async()=>{if(env)await env.cleanup();});
+test('proprietario ativo consegue consultar convite antes do primeiro cadastro',async()=>{
+ const db=env.authenticatedContext('owner-test').firestore();
+ const snapshot=await assertSucceeds(getDoc(doc(db,eventPath)));
+ assert.equal(snapshot.exists(),false);
+});
 test('visitante e contas nao autorizadas nao criam convites',async()=>{
  await assertFails(setDoc(doc(env.unauthenticatedContext().firestore(),eventPath),fixture()));
  await assertFails(setDoc(doc(env.authenticatedContext('visitor-test').firestore(),eventPath),fixture(false,'visitor-test')));
