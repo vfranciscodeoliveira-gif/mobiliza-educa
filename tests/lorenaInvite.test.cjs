@@ -30,3 +30,8 @@ test('visual options are applied to public page only after approved publication'
 test('controles de musica e experiencia sao persistidos e aplicados',()=>{for(const name of ['musicaAtiva','musicaArquivo','musicaVolume','abrirEnvelope','mostrarContador','mostrarGaleria','mostrarPresentes']){assert.ok(editor.includes('id="'+name+'"'));assert.ok(rules.includes("'"+name+"'"));assert.ok(invite.includes('data.'+name))}assert.match(invite,/new Audio/);assert.match(editor,/testeMusica/);});
 
 test('galeria, formulario familiar e compartilhamento tem controles operacionais',()=>{for(const field of ['rsvpWhatsapp','rsvpPrazo','galeriaAutomatica','intervaloGaleria']){assert.ok(editor.includes('id="'+field+'"'));assert.ok(rules.includes("'"+field+"'"))}for(const id of ['formRsvp','nomeRsvp','respostaRsvp','quantidadeRsvp','prevFoto','nextFoto','copyInvite','showQr'])assert.ok(invite.includes('id="'+id+'"'));assert.match(invite,/wa\.me/);assert.match(invite,/setupInviteGallery/);assert.match(invite,/api\.qrserver\.com/);});
+
+test('central RSVP não expõe lista ao público e tem check-in autenticado',()=>{
+ assert.match(rules,/match \/inviteGuestFamilies\/\{familyId\}/);
+ assert.match(rules,/allow get,list: if owner\(\)/);
+});
