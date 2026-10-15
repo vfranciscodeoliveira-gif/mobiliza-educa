@@ -16,4 +16,30 @@ test('Página de blitz e materiais do manifesto disponíveis',async()=>{
 });
 test('Arquivos fora do manifesto não são distribuídos',async()=>{let r=await fetch(ROOT+'/actions/blitz-capacete-demo/manifest.json');assert.equal(r.status,403);r=await fetch(ROOT+'/actions/blitz-capacete-demo/assets/segredo.txt');assert.equal(r.status,403)});
 test('Cartaz gera link local e não usa serviço de QR externo',async()=>{const r=await fetch(ROOT+'/placa?acao=blitz-capacete-demo');assert.equal(r.status,200);const html=await r.text();assert.match(html,/127\.0\.0\.1:18091\/a\/blitz-capacete-demo/);assert.match(html,/from '\/qr\.js'/);const qr=await fetch(ROOT+'/qr.js');assert.equal(qr.status,200);assert.match(await qr.text(),/qrSvg/)});
-test('Eventos validam ação, deduplicam ID e estatísticas exigem segredo',async()=>{const event={eventId:randomUUID(),sessionId:randomUUID(),actionId:'blitz-capacete-demo',revision:1,type:'page_view',createdAt:new Date().toISOString()};const opts={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)};let r=await fetch(ROOT+'/api/events',opts);assert.equal(r.status,202);assert.equal((await r.json()).recorded,true);r=await fetch(ROOT+'/api/events',opts);assert.equal((await r.json()).recorded,false);r=await fetch(ROOT+'/admin/stats');assert.equal(r.status,403);r=await fetch(ROOT+'/admin/stats',{headers:{'x-admin-token':'test-admin-secret'}});assert.equal(r.status,200);assert.ok((await r.json()).acessos>=1)});
+test('Eventos validam ação, deduplicam ID e estatísticas exigem segredo',async()=>{const event={eventId:randomUUID(),sessionId:randomUUID(),actionId:'blitz-capacete-demo',revision:2,type:'page_view',createdAt:new Date().toISOString()};const opts={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)};let r=await fetch(ROOT+'/api/events',opts);assert.equal(r.status,202);assert.equal((await r.json()).recorded,true);r=await fetch(ROOT+'/api/events',opts);assert.equal((await r.json()).recorded,false);r=await fetch(ROOT+'/admin/stats');assert.equal(r.status,403);r=await fetch(ROOT+'/admin/stats',{headers:{'x-admin-token':'test-admin-secret'}});assert.equal(r.status,200);assert.ok((await r.json()).acessos>=1)});
+
+test('Quiz pode ser aberto sem internet e registra início/conclusão anonimamente',async()=>{
+ const file=await fetch(ROOT+'/actions/blitz-capacete-demo/assets/quiz-motociclista.html');
+ assert.equal(file.status,200);
+ const html=await file.text();
+ assert.match(html,/Desafio Motociclista Seguro/);
+ assert.match(html,/quiz_finish/);
+ assert.match(html,/8 perguntas|PERGUNTA/);
+ const sessionId=randomUUID();
+ for(const [type,score] of [['quiz_start',undefined],['quiz_finish',6]]){
+  const event={eventId:randomUUID(),sessionId,actionId:'blitz-capacete-demo',revision:2,type,createdAt:new Date().toISOString()};
+  if(score!==undefined)event.score=score;
+  const result=await fetch(ROOT+'/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)});
+  assert.equal(result.status,202);
+ }
+ const stats=await fetch(ROOT+'/admin/stats',{headers:{'x-admin-token':'test-admin-secret'}});
+ const obj=await stats.json();
+ assert.ok(obj.quizzesIniciados>=1);
+ assert.ok(obj.quizzesConcluidos>=1);
+ assert.ok(obj.porAcao['blitz-capacete-demo'].somaAcertos>=6);
+});
+test('Pontuações fora do intervalo são rejeitadas',async()=>{
+ const event={eventId:randomUUID(),sessionId:randomUUID(),actionId:'blitz-capacete-demo',revision:2,type:'quiz_finish',score:100,createdAt:new Date().toISOString()};
+ const res=await fetch(ROOT+'/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)});
+ assert.equal(res.status,400);
+});
