@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "actionId": "blitz-capacete-demo",
+  "revision": 1,
+  "title": "Blitz educativa — Motociclista Seguro",
+  "description": "Demonstração para homologação. Substituir materiais pelos documentos oficiais aprovados antes do uso público.",
+  "materials": [
+    {
+      "id": "orientacoes",
+      "title": "Orientações educativas — exemplo",
+      "path": "assets/orientacoes.html",
+      "type": "html"
+    }
+  ]
+}
