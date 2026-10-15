@@ -43,3 +43,17 @@ test('Pontuações fora do intervalo são rejeitadas',async()=>{
  const res=await fetch(ROOT+'/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)});
  assert.equal(res.status,400);
 });
+
+test('Painel do gestor exige token e permite criar blitz isolada',async()=>{
+ let r=await fetch(ROOT+'/admin');assert.equal(r.status,200);assert.match(await r.text(),/Gestor Offline 360/);
+ r=await fetch(ROOT+'/admin/actions');assert.equal(r.status,403);
+ const auth={'X-Admin-Token':'test-admin-secret'};
+ r=await fetch(ROOT+'/admin/actions',{headers:auth});assert.equal(r.status,200);const before=await r.json();assert.ok(before.actions.length>=1);
+ r=await fetch(ROOT+'/admin/actions',{method:'POST',headers:{...auth,'Content-Type':'application/json'},body:JSON.stringify({title:'Blitz Educativa - Teste',date:'2026-10-15',description:'Ação de teste',materials:['orientacoes','quiz-motociclista']})});assert.equal(r.status,201);const created=await r.json();assert.match(created.actionId,/^blitz-[a-f0-9]{12}$/);
+ r=await fetch(ROOT+'/a/'+created.actionId);assert.equal(r.status,200);
+ r=await fetch(ROOT+'/actions/'+created.actionId+'/assets/quiz-motociclista.html');assert.equal(r.status,200);assert.match(r.headers.get('content-security-policy'),/script-src/);const body=await r.text();assert.ok(body.includes('actionId:"'+created.actionId+'",revision:1'));
+ r=await fetch(ROOT+'/placa?acao='+created.actionId);assert.equal(r.status,200);
+ const event={eventId:randomUUID(),sessionId:randomUUID(),actionId:created.actionId,revision:1,type:'quiz_finish',score:7};
+ r=await fetch(ROOT+'/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)});assert.equal(r.status,202);
+ r=await fetch(ROOT+'/admin/stats',{headers:auth});const stats=await r.json();assert.equal(stats.porAcao[created.actionId].somaAcertos,7);
+});
