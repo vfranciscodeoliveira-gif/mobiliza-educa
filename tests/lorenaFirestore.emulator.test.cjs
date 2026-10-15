@@ -28,6 +28,7 @@ test('proprietario ativo consegue consultar convite antes do primeiro cadastro',
  const db=env.authenticatedContext('owner-test').firestore();
  const snapshot=await assertSucceeds(getDoc(doc(db,eventPath)));
  assert.equal(snapshot.exists(),false);
+ await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(),eventPath)));
 });
 test('visitante e contas nao autorizadas nao criam convites',async()=>{
  await assertFails(setDoc(doc(env.unauthenticatedContext().firestore(),eventPath),fixture()));
