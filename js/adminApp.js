@@ -82,33 +82,23 @@ function bindModules(){
   });
 }
 
-// Atalho para o editor independente de convites, dentro do painel autenticado.
+// Módulo genérico Convites 360, com o convite da Lorena acessível no catálogo.
 function renderInviteShortcut(){
-  const sidebar=qs('#adminSidebarNav');
-  const grid=qs('#adminModuleGrid');
-  if(!sidebar||!grid||!isAdminUnlocked())return;
-  const editorUrl='./convites/lorena-15/editor.html';
-  const inviteUrl='./convites/lorena-15/';
-  const nav=document.createElement('a');
-  nav.className='admin-online-nav-item';
-  nav.href=editorUrl;
-  nav.style.cssText='display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;padding:12px;';
-  nav.innerHTML='<span>💌</span><b>Convites Interativos</b>';
-  nav.title='Gerenciar convite de 15 anos da Lorena • Acesso Firebase restrito';
-  const eventNav=sidebar.querySelector('[data-admin-module="admin-eventos"]');
-  if(eventNav)eventNav.insertAdjacentElement('afterend',nav);else sidebar.append(nav);
-  const card=document.createElement('article');
-  card.className='admin-online-module';
-  card.innerHTML='<div class="admin-online-module-icon">💌</div><div class="admin-online-module-copy"><h3>Convites Interativos</h3><p>Gerencie o convite da Lorena: data, horário, mensagens, capa, galeria, presentes e dress code. Edição autorizada pelo Firebase.</p><div class="module-meta"><span class="chip">15 anos • Lorena</span><span class="chip">Editor protegido</span></div></div>';
-  const actions=document.createElement('div');
-  const edit=document.createElement('a');
-  edit.className='btn primary';edit.href=editorUrl;edit.textContent='Administrar convite';
-  const view=document.createElement('a');
-  view.className='btn ghost';view.href=inviteUrl;view.target='_blank';view.rel='noopener noreferrer';view.textContent='Ver convite público';
-  actions.append(edit,view);
-  card.append(actions);
-  const eventCard=grid.querySelector('[data-admin-module="admin-eventos"]')?.closest('.admin-online-module');
-  if(eventCard)eventCard.insertAdjacentElement('afterend',card);else grid.append(card);
+ const sidebar=qs('#adminSidebarNav'),grid=qs('#adminModuleGrid');
+ if(!sidebar||!grid||!isAdminUnlocked())return;
+ const nav=document.createElement('a');nav.className='admin-online-nav-item';
+ nav.href='./convites/';nav.style.cssText='display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;padding:12px';
+ nav.innerHTML='<span>💌</span><b>Convites Interativos 360</b>';
+ const eventNav=sidebar.querySelector('[data-admin-module="admin-eventos"]');
+ if(eventNav)eventNav.insertAdjacentElement('afterend',nav);else sidebar.append(nav);
+ const card=document.createElement('article');card.className='admin-online-module';
+ card.innerHTML='<div class="admin-online-module-icon">💌</div><div class="admin-online-module-copy"><h3>Convites Interativos 360</h3><p>Crie convites para festas e eventos, personalize o visual e administre links públicos. O convite da Lorena permanece disponível.</p><div class="module-meta"><span class="chip">Múltiplos convites</span><span class="chip">Rascunhos</span></div></div>';
+ const actions=document.createElement('div');
+ const link=document.createElement('a');link.href='./convites/';link.className='btn primary';link.textContent='Abrir central de convites';
+ const legacy=document.createElement('a');legacy.href='./convites/lorena-15/editor.html';legacy.className='btn ghost';legacy.textContent='Convite da Lorena';
+ actions.append(link,legacy);card.append(actions);
+ const eventCard=grid.querySelector('[data-admin-module="admin-eventos"]')?.closest('.admin-online-module');
+ if(eventCard)eventCard.insertAdjacentElement('afterend',card);else grid.append(card);
 }
 
 function renderAuthenticated(){
