@@ -57,3 +57,19 @@ test('Painel do gestor exige token e permite criar blitz isolada',async()=>{
  r=await fetch(ROOT+'/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)});assert.equal(r.status,202);
  r=await fetch(ROOT+'/admin/stats',{headers:auth});const stats=await r.json();assert.equal(stats.porAcao[created.actionId].somaAcertos,7);
 });
+
+test('Gestor v2: cadastro completo, edição, duplicação, biblioteca PDF e CSV',async()=>{
+ const auth={'X-Admin-Token':'test-admin-secret','Content-Type':'application/json'};
+ const send=async(path,method,data)=>fetch(ROOT+path,{method,headers:auth,body:JSON.stringify(data)});
+ const payload={title:'Blitz v2 - Terminal',date:'2026-10-16',time:'09:30',location:'Terminal Central',responsible:'Equipe Educativa',audience:'Motociclistas',status:'planejada',description:'Teste de integracao',materials:['orientacoes','quiz-motociclista']};
+ let r=await send('/admin/actions','POST',payload);assert.equal(r.status,201);const id=(await r.json()).actionId;
+ r=await send('/admin/actions/'+id+'/edit','PUT',{...payload,title:'Blitz v2 - Atualizada',status:'em_andamento'});assert.equal(r.status,200);
+ r=await fetch(ROOT+'/admin/actions',{headers:auth});const list=(await r.json()).actions;assert.equal(list.find(x=>x.actionId===id).status,'em_andamento');
+ const pdf=Buffer.from('%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF').toString('base64');
+ r=await send('/admin/actions/'+id+'/materials','POST',{filename:'seguranca.pdf',title:'Cartilha ilustrativa',data:pdf});assert.equal(r.status,200);const added=(await r.json()).result;
+ r=await fetch(ROOT+'/actions/'+id+'/'+added.path);assert.equal(r.status,200);assert.match(r.headers.get('content-type'),/pdf/);
+ r=await send('/admin/actions/'+id+'/materials','POST',{filename:'falso.pdf',title:'Arquivo invalido',data:Buffer.from('not a pdf').toString('base64')});assert.equal(r.status,400);
+ r=await send('/admin/actions/'+id+'/duplicate','POST',{});assert.equal(r.status,200);const copy=(await r.json()).result;assert.notEqual(copy.actionId,id);
+ r=await fetch(ROOT+'/admin/report.csv',{headers:auth});assert.equal(r.status,200);assert.match(r.headers.get('content-type'),/text\/csv/);
+ r=await fetch(ROOT+'/admin/report.csv');assert.equal(r.status,403);
+});
