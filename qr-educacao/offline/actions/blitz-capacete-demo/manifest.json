@@ -1,14 +1,20 @@
 {
   "schemaVersion": 1,
   "actionId": "blitz-capacete-demo",
-  "revision": 1,
+  "revision": 2,
   "title": "Blitz educativa — Motociclista Seguro",
-  "description": "Demonstração para homologação. Substituir materiais pelos documentos oficiais aprovados antes do uso público.",
+  "description": "Pacote pedagógico para homologação: orientações sobre segurança de motociclistas e quiz educativo com oito situações. Revisão editorial da SEMOB pendente.",
   "materials": [
     {
       "id": "orientacoes",
       "title": "Orientações educativas — exemplo",
       "path": "assets/orientacoes.html",
+      "type": "html"
+    },
+    {
+      "id": "quiz-motociclista",
+      "title": "🏍️ Desafio Motociclista Seguro — 8 perguntas",
+      "path": "assets/quiz-motociclista.html",
       "type": "html"
     }
   ]
