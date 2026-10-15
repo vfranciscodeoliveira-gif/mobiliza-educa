@@ -92,3 +92,5 @@ test('Após upload o manifesto mantém material e conteúdo após consulta poste
  res=await fetch(ROOT+'/a/'+id);assert.match(await res.text(),/Cartilha de campo/);
  res=await fetch(ROOT+'/actions/'+id+'/'+added.path);assert.equal(res.status,200);assert.deepEqual(Buffer.from(await res.arrayBuffer()),pdf);
 });
+
+test('Painel trata API de rede ausente sem acesso direto a length',async()=>{const r=await fetch(ROOT+'/admin');assert.equal(r.status,200);const html=await r.text();assert.match(html,/Array\.isArray\(net\.data\?\.ips\)/);assert.match(html,/servidor Node\.js está desatualizado/);});
