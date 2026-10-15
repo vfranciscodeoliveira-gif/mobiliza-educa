@@ -115,3 +115,8 @@ test('Gestor apresenta biblioteca visual com recursos de gerenciamento',async()=
  const r=await fetch(ROOT+'/admin'),html=await r.text();
  assert.equal(r.status,200);assert.match(html,/id="libraryList"/);assert.match(html,/Renomear/);assert.match(html,/Despublicar/);
 });
+
+test('Gestor v4 contém navegação responsiva, pesquisa e gráficos locais',async()=>{
+ const r=await fetch(ROOT+'/admin');assert.equal(r.status,200);const html=await r.text();
+ for(const target of ['data-nav="dashboard"','data-nav="blitzes"','data-nav="biblioteca"','data-nav="relatorios"','id="searchBlitz"','id="filterStatus"','id="chartActions"','id="reportVisual"','function showPage','function applyBlitzFilter','function renderOverview'])assert.ok(html.includes(target),'Elemento ausente: '+target);
+});
