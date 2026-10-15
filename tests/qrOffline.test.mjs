@@ -15,7 +15,7 @@ test('Página de blitz e materiais do manifesto disponíveis',async()=>{
  const file=await fetch(ROOT+'/actions/blitz-capacete-demo/assets/orientacoes.html');assert.equal(file.status,200);assert.match(await file.text(),/demonstração/);
 });
 test('Arquivos fora do manifesto não são distribuídos',async()=>{let r=await fetch(ROOT+'/actions/blitz-capacete-demo/manifest.json');assert.equal(r.status,403);r=await fetch(ROOT+'/actions/blitz-capacete-demo/assets/segredo.txt');assert.equal(r.status,403)});
-test('Cartaz gera link local e não usa serviço de QR externo',async()=>{const r=await fetch(ROOT+'/placa?acao=blitz-capacete-demo');assert.equal(r.status,200);const html=await r.text();assert.match(html,/127\.0\.0\.1:18091\/a\/blitz-capacete-demo/);assert.match(html,/from '\/qr\.js'/);const qr=await fetch(ROOT+'/qr.js');assert.equal(qr.status,200);assert.match(await qr.text(),/qrSvg/)});
+test('Cartaz gera link local e não usa serviço de QR externo',async()=>{const r=await fetch(ROOT+'/placa?acao=blitz-capacete-demo');assert.equal(r.status,200);const html=await r.text();assert.match(html,/http:\/\/(?:10\.|192\.168\.|172\.)[0-9.]+:18091\/a\/blitz-capacete-demo/);assert.match(html,/from '\/qr\.js'/);const qr=await fetch(ROOT+'/qr.js');assert.equal(qr.status,200);assert.match(await qr.text(),/qrSvg/)});
 test('Eventos validam ação, deduplicam ID e estatísticas exigem segredo',async()=>{const event={eventId:randomUUID(),sessionId:randomUUID(),actionId:'blitz-capacete-demo',revision:2,type:'page_view',createdAt:new Date().toISOString()};const opts={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)};let r=await fetch(ROOT+'/api/events',opts);assert.equal(r.status,202);assert.equal((await r.json()).recorded,true);r=await fetch(ROOT+'/api/events',opts);assert.equal((await r.json()).recorded,false);r=await fetch(ROOT+'/admin/stats');assert.equal(r.status,403);r=await fetch(ROOT+'/admin/stats',{headers:{'x-admin-token':'test-admin-secret'}});assert.equal(r.status,200);assert.ok((await r.json()).acessos>=1)});
 
 test('Quiz pode ser aberto sem internet e registra início/conclusão anonimamente',async()=>{
@@ -72,4 +72,23 @@ test('Gestor v2: cadastro completo, edição, duplicação, biblioteca PDF e CSV
  r=await send('/admin/actions/'+id+'/duplicate','POST',{});assert.equal(r.status,200);const copy=(await r.json()).result;assert.notEqual(copy.actionId,id);
  r=await fetch(ROOT+'/admin/report.csv',{headers:auth});assert.equal(r.status,200);assert.match(r.headers.get('content-type'),/text\/csv/);
  r=await fetch(ROOT+'/admin/report.csv');assert.equal(r.status,403);
+});
+
+test('QR da blitz usa IPv4 LAN mesmo quando cartaz foi aberto em localhost',async()=>{
+ const net=await fetch(ROOT+'/network');assert.equal(net.status,200);
+ const info=await net.json();assert.ok(Array.isArray(info.ips));
+ const res=await fetch(ROOT+'/placa?acao=blitz-capacete-demo',{headers:{Host:'localhost:'+PORT}});
+ assert.equal(res.status,info.ips.length?200:400);
+ if(info.ips.length){const html=await res.text();assert.ok(html.includes('http://'+info.ips[0].address+':'+PORT+'/a/blitz-capacete-demo'));assert.ok(!html.includes('http://localhost:'+PORT+'/a/'))}
+});
+test('Após upload o manifesto mantém material e conteúdo após consulta posterior',async()=>{
+ const auth={'X-Admin-Token':'test-admin-secret','Content-Type':'application/json'};
+ let res=await fetch(ROOT+'/admin/actions',{method:'POST',headers:auth,body:JSON.stringify({title:'Teste arquivo persistente',date:'',description:'',materials:['orientacoes']})});
+ assert.equal(res.status,201);const id=(await res.json()).actionId;
+ const pdf=Buffer.from('%PDF-1.4\nPersistencia do material QR\n%%EOF');
+ res=await fetch(ROOT+'/admin/actions/'+id+'/materials',{method:'POST',headers:auth,body:JSON.stringify({filename:'cartilha.pdf',title:'Cartilha de campo',data:pdf.toString('base64')})});
+ assert.equal(res.status,200);const added=(await res.json()).result;
+ res=await fetch(ROOT+'/admin/actions',{headers:auth});const actions=(await res.json()).actions;assert.ok(actions.find(a=>a.actionId===id).materials.some(m=>m.path===added.path));
+ res=await fetch(ROOT+'/a/'+id);assert.match(await res.text(),/Cartilha de campo/);
+ res=await fetch(ROOT+'/actions/'+id+'/'+added.path);assert.equal(res.status,200);assert.deepEqual(Buffer.from(await res.arrayBuffer()),pdf);
 });
