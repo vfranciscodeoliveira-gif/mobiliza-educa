@@ -17,6 +17,36 @@ service cloud.firestore {
   // escrita exclusivamente por proprietário ativo da plataforma.
   // Central RSVP 360: informações pessoais de famílias não são públicas.
   // Somente proprietário ativo administra famílias, respostas e check-in.
+  // QR Educação 360: conteúdos de blitz separados de dados pessoais.
+  match /qrPublic/{code} {
+    function canRead(d) {
+      return signedIn() && permitted(d.tenantId,'events.read') && allSchools(d.tenantId);
+    }
+    function canManage(d) {
+      return signedIn() && permitted(d.tenantId,'events.manage') && allSchools(d.tenantId);
+    }
+    function validQr(d) {
+      return d.keys().hasOnly(['tenantId','actionId','title','description','materials','published','updatedBy','updatedAt'])
+        && d.keys().hasAll(['tenantId','actionId','title','description','materials','published','updatedBy','updatedAt'])
+        && d.tenantId is string && d.tenantId.size() > 0 && d.tenantId.size() <= 120
+        && d.actionId is string && d.actionId.size() > 0 && d.actionId.size() <= 180
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 120
+        && d.description is string && d.description.size() <= 600
+        && d.materials is list && d.materials.size() >= 1 && d.materials.size() <= 20
+        && d.published is bool
+        && d.updatedBy == request.auth.uid && d.updatedAt == request.time
+        && exists(/databases/$(database)/documents/tenants/$(d.tenantId)/appointments/$(d.actionId));
+    }
+    allow get: if (resource != null && resource.data.published == true)
+      || (resource != null && canRead(resource.data));
+    allow list: if canRead(resource.data);
+    allow create: if code.matches('[a-f0-9]{20}')
+      && canManage(request.resource.data) && validQr(request.resource.data);
+    allow update: if canManage(resource.data) && validQr(request.resource.data)
+      && request.resource.data.tenantId == resource.data.tenantId
+      && request.resource.data.actionId == resource.data.actionId;
+    allow delete: if false;
+  }
   match /inviteGuestFamilies/{familyId} {
     function validGuest(d) {
       return familyId.matches('[a-f0-9-]{36}')
