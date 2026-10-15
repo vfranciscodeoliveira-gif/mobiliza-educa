@@ -14,14 +14,56 @@
 <section class="section" id="detalhes"><div class="eyebrow">Reserve esta data</div><h2>27 de fevereiro de 2027</h2><div class="divider"></div><p>O grande dia está chegando!</p><div class="count" aria-live="off"><div class="tile"><strong id="days">—</strong><small>DIAS</small></div><div class="tile"><strong id="hours">—</strong><small>HORAS</small></div><div class="tile"><strong id="minutes">—</strong><small>MINUTOS</small></div><div class="tile"><strong id="seconds">—</strong><small>SEGUNDOS</small></div></div><div class="card"><div class="date">✧ 27/02/2027 ✧</div><p>🕰️ Horário em definição</p><p>📍 Local a confirmar</p><p style="font-size:13px">Os detalhes serão divulgados pela família.</p><div class="pills"><button class="pill" disabled title="Local ainda não divulgado">📍 Abrir localização</button><button class="pill" disabled title="Horário ainda não divulgado">📅 Adicionar à agenda</button></div></div></section>
 <section class="section"><div class="eyebrow">Um convite cheio de carinho</div><h2>Clique para interagir</h2><div class="actions"><button class="act" data-info="confirmar"><span class="orb">💗</span>Confirmar presença</button><button class="act" data-info="presentes"><span class="orb">🎁</span>Sugestão de presentes</button><button class="act" data-info="dress"><span class="orb">👗</span>Dress code</button></div></section>
 <section class="section"><p class="quote">“Hoje, uma menina sonhadora se prepara para viver uma noite repleta de encanto e momentos inesquecíveis.”</p><div class="divider"></div><h2 class="close-text">Espero por você!</h2><p>Obrigada por fazer parte desse momento tão especial da minha vida.</p><p class="gold">Com carinho, Lorena ♡</p></section>
-<footer>Convite de 15 anos da Lorena • 27 de fevereiro de 2027<br>Prévia pública • Confirmações ainda não habilitadas</footer></main>
+<section class="section" id="galeria" hidden><div class="eyebrow">Nossos momentos</div><h2>Galeria da Lorena</h2><div id="fotosPublicas" style="display:flex;gap:12px;overflow-x:auto;padding:12px 2px;scroll-snap-type:x mandatory"></div></section><footer>Convite de 15 anos da Lorena • 27 de fevereiro de 2027<br>Prévia pública • Confirmações ainda não habilitadas</footer></main>
 <div class="overlay" id="overlay"><div><div class="eyebrow">Você recebeu um convite especial</div><h2>Lorena • 15 anos</h2><button class="envelope" id="open" aria-label="Abrir convite"><span>♥</span></button><p>Toque no envelope para abrir</p></div></div>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Informações do convite"><div class="dialog"><button class="x" id="close" aria-label="Fechar">×</button><div id="dialogBody"></div></div></div>
 <script>
 const overlay=document.getElementById('overlay');function openInvite(){if(overlay.classList.contains('hidden'))return;overlay.classList.add('opening');setTimeout(()=>overlay.classList.add('hidden'),850)}document.getElementById('open').addEventListener('click',openInvite);
 const sky=document.getElementById('sky');for(let i=0;i<42;i++){let e=document.createElement('i');e.className='star';e.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;width:2px;height:2px;--d:'+(1+Math.random()*3)+'s;animation-delay:-'+Math.random()*4+'s';sky.append(e)}for(let i=0;i<11;i++){let e=document.createElement('i');e.className='lantern';e.style.cssText='left:'+Math.random()*100+'%;--dur:'+(15+Math.random()*16)+'s;--delay:-'+Math.random()*29+'s';sky.append(e)}
 const portrait=document.getElementById('portrait');const img=new Image();img.onload=()=>portrait.classList.add('loaded');img.src='capa-lorena.webp';
-function countdown(){const target=new Date('2027-02-27T00:00:00-03:00').getTime(),v=Math.max(0,Math.floor((target-Date.now())/1000)),d=Math.floor(v/86400),h=Math.floor(v%86400/3600),m=Math.floor(v%3600/60),s=v%60;for(const [k,n] of [['days',d],['hours',h],['minutes',m],['seconds',s]])document.getElementById(k).textContent=String(n).padStart(2,'0')}countdown();setInterval(countdown,1000);
+let eventDate='2027-02-27',eventTime='20:00';function countdown(){const target=new Date(eventDate+'T'+eventTime+':00-03:00').getTime(),v=Math.max(0,Math.floor((target-Date.now())/1000)),d=Math.floor(v/86400),h=Math.floor(v%86400/3600),m=Math.floor(v%3600/60),s=v%60;for(const [k,n] of [['days',d],['hours',h],['minutes',m],['seconds',s]])document.getElementById(k).textContent=String(n).padStart(2,'0')}countdown();setInterval(countdown,1000);
 const modal=document.getElementById('modal');document.getElementById('close').onclick=()=>modal.classList.remove('show');modal.onclick=e=>{if(e.target===modal)modal.classList.remove('show')};document.querySelectorAll('[data-info]').forEach(b=>b.onclick=()=>{let obj={confirmar:['💗 Confirmar presença','A confirmação de presença será disponibilizada quando a família concluir os detalhes da festa. Nenhuma resposta é registrada nesta prévia.'],presentes:['🎁 Sugestão de presentes','As sugestões de presentes serão divulgadas em breve.'],dress:['👗 Dress code','O traje recomendado será informado pela família em breve.']}[b.dataset.info];document.getElementById('dialogBody').innerHTML='<h3>'+obj[0]+'</h3><p>'+obj[1]+'</p>';modal.classList.add('show')});document.addEventListener('keydown',e=>{if(e.key==='Escape')modal.classList.remove('show')});
 let ctx=null,timer=null,on=false;document.getElementById('music').onclick=async()=>{let btn=document.getElementById('music');if(on){clearInterval(timer);on=false;btn.textContent='♫ Tocar música';btn.setAttribute('aria-pressed','false');return}try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();let notes=[261.63,329.63,392,523.25,493.88,392,349.23,293.66,329.63,392,440,392],i=0;function note(){let osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=notes[i++%notes.length];gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.035,ctx.currentTime+.09);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.44);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.46)}on=true;note();timer=setInterval(note,510);btn.textContent='♫ Pausar música';btn.setAttribute('aria-pressed','true')}catch{btn.textContent='♫ Som indisponível'}};
+</script>
+
+<script type="module">
+import{initializeApp,getApp,getApps}from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import{getFirestore,getDoc,doc}from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import{cloudConfig}from '../../js/cloudConfig.js?v=3';
+try{
+ const app=getApps().length?getApp():initializeApp(cloudConfig.firebaseWebConfig);
+ const snap=await getDoc(doc(getFirestore(app),'publicInvites','lorena-15'));
+ if(snap.exists()&&snap.data().publicado===true){
+  const data=snap.data(),text=(selector,value)=>{const el=document.querySelector(selector);if(el&&value)el.textContent=String(value)};
+  text('.headline p',data.mensagem);
+  text('.hero .eyebrow','Uma noite encantada');
+  if(/^\d{4}-\d{2}-\d{2}$/.test(data.data||'')){eventDate=data.data;eventTime=/^\d{2}:\d{2}$/.test(data.horario||'')?data.horario:'20:00';countdown();text('#detalhes > h2',new Date(data.data+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'}))}
+  text('#detalhes .date',data.data?new Date(data.data+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'}):'');
+  text('#detalhes .card p:nth-of-type(1)',data.horario?'🕰️ '+data.horario:'🕰️ Horário em definição');
+  text('#detalhes .card p:nth-of-type(2)',data.local?'📍 '+data.local:'📍 Local a confirmar');
+  text('.section .quote',data.encerramento);
+  const portrait=document.getElementById('portrait');
+  if(data.cover){portrait.style.backgroundImage='linear-gradient(0deg,#1a142b 0%,transparent 50%),url('+JSON.stringify(data.cover)+')';portrait.classList.add('loaded')}
+  if(data.endereco){const link=document.querySelector('#detalhes .pills button:first-child');link.disabled=false;link.onclick=()=>window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(data.endereco),'_blank','noopener,noreferrer')}
+  if(data.data&&data.horario){
+   const calendar=document.querySelector('#detalhes .pills button:last-child');calendar.disabled=false;
+   calendar.onclick=()=>{const start=(data.data.replace(/-/g,'')+'T'+data.horario.replace(':','')+'00');const dt=new Date(data.data+'T'+data.horario+':00-03:00');dt.setHours(dt.getHours()+4);const end=new Date(dt.getTime()-3*3600000).toISOString().slice(0,19).replace(/[-:]/g,'');
+    const url='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(data.titulo||'Lorena 15 anos')+'&dates='+encodeURIComponent(start+'/'+end)+'&details='+encodeURIComponent(data.mensagem||'')+'&location='+encodeURIComponent(data.endereco||'');
+    window.open(url,'_blank','noopener,noreferrer')};
+  }
+  const d=data.dressCode||'',p=data.presentes||'';
+  document.querySelectorAll('[data-info]').forEach(button=>{
+    if(button.dataset.info==='dress'&&d)button.onclick=()=>showInfo('👗 Dress code',d);
+    if(button.dataset.info==='presentes'&&(p||data.presentesUrl))button.onclick=()=>{
+      showInfo('🎁 Sugestão de presentes',p||'Confira nossa lista de presentes.');
+      if(data.presentesUrl&&data.presentesUrl.startsWith('https://')){
+       const a=document.createElement('a');a.href=data.presentesUrl;a.target='_blank';a.rel='noopener noreferrer';a.className='pill';a.textContent='Abrir lista de presentes';document.getElementById('dialogBody').append(a);
+      }
+    };
+  });
+  function showInfo(title,body){const container=document.getElementById('dialogBody');container.replaceChildren();const heading=document.createElement('h3'),paragraph=document.createElement('p');heading.textContent=title;paragraph.textContent=body;container.append(heading,paragraph);document.getElementById('modal').classList.add('show')}
+  const photos=Array.isArray(data.photos)?data.photos.slice(0,12):[];
+  if(photos.length){document.getElementById('galeria').hidden=false;for(const photo of photos){if(!photo?.url||!String(photo.url).startsWith('https://'))continue;const im=document.createElement('img');im.src=photo.url;im.alt='Recordação de Lorena';im.loading='lazy';im.style.cssText='height:230px;width:170px;object-fit:cover;flex:none;border-radius:16px;border:1px solid #f1c6e3;scroll-snap-align:center';document.getElementById('fotosPublicas').append(im)}}
+ }
+}catch(error){console.info('Convite exibido em modo padrão; configuração pública ainda indisponível.')}
 </script></body></html>

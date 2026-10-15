@@ -13,6 +13,30 @@ service cloud.firestore {
   function manage(t){return permitted(t,'users.manage') && allSchools(t);}
   function knownPermissions(){return ['education.read','education.create','education.update','education.delete','certificates.emit','users.manage','events.read','events.manage','reports.read'];}
   function validMember(t,uid,d){return uid != request.auth.uid && d.uid == uid && d.tenantId == t && d.active is bool && d.role in ['GESTOR','PERSONALIZADO'] && d.permissions is list && d.permissions.hasOnly(knownPermissions()) && d.allSchools is bool && d.schoolIds is list && d.schoolIds.size() <= 100 && d.name is string && d.email is string && d.updatedBy == request.auth.uid && d.updatedAt == request.time && (owner() || gestor(t) || (staff(t) && d.role == 'PERSONALIZADO' && d.permissions.hasOnly(get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.permissions)));}
+  // Convite público da Lorena: leitura pública somente quando publicado;
+  // escrita exclusivamente por proprietário ativo da plataforma.
+  match /publicInvites/{inviteId}{
+    allow get: if (resource.data.publicado == true) || owner();
+    allow list: if false;
+    allow create,update: if owner() && inviteId == 'lorena-15'
+      && request.resource.data.keys().hasOnly(['titulo','mensagem','data','horario','local','endereco','dressCode','presentes','presentesUrl','encerramento','habilitarRsvp','publicado','cover','photos','updatedAt','updatedBy'])
+      && request.resource.data.updatedBy == request.auth.uid
+      && request.resource.data.updatedAt == request.time
+      && request.resource.data.titulo is string && request.resource.data.titulo.size() <= 90
+      && request.resource.data.mensagem is string && request.resource.data.mensagem.size() <= 4000
+      && request.resource.data.data is string && request.resource.data.data.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+      && request.resource.data.horario is string && request.resource.data.horario.size() <= 5
+      && request.resource.data.local is string && request.resource.data.local.size() <= 140
+      && request.resource.data.endereco is string && request.resource.data.endereco.size() <= 260
+      && request.resource.data.dressCode is string && request.resource.data.dressCode.size() <= 1500
+      && request.resource.data.presentes is string && request.resource.data.presentes.size() <= 1500
+      && request.resource.data.presentesUrl is string && request.resource.data.presentesUrl.size() <= 500
+      && request.resource.data.encerramento is string && request.resource.data.encerramento.size() <= 1500
+      && request.resource.data.habilitarRsvp is bool && request.resource.data.publicado is bool
+      && request.resource.data.cover is string && request.resource.data.cover.size() <= 2000
+      && request.resource.data.photos is list && request.resource.data.photos.size() <= 12;
+    allow delete: if false;
+  }
   match /platformOwners/{uid}{allow get: if signedIn() && (uid == request.auth.uid || owner());allow list: if owner();allow write: if false;}
   match /platformStaff/{uid}{allow get: if signedIn() && (uid == request.auth.uid || owner());allow list: if owner();allow create,update: if owner() && uid != request.auth.uid && request.resource.data.uid == uid && request.resource.data.active is bool && request.resource.data.allClients is bool && request.resource.data.tenantIds is list && request.resource.data.permissions is list && request.resource.data.permissions.hasOnly(knownPermissions()) && request.resource.data.role == 'PERSONALIZADO' && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time;allow delete: if false;}
   match /memberships/{id}{
