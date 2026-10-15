@@ -94,3 +94,24 @@ test('Após upload o manifesto mantém material e conteúdo após consulta poste
 });
 
 test('Painel trata API de rede ausente sem acesso direto a length',async()=>{const r=await fetch(ROOT+'/admin');assert.equal(r.status,200);const html=await r.text();assert.match(html,/Array\.isArray\(net\.data\?\.ips\)/);assert.match(html,/servidor Node\.js está desatualizado/);});
+
+test('Biblioteca: renomeia e despublica material sem apagar arquivo histórico',async()=>{
+ const auth={'X-Admin-Token':'test-admin-secret','Content-Type':'application/json'};
+ const call=(url,method,body)=>fetch(ROOT+url,{method,headers:auth,body:JSON.stringify(body)});
+ let r=await call('/admin/actions','POST',{title:'Blitz Biblioteca v3',date:'',description:'Testes',materials:['orientacoes']});
+ assert.equal(r.status,201);const id=(await r.json()).actionId;
+ const pdf=Buffer.from('%PDF-1.4\nTeste biblioteca\n%%EOF');
+ r=await call('/admin/actions/'+id+'/materials','POST',{filename:'cartilha.pdf',title:'Material Inicial',data:pdf.toString('base64')});
+ assert.equal(r.status,200);const material=(await r.json()).result;
+ const url='/admin/actions/'+id+'/materials/'+material.id;
+ r=await call(url,'PATCH',{title:'Material Atualizado'});assert.equal(r.status,200);
+ r=await fetch(ROOT+'/a/'+id);let html=await r.text();assert.match(html,/Material Atualizado/);assert.match(html,/class="cards"/);
+ r=await call(url,'DELETE',{});assert.equal(r.status,200);
+ r=await fetch(ROOT+'/a/'+id);html=await r.text();assert.doesNotMatch(html,/Material Atualizado/);
+ r=await fetch(ROOT+'/actions/'+id+'/'+material.path);assert.equal(r.status,403);
+ r=await call('/admin/actions/blitz-capacete-demo/materials/'+material.id,'DELETE',{});assert.equal(r.status,400);
+});
+test('Gestor apresenta biblioteca visual com recursos de gerenciamento',async()=>{
+ const r=await fetch(ROOT+'/admin'),html=await r.text();
+ assert.equal(r.status,200);assert.match(html,/id="libraryList"/);assert.match(html,/Renomear/);assert.match(html,/Despublicar/);
+});
