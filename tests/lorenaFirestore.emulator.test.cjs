@@ -95,3 +95,15 @@ test('QR Educação privado no rascunho e público somente após publicação',a
  await assertSucceeds(updateDoc(target,{published:false,updatedBy:'owner-test',updatedAt:serverTimestamp()}));
  await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(),'qrPublic',qrId)));
 });
+
+test('Convites360: rascunhos privados e convites publicados acessíveis sem login',async()=>{
+ const id='af2a615c-4bd5-4c72-9025-2aa93dd427ee',owner=env.authenticatedContext('owner-test').firestore(),target=doc(owner,'invites360',id);
+ const d={tipo:'social',titulo:'Festa de teste',mensagem:'Celebração',data:'2027-02-27',horario:'20:00',local:'',endereco:'',estilo:'encantado',foto:'',musica:'',whatsapp:'',instrucoes:'',publicado:false,createdBy:'owner-test',createdAt:serverTimestamp(),updatedBy:'owner-test',updatedAt:serverTimestamp()};
+ await assertSucceeds(setDoc(target,d));
+ await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(),'invites360',id)));
+ await assertFails(setDoc(doc(env.authenticatedContext('visitor-test').firestore(),'invites360',id),d));
+ await assertSucceeds(updateDoc(target,{publicado:true,updatedBy:'owner-test',updatedAt:serverTimestamp()}));
+ await assertSucceeds(getDoc(doc(env.unauthenticatedContext().firestore(),'invites360',id)));
+ await assertSucceeds(updateDoc(target,{publicado:false,updatedBy:'owner-test',updatedAt:serverTimestamp()}));
+ await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(),'invites360',id)));
+});
