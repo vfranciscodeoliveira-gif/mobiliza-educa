@@ -48,7 +48,7 @@ function localIPv4(){
  for(const [name,entries] of Object.entries(networkInterfaces()))for(const item of entries||[]){
   if(item.family!=='IPv4'||item.internal)continue;
   const ip=item.address;
-  if(!/^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.)/.test(ip))continue;
+  if(!/^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(ip))continue;
   const penalty=/vEthernet|Virtual|VMware|Docker|Loopback|Tailscale|Hyper-V|WSL/i.test(name)?10:0;
   ips.push({ip,interface:name,penalty});
  }
