@@ -1,3 +1,4 @@
+import {renderQREducacao} from './modules/qrEducacao.js?v=2';
 import {mountProtocolCenter,unmountProtocolCenter,openUnreadNotifications} from './modules/protocolCenter.js?v=4';
 import {renderAgendaOverview} from './modules/agendaOverview.js?v=1';
 import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed} from './core/cloudAccess.js?v=1';
@@ -124,6 +125,20 @@ function renderAuthenticated(){
   qs('#adminSidebarNav').innerHTML=adminModules.map(sidebarButton).join('');
   qs('#adminModuleGrid').innerHTML=adminModules.map(moduleCard).join('');
   renderInviteShortcut();
+  const qrAllowed=moduleState('admin-eventos').allowed;
+  const grid=qs('#adminModuleGrid'),sidebar=qs('#adminSidebarNav');
+  const qrCard=document.createElement('article');
+  qrCard.className='admin-online-module'+(qrAllowed?'':' disabled');
+  qrCard.innerHTML='<div class="admin-online-module-icon">📱</div><div class="admin-online-module-copy"><h3>QR Educação 360</h3><p>Blitz, campanhas e palestras: materiais digitais e QR por ação da agenda.</p><div class="module-meta"><span class="chip">Blitz</span><span class="chip">QR</span></div></div>';
+  const qrOpen=document.createElement('button');qrOpen.className='btn primary';qrOpen.textContent='Gerenciar QR Codes';qrOpen.disabled=!qrAllowed;
+  qrOpen.onclick=()=>{if(!moduleState('admin-eventos').allowed)return;renderQREducacao(qs('#adminHost'));qs('#adminDialog').showModal();};
+  qrCard.append(qrOpen);
+  const eventCard=grid.querySelector('[data-admin-module="admin-eventos"]')?.closest('.admin-online-module');
+  if(eventCard)eventCard.insertAdjacentElement('afterend',qrCard);else grid.append(qrCard);
+  const nav=document.createElement('button');nav.type='button';nav.className='admin-online-nav-item';nav.innerHTML='<span>📱</span><b>QR Educação 360</b>';nav.disabled=!qrAllowed;nav.onclick=qrOpen.onclick;
+  const eventNav=sidebar.querySelector('[data-admin-module="admin-eventos"]');
+  if(eventNav)eventNav.insertAdjacentElement('afterend',nav);else sidebar.append(nav);
+
   bindModules();
   mountProtocolCenter();
   renderAgendaOverview(qs('#adminAgendaOverview'),options=>openAdminModule('admin-eventos',qs('#adminDialog'),qs('#adminHost'),qs('#authDialog'),options));
