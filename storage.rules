@@ -12,8 +12,11 @@ service firebase.storage {
     }
 
     match /public-invites/lorena-15/{fileName} {
-      allow read: if firestore.exists(/databases/(default)/documents/publicInvites/lorena-15)
-        && firestore.get(/databases/(default)/documents/publicInvites/lorena-15).data.publicado == true;
+      allow read: if (signedIn()
+        && firestore.exists(/databases/(default)/documents/platformOwners/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/platformOwners/$(request.auth.uid)).data.active == true)
+        || (firestore.exists(/databases/(default)/documents/publicInvites/lorena-15)
+        && firestore.get(/databases/(default)/documents/publicInvites/lorena-15).data.publicado == true);
       allow write: if signedIn()
         && firestore.exists(/databases/(default)/documents/platformOwners/$(request.auth.uid))
         && firestore.get(/databases/(default)/documents/platformOwners/$(request.auth.uid)).data.active == true
