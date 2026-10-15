@@ -26,3 +26,5 @@ test('visual options are applied to public page only after approved publication'
  assert.match(invite,/effects-off/);
  for(const key of ['estilo','paleta','corFundo','corDestaque','corTitulo','fundo','fonte','animacoes'])assert.ok(rules.includes("'"+key+"'"));
 });
+
+test('controles de musica e experiencia sao persistidos e aplicados',()=>{for(const name of ['musicaAtiva','musicaArquivo','musicaVolume','abrirEnvelope','mostrarContador','mostrarGaleria','mostrarPresentes']){assert.ok(editor.includes('id="'+name+'"'));assert.ok(rules.includes("'"+name+"'"));assert.ok(invite.includes('data.'+name))}assert.match(invite,/new Audio/);assert.match(editor,/testeMusica/);});

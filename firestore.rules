@@ -19,7 +19,7 @@ service cloud.firestore {
     allow get: if owner() || (resource != null && resource.data.publicado == true);
     allow list: if false;
     allow create,update: if owner() && inviteId == 'lorena-15'
-      && request.resource.data.keys().hasOnly(['titulo','mensagem','data','horario','local','endereco','dressCode','presentes','presentesUrl','encerramento','habilitarRsvp','publicado','cover','photos','estilo','paleta','corFundo','corDestaque','corTitulo','fundo','fonte','animacoes','updatedAt','updatedBy'])
+      && request.resource.data.keys().hasOnly(['titulo','mensagem','data','horario','local','endereco','dressCode','presentes','presentesUrl','encerramento','habilitarRsvp','publicado','cover','photos','estilo','paleta','corFundo','corDestaque','corTitulo','fundo','fonte','animacoes','musicaAtiva','musicaArquivo','musicaVolume','abrirEnvelope','mostrarContador','mostrarGaleria','mostrarPresentes','updatedAt','updatedBy'])
       && request.resource.data.updatedBy == request.auth.uid
       && request.resource.data.updatedAt == request.time
       && request.resource.data.titulo is string && request.resource.data.titulo.size() <= 90
@@ -42,7 +42,15 @@ service cloud.firestore {
       && request.resource.data.corFundo is string && request.resource.data.corFundo.matches('^#[A-Fa-f0-9]{6}$')
       && request.resource.data.corDestaque is string && request.resource.data.corDestaque.matches('^#[A-Fa-f0-9]{6}$')
       && request.resource.data.corTitulo is string && request.resource.data.corTitulo.matches('^#[A-Fa-f0-9]{6}$')
-      && request.resource.data.animacoes is bool;
+      && request.resource.data.animacoes is bool
+      && request.resource.data.musicaAtiva is bool
+      && request.resource.data.musicaArquivo is string && request.resource.data.musicaArquivo.size() <= 100
+      && (!request.resource.data.musicaAtiva || request.resource.data.musicaArquivo.matches('[A-Za-z0-9][A-Za-z0-9._-]{0,94}[.]mp3'))
+      && request.resource.data.musicaVolume is int && request.resource.data.musicaVolume >= 0 && request.resource.data.musicaVolume <= 100
+      && request.resource.data.abrirEnvelope is bool
+      && request.resource.data.mostrarContador is bool
+      && request.resource.data.mostrarGaleria is bool
+      && request.resource.data.mostrarPresentes is bool;
     allow delete: if false;
   }
   match /platformOwners/{uid}{allow get: if signedIn() && (uid == request.auth.uid || owner());allow list: if owner();allow write: if false;}

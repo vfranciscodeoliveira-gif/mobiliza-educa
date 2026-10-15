@@ -20,7 +20,7 @@
 .wrap[data-estilo="noite"] .hero:before{content:"✦ ☾ ✧ ✦"}
 .wrap[data-estilo="moderno"] .card,.wrap[data-estilo="moderno"] .tile{border-radius:5px}
 body.effects-off .sky{display:none}
-</style></head><body>
+</style><style>.count[hidden],.act[hidden],.float-music[hidden],.section[hidden]{display:none!important}</style></head><body>
 <div class="sky" id="sky" aria-hidden="true"></div>
 <button class="float-music" id="music" aria-pressed="false">♫ Tocar música</button>
 <main class="wrap" data-estilo="encantado" data-fundo="estrelas" data-fonte="caligrafia"><header class="hero" id="inicio">
@@ -39,7 +39,12 @@ const sky=document.getElementById('sky');for(let i=0;i<42;i++){let e=document.cr
 const portrait=document.getElementById('portrait');const img=new Image();img.onload=()=>portrait.classList.add('loaded');img.src='capa-lorena.webp';
 let eventDate='2027-02-27',eventTime='20:00';function countdown(){const target=new Date(eventDate+'T'+eventTime+':00-03:00').getTime(),v=Math.max(0,Math.floor((target-Date.now())/1000)),d=Math.floor(v/86400),h=Math.floor(v%86400/3600),m=Math.floor(v%3600/60),s=v%60;for(const [k,n] of [['days',d],['hours',h],['minutes',m],['seconds',s]])document.getElementById(k).textContent=String(n).padStart(2,'0')}countdown();setInterval(countdown,1000);
 const modal=document.getElementById('modal');document.getElementById('close').onclick=()=>modal.classList.remove('show');modal.onclick=e=>{if(e.target===modal)modal.classList.remove('show')};document.querySelectorAll('[data-info]').forEach(b=>b.onclick=()=>{let obj={confirmar:['💗 Confirmar presença','A confirmação de presença será disponibilizada quando a família concluir os detalhes da festa. Nenhuma resposta é registrada nesta prévia.'],presentes:['🎁 Sugestão de presentes','As sugestões de presentes serão divulgadas em breve.'],dress:['👗 Dress code','O traje recomendado será informado pela família em breve.']}[b.dataset.info];document.getElementById('dialogBody').innerHTML='<h3>'+obj[0]+'</h3><p>'+obj[1]+'</p>';modal.classList.add('show')});document.addEventListener('keydown',e=>{if(e.key==='Escape')modal.classList.remove('show')});
-let ctx=null,timer=null,on=false;document.getElementById('music').onclick=async()=>{let btn=document.getElementById('music');if(on){clearInterval(timer);on=false;btn.textContent='♫ Tocar música';btn.setAttribute('aria-pressed','false');return}try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();let notes=[261.63,329.63,392,523.25,493.88,392,349.23,293.66,329.63,392,440,392],i=0;function note(){let osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=notes[i++%notes.length];gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.035,ctx.currentTime+.09);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.44);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.46)}on=true;note();timer=setInterval(note,510);btn.textContent='♫ Pausar música';btn.setAttribute('aria-pressed','true')}catch{btn.textContent='♫ Som indisponível'}};
+// O som só inicia após interação explícita do visitante.
+let ctx=null,timer=null,on=false,invitationAudio=null,musicSettings={enabled:false,file:'',volume:35};
+const musicButton=document.getElementById('music');
+function stopSound(){if(timer){clearInterval(timer);timer=null}if(invitationAudio){invitationAudio.pause();invitationAudio.currentTime=0}on=false;musicButton.textContent='♫ Tocar música';musicButton.setAttribute('aria-pressed','false')}
+function demoNote(){const notes=[261.63,329.63,392,523.25,493.88,392,349.23,293.66,329.63,392,440,392];demoNote.i=(demoNote.i||0)+1;const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=notes[demoNote.i%notes.length];gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.03,ctx.currentTime+.09);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.44);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.46)}
+musicButton.onclick=async()=>{if(on){stopSound();return}try{if(musicSettings.enabled&&musicSettings.file){if(!invitationAudio){invitationAudio=new Audio(new URL('./musicas/'+encodeURIComponent(musicSettings.file),location.href).href);invitationAudio.loop=true;invitationAudio.volume=musicSettings.volume/100;invitationAudio.onerror=()=>{stopSound();musicButton.textContent='♫ Áudio indisponível'}}await invitationAudio.play()}else{ctx=ctx||new(window.AudioContext||window.webkitAudioContext)();await ctx.resume();demoNote();timer=setInterval(demoNote,510)}on=true;musicButton.textContent='♫ Pausar música';musicButton.setAttribute('aria-pressed','true')}catch(e){stopSound();musicButton.textContent='♫ Áudio indisponível'}};
 </script>
 
 <script type="module">
@@ -61,6 +66,13 @@ try{
   wrap.style.setProperty('--custom-accent',validHex(data.corDestaque)?data.corDestaque:'#f7ce87');
   wrap.style.setProperty('--custom-title',validHex(data.corTitulo)?data.corTitulo:'#ffbce9');
   document.body.classList.toggle('effects-off',data.animacoes===false);
+  const mp3Valid=typeof data.musicaArquivo==='string'&&/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,94}\.mp3$/i.test(data.musicaArquivo);
+  musicSettings={enabled:data.musicaAtiva===true&&mp3Valid,file:mp3Valid?data.musicaArquivo:'',volume:Number.isInteger(data.musicaVolume)&&data.musicaVolume>=0&&data.musicaVolume<=100?data.musicaVolume:35};
+  if(data.musicaAtiva===false)musicButton.hidden=true;
+  if(data.abrirEnvelope===false){document.getElementById('overlay').classList.add('hidden')}
+  if(data.mostrarContador===false)document.querySelector('.count').hidden=true;
+  if(data.mostrarPresentes===false)document.querySelectorAll('[data-info="presentes"],[data-info="dress"]').forEach(el=>el.hidden=true);
+
 
   text('.headline p',data.mensagem);
   text('.hero .eyebrow','Uma noite encantada');
@@ -90,7 +102,7 @@ try{
   });
   function showInfo(title,body){const container=document.getElementById('dialogBody');container.replaceChildren();const heading=document.createElement('h3'),paragraph=document.createElement('p');heading.textContent=title;paragraph.textContent=body;container.append(heading,paragraph);document.getElementById('modal').classList.add('show')}
   const photos=Array.isArray(data.photos)?data.photos.slice(0,12):[];
-  if(photos.length){document.getElementById('galeria').hidden=false;for(const photo of photos){if(!photo?.url||!String(photo.url).startsWith('https://'))continue;const im=document.createElement('img');im.src=photo.url;im.alt='Recordação de Lorena';im.loading='lazy';im.style.cssText='height:230px;width:170px;object-fit:cover;flex:none;border-radius:16px;border:1px solid #f1c6e3;scroll-snap-align:center';document.getElementById('fotosPublicas').append(im)}}
+  if(photos.length&&data.mostrarGaleria!==false){document.getElementById('galeria').hidden=false;for(const photo of photos){if(!photo?.url||!String(photo.url).startsWith('https://'))continue;const im=document.createElement('img');im.src=photo.url;im.alt='Recordação de Lorena';im.loading='lazy';im.style.cssText='height:230px;width:170px;object-fit:cover;flex:none;border-radius:16px;border:1px solid #f1c6e3;scroll-snap-align:center';document.getElementById('fotosPublicas').append(im)}}
  }
 }catch(error){console.info('Convite exibido em modo padrão; configuração pública ainda indisponível.')}
 </script></body></html>
