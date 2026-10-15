@@ -63,3 +63,16 @@ test('proprietario pode recolher convite publicado e leitura publica cessa',asyn
 test('musica invalida nao pode ser publicada',async()=>{const db=env.authenticatedContext('owner-test').firestore();await assertFails(updateDoc(doc(db,eventPath),{musicaAtiva:true,musicaArquivo:'../secreto.mp3',updatedBy:'owner-test',updatedAt:serverTimestamp()}));});
 
 test('WhatsApp invalido nao permite ativar RSVP',async()=>{const db=env.authenticatedContext('owner-test').firestore();await assertFails(updateDoc(doc(db,eventPath),{habilitarRsvp:true,rsvpWhatsapp:'551899',updatedBy:'owner-test',updatedAt:serverTimestamp()}));});
+
+test('familias RSVP privadas: proprietário tem acesso e visitantes não',async()=>{
+ const id='a6d2cd0a-cb69-47b1-9a18-1d3e1c705eaf';
+ const family=doc(env.authenticatedContext('owner-test').firestore(),'inviteGuestFamilies',id);
+ const record={nome:'Família Teste',telefone:'',quantidade:3,resposta:'pendente',acompanhantes:'',observacao:'',checkedIn:false,checkedAt:null,createdBy:'owner-test',createdAt:serverTimestamp(),updatedBy:'owner-test',updatedAt:serverTimestamp()};
+ await assertSucceeds(setDoc(family,record));
+ await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(),'inviteGuestFamilies',id)));
+ await assertFails(getDoc(doc(env.authenticatedContext('visitor-test').firestore(),'inviteGuestFamilies',id)));
+ await assertFails(setDoc(doc(env.authenticatedContext('visitor-test').firestore(),'inviteGuestFamilies',id),record));
+ await assertSucceeds(updateDoc(family,{resposta:'confirmado',updatedBy:'owner-test',updatedAt:serverTimestamp()}));
+ await assertFails(updateDoc(family,{observacao:'x',createdBy:'visitor-test',updatedBy:'owner-test',updatedAt:serverTimestamp()}));
+ await assertSucceeds(updateDoc(family,{checkedIn:true,checkedAt:serverTimestamp(),updatedBy:'owner-test',updatedAt:serverTimestamp()}));
+});
