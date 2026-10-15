@@ -76,3 +76,22 @@ test('familias RSVP privadas: proprietário tem acesso e visitantes não',async(
  await assertFails(updateDoc(family,{observacao:'x',createdBy:'visitor-test',updatedBy:'owner-test',updatedAt:serverTimestamp()}));
  await assertSucceeds(updateDoc(family,{checkedIn:true,checkedAt:serverTimestamp(),updatedBy:'owner-test',updatedAt:serverTimestamp()}));
 });
+
+test('QR Educação privado no rascunho e público somente após publicação',async()=>{
+ const qrId='0123456789abcdefabcd',tenant='qr-tenant-test',appt='appt-qr';
+ await env.withSecurityRulesDisabled(async ctx=>{
+  await setDoc(doc(ctx.firestore(),'tenants',tenant),{name:'Teste'});
+  await setDoc(doc(ctx.firestore(),'tenants',tenant,'appointments',appt),{tenantId:tenant,nome:'Blitz educativa'});
+ });
+ const owner=env.authenticatedContext('owner-test').firestore();
+ const target=doc(owner,'qrPublic',qrId);
+ const input={tenantId:tenant,actionId:appt,title:'Blitz capacete',description:'Orientações',materials:[{id:'m1',title:'Guia',url:'https://example.org/guia.pdf',type:'pdf'}],published:false,updatedBy:'owner-test',updatedAt:serverTimestamp()};
+ await assertSucceeds(setDoc(target,input));
+ await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(),'qrPublic',qrId)));
+ await assertFails(setDoc(doc(env.unauthenticatedContext().firestore(),'qrPublic','aaaaaaaaaaaaaaaaaaaa'),input));
+ await assertFails(setDoc(doc(env.authenticatedContext('visitor-test').firestore(),'qrPublic','bbbbbbbbbbbbbbbbbbbb'),input));
+ await assertSucceeds(updateDoc(target,{published:true,updatedBy:'owner-test',updatedAt:serverTimestamp()}));
+ await assertSucceeds(getDoc(doc(env.unauthenticatedContext().firestore(),'qrPublic',qrId)));
+ await assertSucceeds(updateDoc(target,{published:false,updatedBy:'owner-test',updatedAt:serverTimestamp()}));
+ await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(),'qrPublic',qrId)));
+});
