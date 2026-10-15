@@ -15,6 +15,34 @@ service cloud.firestore {
   function validMember(t,uid,d){return uid != request.auth.uid && d.uid == uid && d.tenantId == t && d.active is bool && d.role in ['GESTOR','PERSONALIZADO'] && d.permissions is list && d.permissions.hasOnly(knownPermissions()) && d.allSchools is bool && d.schoolIds is list && d.schoolIds.size() <= 100 && d.name is string && d.email is string && d.updatedBy == request.auth.uid && d.updatedAt == request.time && (owner() || gestor(t) || (staff(t) && d.role == 'PERSONALIZADO' && d.permissions.hasOnly(get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.permissions)));}
   // Convite público da Lorena: leitura pública somente quando publicado;
   // escrita exclusivamente por proprietário ativo da plataforma.
+  // Central RSVP 360: informações pessoais de famílias não são públicas.
+  // Somente proprietário ativo administra famílias, respostas e check-in.
+  match /inviteGuestFamilies/{familyId} {
+    function validGuest(d) {
+      return familyId.matches('[a-f0-9-]{36}')
+        && d.keys().hasOnly(['nome','telefone','quantidade','resposta','acompanhantes','observacao','checkedIn','checkedAt','createdBy','createdAt','updatedBy','updatedAt'])
+        && d.keys().hasAll(['nome','telefone','quantidade','resposta','acompanhantes','observacao','checkedIn','checkedAt','createdBy','createdAt','updatedBy','updatedAt'])
+        && d.nome is string && d.nome.size() >= 2 && d.nome.size() <= 120
+        && d.telefone is string && d.telefone.size() <= 25
+        && d.quantidade is int && d.quantidade >= 1 && d.quantidade <= 30
+        && d.resposta in ['pendente','confirmado','recusado']
+        && d.acompanhantes is string && d.acompanhantes.size() <= 1000
+        && d.observacao is string && d.observacao.size() <= 1000
+        && d.checkedIn is bool
+        && (d.checkedAt == null || d.checkedAt is timestamp)
+        && d.createdBy is string && d.createdAt is timestamp
+        && d.updatedBy == request.auth.uid && d.updatedAt == request.time;
+    }
+    allow get,list: if owner();
+    allow create: if owner() && validGuest(request.resource.data)
+      && request.resource.data.createdBy == request.auth.uid
+      && request.resource.data.createdAt == request.time
+      && request.resource.data.checkedIn == false && request.resource.data.checkedAt == null;
+    allow update: if owner() && validGuest(request.resource.data)
+      && request.resource.data.createdBy == resource.data.createdBy
+      && request.resource.data.createdAt == resource.data.createdAt;
+    allow delete: if owner();
+  }
   match /publicInvites/{inviteId}{
     allow get: if owner() || (resource != null && resource.data.publicado == true);
     allow list: if false;
