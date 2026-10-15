@@ -43,6 +43,39 @@ service cloud.firestore {
       && request.resource.data.createdAt == resource.data.createdAt;
     allow delete: if owner();
   }
+  // Convites360: rascunhos e listagem disponíveis somente a proprietários.
+  // Publicação expõe exclusivamente os campos deste documento; não incluir dados pessoais.
+  match /invites360/{inviteId} {
+    function validInvite(d) {
+      return inviteId.matches('[a-f0-9-]{36}')
+        && d.keys().hasOnly(['tipo','titulo','mensagem','data','horario','local','endereco','estilo','foto','musica','whatsapp','instrucoes','publicado','createdBy','createdAt','updatedBy','updatedAt'])
+        && d.keys().hasAll(['tipo','titulo','mensagem','data','horario','local','endereco','estilo','foto','musica','whatsapp','instrucoes','publicado','createdBy','createdAt','updatedBy','updatedAt'])
+        && d.tipo in ['social','educacional','institucional','corporativo']
+        && d.titulo is string && d.titulo.size() >= 3 && d.titulo.size() <= 110
+        && d.mensagem is string && d.mensagem.size() <= 2500
+        && d.data is string && d.data.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && d.horario is string && d.horario.size() <= 5
+        && d.local is string && d.local.size() <= 160
+        && d.endereco is string && d.endereco.size() <= 260
+        && d.estilo in ['encantado','moderno','floral','institucional']
+        && d.foto is string && d.foto.size() <= 1200
+        && d.musica is string && d.musica.size() <= 1200
+        && d.whatsapp is string && d.whatsapp.size() <= 15
+        && d.instrucoes is string && d.instrucoes.size() <= 1000
+        && d.publicado is bool
+        && d.createdBy is string && d.createdAt is timestamp
+        && d.updatedBy == request.auth.uid && d.updatedAt == request.time;
+    }
+    allow get: if owner() || (resource != null && resource.data.publicado == true);
+    allow list: if owner();
+    allow create: if owner() && validInvite(request.resource.data)
+      && request.resource.data.createdBy == request.auth.uid
+      && request.resource.data.createdAt == request.time;
+    allow update: if owner() && validInvite(request.resource.data)
+      && request.resource.data.createdBy == resource.data.createdBy
+      && request.resource.data.createdAt == resource.data.createdAt;
+    allow delete: if owner();
+  }
   match /publicInvites/{inviteId}{
     allow get: if owner() || (resource != null && resource.data.publicado == true);
     allow list: if false;
