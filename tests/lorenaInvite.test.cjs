@@ -5,3 +5,17 @@ test('publisher has authentication, role check and no anonymous edits',()=>{asse
 test('images delete only after successful Firestore save',()=>{const savePos=editor.indexOf('await setDoc(dataRef'),deletePos=editor.indexOf('await deleteObject(ref(storage,path))');assert.ok(savePos>=0&&deletePos>savePos);assert.match(editor,/pendingDeletes\.push\(p\.path\)/)});
 test('public page uses published document, countdown and safe dialog output',()=>{assert.match(invite,/snap\.data\(\)\.publicado===true/);assert.match(invite,/eventDate=data\.data/);assert.match(invite,/container\.replaceChildren\(\)/);assert.ok(invite.indexOf('id="galeria"')<invite.indexOf('</main>'))});
 test('public invitation has no active RSVP until secure backend exists',()=>{assert.match(invite,/Confirmações ainda não habilitadas/);assert.doesNotMatch(invite,/collection\(db,\s*['"]confirmacoes/);});
+
+test('editor exposes configurable layouts, colors and animation controls',()=>{
+ for(const id of ['estilo','paleta','corFundo','corDestaque','corTitulo','fundo','fonte','animacoes'])assert.match(editor,new RegExp('id="'+id+'"'));
+ for(const mode of ['encantado','moderno','floral','noite'])assert.ok(editor.includes('value="'+mode+'"'));
+ assert.match(editor,/presetColors/);
+ assert.match(editor,/function preview\(\)/);
+});
+test('visual options are applied to public page only after approved publication',()=>{
+ assert.match(invite,/snap\.data\(\)\.publicado===true/);
+ assert.match(invite,/allowedStyle\.includes\(data\.estilo\)/);
+ assert.match(invite,/validHex\(data\.corFundo\)/);
+ assert.match(invite,/effects-off/);
+ for(const key of ['estilo','paleta','corFundo','corDestaque','corTitulo','fundo','fonte','animacoes'])assert.ok(rules.includes("'"+key+"'"));
+});
