@@ -19,10 +19,20 @@ concurrency:
   cancel-in-progress: false
 jobs:
   security-rules:
-    if: ${{ github.ref == 'refs/heads/main' && inputs.project_confirmation == 'mobiliza-educa' && inputs.publish_rules }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     environment: firebase-production
     runs-on: ubuntu-latest
     steps:
+      - name: Verificar confirmação antes de publicar
+        env:
+          PROJECT_CONFIRMATION: ${{ inputs.project_confirmation }}
+          PUBLISH_RULES: ${{ inputs.publish_rules }}
+        run: |
+          if [ "$PROJECT_CONFIRMATION" != "mobiliza-educa" ] || [ "$PUBLISH_RULES" != "true" ]; then
+            echo "::error::Publicação NÃO autorizada. Digite mobiliza-educa e MARQUE a caixa de confirmação em uma nova execução Run workflow."
+            exit 1
+          fi
+          echo "Confirmação válida; etapa de publicação autorizada."
       - uses: actions/checkout@v4
       - name: Autenticação OIDC sem chave privada
         uses: google-github-actions/auth@v2
