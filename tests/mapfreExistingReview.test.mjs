@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';const s=await readFile(new URL('../js/core/mapfreSchedule.js',import.meta.url),'utf8');const {mapfreExistingReview,mapfreAssociation}=await import('data:text/javascript;base64,'+Buffer.from(s).toString('base64'));
+test('Identifica histórico MAPFRE sem projeto',()=>{const rows=mapfreExistingReview([{id:'1',nome:'Na Pista Certa — MAPFRE',dataInicio:'2026-10-20',status:'Confirmado'}]);assert.equal(rows.length,1);});
+test('Não confunde projeto explicitamente diferente',()=>{assert.equal(mapfreAssociation({projetoId:'agente-mirim',nome:'MAPFRE'}),'other');});
+test('Não soma reserva cancelada',()=>{assert.equal(mapfreExistingReview([{nome:'Pista Certa',dataInicio:'2026-10-20',status:'Cancelado'}]).length,0);});
