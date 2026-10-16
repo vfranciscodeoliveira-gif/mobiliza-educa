@@ -17,7 +17,7 @@ const questions=[
 {q:'Se você estiver cansado ou com sonolência, a atitude mais segura é:',a:['Abrir a viseira e acelerar','Parar em lugar seguro e descansar antes de continuar','Tomar uma bebida estimulante e ignorar o cansaço'],c:1,why:'Fadiga compromete atenção, julgamento e reflexos. Interromper a viagem é a escolha preventiva.'}
 ];
 const $=id=>document.getElementById(id);let index=0,hits=0,answered=false,sessionId='';
-const token=()=>{try{return crypto.randomUUID()}catch{return String(Date.now())+'-'+Math.random()}};
+const token=()=>{if(typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function')return crypto.randomUUID();return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const n=Math.floor(Math.random()*16);return(c==='x'?n:(n&3|8)).toString(16)})};
 const cfg={actionId:'blitz-capacete-demo',revision:2};
 let pendingFinish=null;
 async function sendEvent(message){const response=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(message),cache:'no-store'});if(!response.ok){let detail='HTTP '+response.status;try{detail=(await response.json()).error||detail}catch{}throw Error(detail)}const result=await response.json();if(!result.ok)throw Error('Servidor não confirmou registro');return result}
