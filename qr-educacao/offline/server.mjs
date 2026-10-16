@@ -86,6 +86,23 @@ async function changeMaterial(id,materialId,method,data){
  }
  throw Error('Método inválido');
 }
+
+function buildFieldReport(events,actions){
+ const result={generatedAt:new Date().toISOString(),totals:{pageViews:0,uniqueSessions:0,materialOpens:0,quizStarts:0,quizFinishes:0,averageScore:null},actions:[],daily:[]};
+ const days=new Map();let totalScore=0;
+ for(const action of actions){
+  const ev=events.filter(x=>x.actionId===action.actionId);
+  const sessions=new Set(ev.filter(x=>x.type==='page_view'&&x.sessionId).map(x=>x.sessionId));
+  const views=ev.filter(x=>x.type==='page_view').length,opens=ev.filter(x=>x.type==='material_open'),starts=ev.filter(x=>x.type==='quiz_start').length,finishes=ev.filter(x=>x.type==='quiz_finish'&&Number.isInteger(x.score));
+  const averageScore=finishes.length?Number((finishes.reduce((sum,x)=>sum+x.score,0)/finishes.length).toFixed(2)):null;
+  const materials=action.materials.map(m=>({id:m.id,title:m.title,opens:opens.filter(x=>x.materialId===m.id).length})).sort((a,b)=>b.opens-a.opens);
+  result.actions.push({actionId:action.actionId,title:action.title,date:action.date,location:action.location,views,uniqueSessions:sessions.size,materialOpens:opens.length,quizStarts:starts,quizFinishes:finishes.length,averageScore,materials});
+  result.totals.pageViews+=views;result.totals.uniqueSessions+=sessions.size;result.totals.materialOpens+=opens.length;result.totals.quizStarts+=starts;result.totals.quizFinishes+=finishes.length;totalScore+=finishes.reduce((sum,x)=>sum+x.score,0);
+ }
+ result.totals.averageScore=result.totals.quizFinishes?Number((totalScore/result.totals.quizFinishes).toFixed(2)):null;
+ for(const event of events){const date=typeof event.createdAt==='string'?event.createdAt.slice(0,10):'';if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))continue;const day=days.get(date)||{date,views:0,materialOpens:0,quizFinishes:0};if(event.type==='page_view')day.views++;if(event.type==='material_open')day.materialOpens++;if(event.type==='quiz_finish')day.quizFinishes++;days.set(date,day)}
+ result.daily=[...days.values()].sort((a,b)=>a.date.localeCompare(b.date));return result;
+}
 async function allEvents(){try{return(await readFile(join(DATA,'events.ndjson'),'utf8')).trim().split('\n').filter(Boolean).map(x=>JSON.parse(x))}catch(e){if(e.code==='ENOENT')return[];throw e}}
 const seen=new Set();let lock=Promise.resolve();
 async function accept(e){if(!e||typeof e!=='object'||!(/^[0-9a-f-]{36}$/i.test(e.eventId||''))||!ID.test(e.actionId||'')||!['page_view','material_open','quiz_start','quiz_finish'].includes(e.type)||typeof e.sessionId!=='string'||e.sessionId.length>80)throw Error('Evento inválido');const m=await manifest(e.actionId);if(e.revision!==m.revision)throw Error('Revisão divergente');if(e.type==='material_open'&&!m.materials.some(x=>x.id===e.materialId))throw Error('Material inválido');if(['quiz_start','quiz_finish'].includes(e.type)&&!m.materials.some(x=>x.id==='quiz-motociclista'))throw Error('Quiz indisponível');if(e.type==='quiz_finish'&&(!Number.isInteger(e.score)||e.score<0||e.score>8))throw Error('Pontuação inválida');const result={eventId:e.eventId,sessionId:e.sessionId,actionId:e.actionId,revision:e.revision,type:e.type,materialId:e.type==='material_open'?e.materialId:null,score:e.type==='quiz_finish'?e.score:null,createdAt:new Date().toISOString(),source:'offline'};let created=false;
@@ -104,6 +121,7 @@ async function handler(req,res){try{
   const result=await changeMaterial(bits[0],bits[2],req.method,buf?JSON.parse(buf):{});
   return send(res,200,{ok:true,result});
  }
+ if(req.method==='GET'&&p==='/admin/field-report'){if(!ACCESS_TOKEN||req.headers['x-admin-token']!==ACCESS_TOKEN)return send(res,403,{error:'Acesso restrito'});const id=u.searchParams.get('acao')||'';if(id&&!ID.test(id))return send(res,400,{error:'Ação inválida'});const actions=(await listActions()).filter(a=>!id||a.actionId===id);const known=new Set(actions.map(a=>a.actionId));const events=(await allEvents()).filter(e=>known.has(e.actionId));return send(res,200,buildFieldReport(events,actions))}
  if(req.method==='GET'&&p==='/admin/report.csv'){if(!ACCESS_TOKEN||req.headers['x-admin-token']!==ACCESS_TOKEN)return send(res,403,{error:'Acesso restrito'});const id=u.searchParams.get('acao')||'';if(id&&!ID.test(id))return send(res,400,{error:'Ação inválida'});const events=(await allEvents()).filter(x=>!id||x.actionId===id);const quote=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const csv=['acao;data;tipo;material;pontuacao',...events.map(x=>[x.actionId,x.createdAt,x.type,x.materialId||'',x.score??''].map(quote).join(';'))].join('\r\n');res.writeHead(200,{'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="qr-educacao-relatorio.csv"','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});return res.end('\uFEFF'+csv)}
  if(req.method==='GET'&&p==='/network')return send(res,200,{ips:localIPv4().map(x=>({address:x.ip,interface:x.interface})),port:PORT});
  if(req.method==='GET'&&p==='/health')return send(res,200,{ok:true,mode:'offline',version:1});
