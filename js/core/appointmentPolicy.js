@@ -1,8 +1,10 @@
+import {validProject} from './appointmentProjects.js?v=1';
 export const APPOINTMENT_STATUSES=['Solicitado','Planejado','Confirmado','Em preparação','Em andamento','Concluído','Cancelado','Reagendado'];
 export const APPOINTMENT_KINDS=['Escola','Demanda espontânea'];
 export const localDay=(date=new Date())=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 export function validDate(value){const d=new Date(value+'T12:00:00');return /^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(+d)&&localDay(d)===value;}
 export function validateAppointment(d,schools=[],classes=[]){
+ if(!validProject(d.projetoId))throw new Error('Selecione um projeto válido para o atendimento.');
  if(!String(d.nome||'').trim())throw new Error('Informe a atividade ou o título do atendimento.');
  if(!APPOINTMENT_KINDS.includes(d.origem))throw new Error('Escolha escola ou demanda espontânea.');
  if(!validDate(d.dataInicio)||!validDate(d.dataFim)||d.dataFim<d.dataInicio)throw new Error('Confira as datas inicial e final.');
