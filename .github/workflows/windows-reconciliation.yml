@@ -1,0 +1,25 @@
+name: Reconciliação Windows 360 - testes
+on:
+  pull_request:
+    paths:
+      - 'js/core/windowsReconciliationReadOnly.js'
+      - 'tests/windowsReconciliationReadOnly.test.mjs'
+      - '.github/workflows/windows-reconciliation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'js/core/windowsReconciliationReadOnly.js'
+      - 'tests/windowsReconciliationReadOnly.test.mjs'
+      - '.github/workflows/windows-reconciliation.yml'
+permissions:
+  contents: read
+jobs:
+  reconciliacao:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validar reconciliação sem escrita de dados
+        run: node --test tests/windowsReconciliationReadOnly.test.mjs
