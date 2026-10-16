@@ -1,3 +1,4 @@
+import vm from 'node:vm';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
@@ -135,4 +136,20 @@ test('Quiz de blitz existente usa confirmação da versão atual e registra conc
  let r=await fetch(ROOT+'/api/events',opts);assert.equal(r.status,202);assert.equal((await r.json()).recorded,true);
  r=await fetch(ROOT+'/api/events',opts);assert.equal((await r.json()).recorded,false);
  r=await fetch(ROOT+'/admin/stats',{headers:auth});assert.ok((await r.json()).porAcao[id].quizzesConcluidos>=1);
+});
+
+test('Celular em HTTP sem crypto.randomUUID gera UUID aceito pelo servidor',async()=>{
+ const response=await fetch(ROOT+'/actions/blitz-capacete-demo/assets/quiz-motociclista.html');
+ const html=await response.text();
+ const start=html.indexOf('const token=() =>')>=0?html.indexOf('const token=() =>'):html.indexOf('const token=()=>');
+ const end=html.indexOf('const cfg=',start);
+ assert.ok(start>0&&end>start);
+ const source=html.slice(start,end)+'; token()';
+ const fallback=vm.runInNewContext(source,{Math,crypto:{}});
+ assert.match(fallback,/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+ const event={eventId:fallback,sessionId:fallback,actionId:'blitz-capacete-demo',revision:2,type:'quiz_finish',score:5};
+ const recorded=await fetch(ROOT+'/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)});
+ assert.equal(recorded.status,202);assert.equal((await recorded.json()).recorded,true);
+ const view=await fetch(ROOT+'/a/blitz-capacete-demo');const portal=await view.text();
+ assert.match(portal,/typeof crypto\.randomUUID==='function'/);
 });
