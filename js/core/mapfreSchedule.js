@@ -1,21 +1,32 @@
 export const MAPFRE_PROJECT='na-pista-certa-mapfre';
 export const MAPFRE_DAYS=['2026-10-19','2026-10-20','2026-10-21','2026-10-22','2026-10-23'];
-export const MAPFRE_SLOTS=[['08:30','09:30'],['09:30','10:30'],['10:00','11:00'],['10:30','11:30'],['13:30','14:30'],['14:00','15:00'],['14:30','15:30'],['15:00','16:00'],['15:30','16:30']];
-// Modelo recebido possui intervalos sobrepostos; são opções de agendamento, não capacidade independente acumulável.
-export const mapfreRows=appointments=>MAPFRE_DAYS.flatMap(date=>MAPFRE_SLOTS.map(([start,end])=>{
- const rows=appointments.filter(r=>r.projetoId===MAPFRE_PROJECT&&r.status!=='Cancelado'&&r.dataInicio===date&&r.horaInicio<end&&r.horaFim>start);
+export const MAPFRE_STARTS=['08:30','09:00','09:30','10:00','10:30','13:30','14:00','14:30','15:00','15:30'];
+export const MAPFRE_SLOTS=MAPFRE_STARTS.map(t=>[t,t]);
+const CONFIRMED={
+ '2026-10-19':{'09:30':'João Franco de Godoy','14:00':'João Franco de Godoy'},
+ '2026-10-20':{'09:30':'José Carlos João','14:00':'José Carlos João'},
+ '2026-10-21':{'09:30':'José Carlos João','14:00':'Alayde Tortorella'},
+ '2026-10-22':{'09:30':'José Soares Marcondes','14:00':'José Soares Marcondes'},
+ '2026-10-23':{'09:30':'José Soares Marcondes','14:00':'José Soares Marcondes'}
+};
+export const officialMapfreSchool=(date,start)=>CONFIRMED[date]?.[start]||'';
+export const mapfreRows=appointments=>MAPFRE_DAYS.flatMap(date=>MAPFRE_STARTS.map(start=>{
+ const confirmedSchool=officialMapfreSchool(date,start);
+ const rows=appointments.filter(r=>r.projetoId===MAPFRE_PROJECT&&r.status!=='Cancelado'&&r.dataInicio===date&&r.horaInicio===start);
  const reserved=rows.reduce((n,r)=>n+(Number(r.previsto)||0),0);
- return {date,start,end,rows,reserved,capacity:40,available:Math.max(0,40-reserved),overbooked:reserved>40};
+ return {date,start,end:'',rows,reserved,capacity:40,available:confirmedSchool||rows.length?0:40,overbooked:reserved>40,confirmedSchool,occupied:!!(confirmedSchool||rows.length)};
 }));
 export const mapfreSummary=rows=>({sessions:rows.length,booked:rows.filter(x=>x.rows.length).length,conflicts:rows.filter(x=>x.overbooked).length});
 
 export function validateMapfreBooking(data,appointments=[],excludeId=''){
  if(data.projetoId!==MAPFRE_PROJECT)return {ok:true};
  if(!MAPFRE_DAYS.includes(data.dataInicio)||data.dataFim!==data.dataInicio)throw new Error('Selecione um dos dias autorizados da programação MAPFRE.');
- if(!MAPFRE_SLOTS.some(([start,end])=>start===data.horaInicio&&end===data.horaFim))throw new Error('Selecione um horário da grade MAPFRE.');
- const current=appointments.filter(r=>r.id!==excludeId&&r.projetoId===MAPFRE_PROJECT&&r.status!=='Cancelado'&&r.dataInicio===data.dataInicio&&r.horaInicio<data.horaFim&&r.horaFim>data.horaInicio);
+ if(!MAPFRE_STARTS.includes(data.horaInicio))throw new Error('Escolha um horário da grade MAPFRE.');
+ const school=officialMapfreSchool(data.dataInicio,data.horaInicio);
+ if(school&&data.id!==excludeId)throw new Error('Horário confirmado para '+school+'. Confira a reserva existente antes de cadastrar outra.');
+ const current=appointments.filter(r=>r.id!==excludeId&&r.projetoId===MAPFRE_PROJECT&&r.status!=='Cancelado'&&r.dataInicio===data.dataInicio&&r.horaInicio===data.horaInicio);
  const total=current.reduce((sum,r)=>sum+(Number(r.previsto)||0),0)+(Number(data.previsto)||0);
- if(total>40)throw new Error('Capacidade MAPFRE excedida: '+total+' previstos em horários sobrepostos (máximo 40).');
+ if(total>40)throw new Error('Capacidade da sessão excedida: '+total+' participantes previstos (máximo 40).');
  return {ok:true,reserved:total,remaining:40-total};
 }
 
