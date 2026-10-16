@@ -19,3 +19,13 @@ test('Relatórios 360 permanece válido como módulo ES',async()=>{
  if(typeof SourceTextModule==='function')new SourceTextModule(source);
  else assert.match(source,/export async function renderRelatorios360/);
 });
+
+test('Relatório 360 inclui agendamentos importados da coleção appointments',async()=>{
+ const source=await readFile(file,'utf8');
+ assert.match(source,/\['appointments','appointments'\]/);
+ assert.match(source,/fs\.collection\(db,'tenants',tenant,collection\)/);
+ assert.match(source,/reportCloudAppointments=rows/);
+ assert.match(source,/\.\.\.reportCloudAppointments,\.\.\.reportCloudEvents/);
+ assert.match(source,/agendamento\(s\).*evento\(s\) público\(s\)/);
+ assert.match(source,/failures\.length===2/);
+});
