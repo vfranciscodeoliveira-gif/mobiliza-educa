@@ -1,6 +1,6 @@
 import {listWindowsArchives,loadWindowsArchive} from '../core/windowsArchiveRepository.js?v=1';
 import {reconcileWindowsReadOnly} from '../core/windowsReconciliationReadOnly.js?v=1';
-const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export async function renderWindowsReconciliation(host,ctx){
  const token=Symbol('reconciliation');host._reconciliationToken=token;host.hidden=false;
  const live=()=>host.isConnected&&host._reconciliationToken===token;
