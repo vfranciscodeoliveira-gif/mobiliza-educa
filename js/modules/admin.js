@@ -15,7 +15,7 @@ import {publishEvent,updateCloudRequestStatus,updateCloudRegistrationStatus} fro
 import {renderPassaporteCertificados} from './passaporteCertificados.js?v=9';
 import {renderAvaliacaoPedagogica} from './avaliacaoPedagogica.js?v=2';
 import {renderEvidenciasImpacto} from './evidenciasImpacto.js?v=3';
-import {renderRelatorios360} from './relatorios360.js?v=2';
+import {renderRelatorios360} from './relatorios360.js?v=3';
 import {renderCloudUsers as renderUsuariosAuditoria} from './cloudUsers.js?v=2';
 import {renderSistemaContinuity} from './sistemaContinuity.js?v=4';
 import {renderCentroEditorial} from './centroEditorial.js?v=1';
