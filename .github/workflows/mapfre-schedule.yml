@@ -12,6 +12,7 @@ on:
       - 'tests/mapfreOfficialCalendar.test.mjs'
       - 'tests/mapfreWeekGrid.test.mjs'
       - 'tests/mapfreGridFilter.test.mjs'
+      - 'tests/mapfreTimeReconciliation.test.mjs'
       - '.github/workflows/mapfre-schedule.yml'
   push:
     branches: [main]
@@ -31,4 +32,4 @@ jobs:
         with:
           node-version: '22'
       - run: node --check js/modules/appointments.js
-      - run: node --test tests/mapfreSchedule.test.mjs tests/mapfreBooking.test.mjs tests/mapfreExistingReview.test.mjs tests/mapfreLegacyGridUI.test.mjs tests/mapfreOfficialCalendar.test.mjs tests/mapfreWeekGrid.test.mjs tests/mapfreGridFilter.test.mjs tests/appointmentProjects.test.mjs
+      - run: node --test tests/mapfreSchedule.test.mjs tests/mapfreBooking.test.mjs tests/mapfreExistingReview.test.mjs tests/mapfreLegacyGridUI.test.mjs tests/mapfreOfficialCalendar.test.mjs tests/mapfreWeekGrid.test.mjs tests/mapfreGridFilter.test.mjs tests/mapfreTimeReconciliation.test.mjs tests/appointmentProjects.test.mjs
