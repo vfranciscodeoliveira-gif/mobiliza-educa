@@ -1,0 +1,30 @@
+name: Agenda - projetos
+on:
+  pull_request:
+    paths:
+      - 'js/core/appointmentProjects.js'
+      - 'js/core/appointmentPolicy.js'
+      - 'js/modules/appointments.js'
+      - 'tests/appointmentProjects.test.mjs'
+      - '.github/workflows/appointment-projects.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'js/core/appointmentProjects.js'
+      - 'js/core/appointmentPolicy.js'
+      - 'js/modules/appointments.js'
+      - 'tests/appointmentProjects.test.mjs'
+      - '.github/workflows/appointment-projects.yml'
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check js/modules/appointments.js
+      - run: node --check js/core/appointmentPolicy.js
+      - run: node --test tests/appointmentProjects.test.mjs
