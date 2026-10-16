@@ -12,7 +12,7 @@ test('Servidor informa porta ocupada sem imprimir stack trace nem trocar o ender
  const port=blocker.address().port;
  try{
   const child=spawn(process.execPath,['server.mjs'],{
-   cwd,env:{...process.env,HOST:'127.0.0.1',PORT:String(port),ADMIN_TOKEN:'test-token'},
+   cwd,env:{...process.env,NODE_ENV:'production',HOST:'127.0.0.1',PORT:String(port),ADMIN_TOKEN:'test-token'},
    stdio:['ignore','pipe','pipe']
   });
   let stderr='';
@@ -26,6 +26,7 @@ test('Servidor informa porta ocupada sem imprimir stack trace nem trocar o ender
   assert.match(stderr,/Get-NetTCPConnection/);
   assert.match(stderr,/Não altere a porta/);
   assert.doesNotMatch(stderr,/Unhandled 'error' event/);
+  assert.equal(blocker.listening,true,'A primeira instância deve continuar ativa');
  }finally{
   await new Promise(resolve=>blocker.close(resolve));
  }
