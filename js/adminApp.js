@@ -10,7 +10,7 @@ import {ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser} from '.
 import {canAccessModule} from './core/accessControl.js?v=2';
 import {activeTenant,installTenantWorkspaceBridge} from './core/tenantRegistry.js?v=2';
 import {adminModuleEntitlement} from './core/saasContext.js?v=2';
-import {openAdminModule} from './modules/admin.js?v=47';
+import {openAdminModule} from './modules/admin.js?v=48';
 import {cloudMe,syncCloudInbox} from './cloudGateway.js?v=6';
 import {signInCloud,cloudSessionHint} from './core/cloudAuth.js?v=3';
 

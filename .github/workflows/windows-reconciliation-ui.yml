@@ -6,6 +6,8 @@ on:
       - 'js/modules/appointments.js'
       - 'tests/windowsReconciliationUI.test.mjs'
       - 'tests/windowsReconciliationScroll.test.mjs'
+      - 'tests/windowsReviewQueue.test.mjs'
+      - 'js/core/windowsReviewQueue.js'
       - '.github/workflows/windows-reconciliation-ui.yml'
   push:
     branches: [main]
@@ -25,6 +27,6 @@ jobs:
         with:
           node-version: '22'
       - name: Verificar integração e segurança somente leitura
-        run: node --test tests/windowsReconciliationUI.test.mjs tests/windowsReconciliationReadOnly.test.mjs tests/windowsReconciliationScroll.test.mjs
+        run: node --test tests/windowsReconciliationUI.test.mjs tests/windowsReconciliationReadOnly.test.mjs tests/windowsReconciliationScroll.test.mjs tests/windowsReviewQueue.test.mjs
       - name: Verificar sintaxe do módulo de interface
         run: node --check js/modules/windowsReconciliation.js
