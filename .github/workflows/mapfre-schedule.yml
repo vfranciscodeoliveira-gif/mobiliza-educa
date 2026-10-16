@@ -1,0 +1,27 @@
+name: Grade MAPFRE
+on:
+  pull_request:
+    paths:
+      - 'js/core/mapfreSchedule.js'
+      - 'js/modules/appointments.js'
+      - 'tests/mapfreSchedule.test.mjs'
+      - '.github/workflows/mapfre-schedule.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'js/core/mapfreSchedule.js'
+      - 'js/modules/appointments.js'
+      - 'tests/mapfreSchedule.test.mjs'
+      - '.github/workflows/mapfre-schedule.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check js/modules/appointments.js
+      - run: node --test tests/mapfreSchedule.test.mjs tests/appointmentProjects.test.mjs
