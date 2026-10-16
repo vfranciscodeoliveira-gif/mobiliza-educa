@@ -100,7 +100,7 @@ function buildFieldReport(events,actions){
   result.totals.pageViews+=views;result.totals.uniqueSessions+=sessions.size;result.totals.materialOpens+=opens.length;result.totals.quizStarts+=starts;result.totals.quizFinishes+=finishes.length;totalScore+=finishes.reduce((sum,x)=>sum+x.score,0);
  }
  result.totals.averageScore=result.totals.quizFinishes?Number((totalScore/result.totals.quizFinishes).toFixed(2)):null;
- for(const event of events){const date=typeof event.createdAt==='string'?event.createdAt.slice(0,10):'';if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))continue;const day=days.get(date)||{date,views:0,materialOpens:0,quizFinishes:0};if(event.type==='page_view')day.views++;if(event.type==='material_open')day.materialOpens++;if(event.type==='quiz_finish')day.quizFinishes++;days.set(date,day)}
+ for(const event of events){const date=typeof event.createdAt==='string'?event.createdAt.slice(0,10):'';if(!/^\d{4}-\d{2}-\d{2}$/.test(date))continue;const day=days.get(date)||{date,views:0,materialOpens:0,quizFinishes:0};if(event.type==='page_view')day.views++;if(event.type==='material_open')day.materialOpens++;if(event.type==='quiz_finish')day.quizFinishes++;days.set(date,day)}
  result.daily=[...days.values()].sort((a,b)=>a.date.localeCompare(b.date));return result;
 }
 async function allEvents(){try{return(await readFile(join(DATA,'events.ndjson'),'utf8')).trim().split('\n').filter(Boolean).map(x=>JSON.parse(x))}catch(e){if(e.code==='ENOENT')return[];throw e}}
