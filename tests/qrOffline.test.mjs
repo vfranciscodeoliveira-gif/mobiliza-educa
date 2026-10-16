@@ -153,3 +153,26 @@ test('Celular em HTTP sem crypto.randomUUID gera UUID aceito pelo servidor',asyn
  const view=await fetch(ROOT+'/a/blitz-capacete-demo');const portal=await view.text();
  assert.match(portal,/typeof crypto\.randomUUID==='function'/);
 });
+
+test('Relatório de campo exige token, distingue sessões e calcula acertos',async()=>{
+ let response=await fetch(ROOT+'/admin/field-report');assert.equal(response.status,403);
+ const auth={'X-Admin-Token':'test-admin-secret','Content-Type':'application/json'};
+ response=await fetch(ROOT+'/admin/actions',{method:'POST',headers:auth,body:JSON.stringify({title:'Blitz teste indicadores v5',date:'',description:'',materials:['quiz-motociclista']})});
+ assert.equal(response.status,201);const id=(await response.json()).actionId;
+ const session=randomUUID();
+ for(const [type,score] of [['page_view',undefined],['page_view',undefined],['quiz_start',undefined],['quiz_finish',6]]){
+ const event={eventId:randomUUID(),sessionId:session,actionId:id,revision:1,type,createdAt:new Date().toISOString()};
+ if(score!==undefined)event.score=score;
+ const response=await fetch(ROOT+'/api/events',{method:'POST',headers:auth,body:JSON.stringify(event)});assert.equal(response.status,202)
+ }
+ response=await fetch(ROOT+'/admin/field-report?acao='+id,{headers:auth});assert.equal(response.status,200);
+ const body=await response.json();assert.equal(body.actions.length,1);
+ assert.equal(body.totals.pageViews,2);assert.equal(body.totals.uniqueSessions,1);assert.equal(body.totals.quizStarts,1);
+ assert.equal(body.totals.quizFinishes,1);assert.equal(body.totals.averageScore,6);
+ assert.equal(body.actions[0].averageScore,6);assert.ok(body.daily.length>=1);
+});
+test('Painel v5 apresenta relatório de campo e orientação de backup',async()=>{
+ const r=await fetch(ROOT+'/admin');const html=await r.text();
+ assert.equal(r.status,200);assert.match(html,/id="fieldRows"/);assert.match(html,/id="fieldSummary"/);
+ assert.match(html,/BACKUP_QR_EDUCACAO.bat/);
+});
