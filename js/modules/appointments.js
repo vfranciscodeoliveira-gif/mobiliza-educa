@@ -1,5 +1,5 @@
 import {renderWindowsHistory} from './windowsHistory.js?v=1';
-import {renderWindowsReconciliation} from './windowsReconciliation.js?v=4';
+import {renderWindowsReconciliation} from './windowsReconciliation.js?v=5';
 import {renderWindowsImport} from './windowsAgendaImport.js?v=6';
 import {loadAppointments,saveAppointment,deleteAppointment,loadSchoolClasses} from '../core/appointmentRepository.js?v=8';
 import {APPOINTMENT_STATUSES,localDay,appointmentConflicts} from '../core/appointmentPolicy.js?v=2';
