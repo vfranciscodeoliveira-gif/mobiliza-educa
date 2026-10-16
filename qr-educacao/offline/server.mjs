@@ -136,5 +136,20 @@ async function handler(req,res){try{
  if(req.method==='GET'&&p==='/admin/events'){if(!ACCESS_TOKEN||req.headers['x-admin-token']!==ACCESS_TOKEN)return send(res,403,{error:'Acesso restrito'});return send(res,200,{events:await allEvents()})}
  return send(res,404,{error:'Página não encontrada'});
 }catch(e){if(e.code==='ENOENT')return send(res,404,{error:'Arquivo não encontrado'});if(e instanceof SyntaxError||/inválid[oa]|proibido|divergente|incompatíveis|não editável|Limite de materiais|Tamanho inválido|Rede local indisponível|não encontrado/.test(e.message))return send(res,400,{error:'Solicitação inválida'});console.error(e);return send(res,500,{error:'Erro interno'})}}
-if(process.env.NODE_ENV!=='test'){try{for(const e of await allEvents())seen.add(e.eventId)}catch(e){console.error('Falha ao ler histórico:',e);process.exitCode=1}if(!process.exitCode)http.createServer(handler).listen(PORT,HOST,()=>console.log('QR Educação offline em http://'+HOST+':'+PORT))}
+if(process.env.NODE_ENV!=='test'){try{for(const e of await allEvents())seen.add(e.eventId)}catch(e){console.error('Falha ao ler histórico:',e);process.exitCode=1}if(!process.exitCode){
+ const server=http.createServer(handler);
+ server.on('error',error=>{
+  if(error.code==='EADDRINUSE'){
+   console.error('ERRO: a porta '+PORT+' já está em uso. O QR Educação Offline pode estar aberto em outra janela.');
+   console.error('Verifique primeiro se o painel já responde em http://127.0.0.1:'+PORT+'/health');
+   console.error('No PowerShell, identifique o processo com: Get-NetTCPConnection -LocalPort '+PORT+' -State Listen | Select-Object LocalAddress,LocalPort,OwningProcess');
+   console.error('Não encerre processos desconhecidos. Feche somente a instância duplicada do QR Educação e reinicie.');
+   console.error('Não altere a porta sem atualizar e reimprimir os QR Codes existentes.');
+  }else if(error.code==='EACCES'){
+   console.error('ERRO: permissão negada ao abrir a porta '+PORT+'. Execute em uma porta permitida.');
+  }else console.error('Erro ao iniciar QR Educação Offline:',error);
+  process.exitCode=1;
+ });
+ server.listen(PORT,HOST,()=>console.log('QR Educação offline em http://'+HOST+':'+PORT));
+}}
 export{handler,manifest,accept,view};
