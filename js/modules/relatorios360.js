@@ -2,26 +2,35 @@ import {accessDb,requirePermission} from '../core/cloudAccess.js?v=1';
 import {getCloudTenantId} from '../cloudGateway.js?v=6';
 import {loadEducation,educationRows} from '../core/educationRepository.js?v=2';
 const K='mobiliza.admin.';
-let reportCloudEvents=[],reportCloudLoaded=false,reportCloudError='',reportCloudTenant='';
+let reportCloudEvents=[],reportCloudAppointments=[],reportCloudLoaded=false,reportCloudError='',reportCloudTenant='';
 const cloudEntity=new Set(['escolas','instituicoes','pessoas','turmas','professores','alunos']);
 const readLocal=k=>{try{const v=JSON.parse(localStorage.getItem(K+k)||'[]');return Array.isArray(v)?v:[]}catch{return[]}};
 const read=k=>{
- if(k==='eventos'&&reportCloudLoaded){const locals=readLocal(k),ids=new Set(reportCloudEvents.map(x=>String(x.id)));return [...reportCloudEvents,...locals.filter(x=>!ids.has(String(x.id)))];}
+ if(k==='eventos'&&reportCloudLoaded){const locals=readLocal(k),combined=new Map();for(const entry of [...locals,...reportCloudAppointments,...reportCloudEvents])combined.set(String(entry.id),entry);return [...combined.values()];}
  if(cloudEntity.has(k)){const rows=educationRows(k);return rows.length?rows:readLocal(k);}
  return readLocal(k);
 };
 async function syncReportCloud(){
- const tenant=getCloudTenantId();reportCloudEvents=[];reportCloudLoaded=false;reportCloudError='';reportCloudTenant=tenant||'';
+ const tenant=getCloudTenantId();reportCloudEvents=[];reportCloudAppointments=[];reportCloudLoaded=false;reportCloudError='';reportCloudTenant=tenant||'';
  if(!tenant){reportCloudError='Nenhuma organização do Firestore selecionada. Exibindo somente dados locais deste navegador.';return;}
  try{
   await requirePermission('reports.read');
   const {db,fs}=await accessDb();
-  const snapshot=await fs.getDocsFromServer(fs.collection(db,'tenants',tenant,'publicEvents'));
-  if(getCloudTenantId()!==tenant)throw Error('Organização mudou durante a consulta.');
-  reportCloudEvents=snapshot.docs.map(d=>({...d.data(),id:d.id})).filter(x=>!x.deletedAt);
+  const failures=[];
+  for(const [collection,assign] of [['appointments','appointments'],['publicEvents','events']]){
+   try{
+    const snapshot=await fs.getDocsFromServer(fs.collection(db,'tenants',tenant,collection));
+    if(getCloudTenantId()!==tenant)throw Error('Organização mudou durante a consulta.');
+    const rows=snapshot.docs.map(d=>({...d.data(),id:d.id})).filter(x=>!x.deletedAt);
+    if(assign==='appointments')reportCloudAppointments=rows;else reportCloudEvents=rows;
+   }catch(error){failures.push(collection+': '+error.message)}
+  }
+  if(failures.length===2)throw Error(failures.join('; '));
   reportCloudLoaded=true;
+  if(failures.length)reportCloudError='Atenção: fonte parcial indisponível — '+failures.join('; ')+'.';
+
   try{await loadEducation()}catch(e){reportCloudError='Agenda carregada, mas cadastros escolares não puderam ser atualizados: '+e.message}
- }catch(e){reportCloudError='Não foi possível consultar os eventos online: '+e.message+'. Os indicadores exibem somente os registros locais acessíveis.'}
+ }catch(e){reportCloudError='Não foi possível consultar os eventos online: '+e.message+'. Verifique permissões e conexão antes de considerar os resultados completos.'}
 }
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -156,10 +165,10 @@ export async function renderRelatorios360(host){
  host.innerHTML=`<section class="admin-module r360"><p class="eyebrow">RELATÓRIOS E INDICADORES 360 • v1.0</p><h2>Visão gerencial consolidada</h2><p class="admin-intro">Cruze agenda, instituições, presença, impacto, avaliações, certificados, parceiros, materiais e evidências em um único recorte.</p>
  <div class="r360-summary" id="r360SourceDiagnostic" role="status"></div><div class="r360-filters"><label>Data inicial<input id="r360From" type="date" value="${filters.from}"></label><label>Data final<input id="r360To" type="date" value="${filters.to}"></label><label>Escola / instituição<select id="r360Source"><option value="">Todas</option>${sources.map(x=>`<option value="${esc(x.key)}">${esc(x.label)}</option>`).join('')}</select></label><label>Tipo de ação<select id="r360Type"><option value="">Todos</option>${types.map(x=>`<option>${esc(x)}</option>`).join('')}</select></label><label>Público<select id="r360Audience"><option value="">Todos</option>${audiences.map(x=>`<option>${esc(x)}</option>`).join('')}</select></label><label>Status<select id="r360Status"><option value="">Todos</option>${['Planejado','Confirmado','Em andamento','Concluído','Cancelado'].map(x=>`<option>${x}</option>`).join('')}</select></label><div class="r360-filter-actions"><button class="btn ghost" id="r360Month">Este mês</button><button class="btn ghost" id="r360Year">Este ano</button><button class="btn primary" id="r360Apply">Aplicar filtros</button></div></div><div id="r360Body"></div></section>`;
  const localCount=readLocal('eventos').length,cloudCount=reportCloudEvents.length;
- const diagnostic=host.querySelector('#r360SourceDiagnostic');diagnostic.textContent=(reportCloudLoaded?'Fonte: '+cloudCount+' ação(ões) no Firestore da organização '+reportCloudTenant+'. ':'Fonte online indisponível. ')+localCount+' ação(ões) no armazenamento local deste navegador. '+(reportCloudError||'')+' Registros de outras organizações, navegadores ou do aplicativo Windows não aparecem sem importação ou sincronização.';
+ const diagnostic=host.querySelector('#r360SourceDiagnostic');diagnostic.textContent=(reportCloudLoaded?'Fonte: '+reportCloudAppointments.length+' agendamento(s) e '+cloudCount+' evento(s) público(s) no Firestore da organização '+reportCloudTenant+'. ':'Fonte online indisponível. ')+localCount+' ação(ões) no armazenamento local deste navegador. '+(reportCloudError||'')+' Registros de outras organizações, navegadores ou do aplicativo Windows não aparecem sem importação ou sincronização.';
  const grab=()=>{filters.from=host.querySelector('#r360From').value;filters.to=host.querySelector('#r360To').value;filters.source=host.querySelector('#r360Source').value;filters.type=host.querySelector('#r360Type').value;filters.audience=host.querySelector('#r360Audience').value;filters.status=host.querySelector('#r360Status').value;};
  const paint=()=>{grab();const d=build(filteredRows(filters)),body=host.querySelector('#r360Body'),maxMonth=Math.max(1,...d.months.map(x=>x.value));
-  body.innerHTML=`${!d.rows.length?`<div class="r360-summary" role="status">Nenhuma ação no recorte. Origem disponível: ${read("eventos").length} ação(ões) no total. Revise o período e a organização selecionada; registros externos não são importados automaticamente.</div>`:""}<div class="r360-kpis"><div class="r360-kpi"><span>Ações</span><strong>${d.rows.length}</strong><small>no recorte</small></div><div class="r360-kpi"><span>Público alcançado</span><strong>${fmt(d.people)}</strong><small>fechamento/presença</small></div><div class="r360-kpi"><span>Presenças nominais</span><strong>${fmt(d.presences)}</strong><small>check-ins</small></div><div class="r360-kpi"><span>Materiais</span><strong>${fmt(d.materials)}</strong><small>distribuídos</small></div><div class="r360-kpi"><span>Certificados</span><strong>${fmt(d.certs)}</strong><small>ativos</small></div><div class="r360-kpi"><span>Evidências</span><strong>${fmt(d.evid)}</strong><small>arquivos/registro</small></div><div class="r360-kpi"><span>Parceiros</span><strong>${d.partners.length}</strong><small>únicos</small></div><div class="r360-kpi"><span>Evolução</span><strong class="${d.delta>0?'av-pos':d.delta<0?'av-neg':''}">${d.evalCount?(d.delta>=0?'+':'')+d.delta+' p.p.':'—'}</strong><small>${d.evalCount} ação(ões) avaliadas</small></div></div>
+  body.innerHTML=`${!d.rows.length?`<div class="r360-summary" role="status">Nenhuma ação no recorte. Registros disponíveis: ${read("eventos").length} ação(ões) no total. Revise o período e a organização selecionada; registros externos não são importados automaticamente.</div>`:""}<div class="r360-kpis"><div class="r360-kpi"><span>Ações</span><strong>${d.rows.length}</strong><small>no recorte</small></div><div class="r360-kpi"><span>Público alcançado</span><strong>${fmt(d.people)}</strong><small>fechamento/presença</small></div><div class="r360-kpi"><span>Presenças nominais</span><strong>${fmt(d.presences)}</strong><small>check-ins</small></div><div class="r360-kpi"><span>Materiais</span><strong>${fmt(d.materials)}</strong><small>distribuídos</small></div><div class="r360-kpi"><span>Certificados</span><strong>${fmt(d.certs)}</strong><small>ativos</small></div><div class="r360-kpi"><span>Evidências</span><strong>${fmt(d.evid)}</strong><small>arquivos/registro</small></div><div class="r360-kpi"><span>Parceiros</span><strong>${d.partners.length}</strong><small>únicos</small></div><div class="r360-kpi"><span>Evolução</span><strong class="${d.delta>0?'av-pos':d.delta<0?'av-neg':''}">${d.evalCount?(d.delta>=0?'+':'')+d.delta+' p.p.':'—'}</strong><small>${d.evalCount} ação(ões) avaliadas</small></div></div>
   <div class="r360-summary"><strong>Resumo executivo.</strong> ${esc(executiveText(d,filters))}</div>
   <div class="r360-actions"><button class="btn ghost" id="r360Csv">⬇ CSV detalhado</button><button class="btn ghost" id="r360Print">🖨 Imprimir / PDF</button></div>
   <div class="r360-grid"><article class="r360-card"><div class="r360-card-head"><div><h3>📅 Alcance por mês</h3><p>Público alcançado no período.</p></div></div>${bars(d.months,maxMonth,x=>monthLabel(x.label),x=>x.value)}</article><article class="r360-card"><h3>🏫 Instituições com maior alcance</h3><p>Pessoas alcançadas por escola/instituição.</p>${bars(d.sources.slice(0,10),null,x=>x.label,x=>x.value)}</article><article class="r360-card"><h3>🧭 Tipos de ação</h3><p>Quantidade de ações por categoria.</p>${bars(d.types.slice(0,10),null,x=>x.label,x=>x.value)}</article><article class="r360-card"><h3>👥 Público por segmento</h3><p>Alcance informado no cadastro do evento.</p>${bars(d.audiences.slice(0,10),null,x=>x.label,x=>x.value)}</article><article class="r360-card"><h3>🤝 Parceiros mais presentes</h3><p>Número de ações em que aparecem.</p>${bars(d.partnersRank.slice(0,10),null,x=>x.label,x=>x.value)}</article><article class="r360-card"><h3>📦 Materiais mais distribuídos</h3><p>Quantidades registradas nos fechamentos.</p>${bars(d.materialsRank.slice(0,10),null,x=>x.label,x=>x.value)}</article></div>
