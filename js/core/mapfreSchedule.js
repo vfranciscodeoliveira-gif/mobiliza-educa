@@ -8,3 +8,13 @@ export const mapfreRows=appointments=>MAPFRE_DAYS.flatMap(date=>MAPFRE_SLOTS.map
  return {date,start,end,rows,reserved,capacity:40,available:Math.max(0,40-reserved),overbooked:reserved>40};
 }));
 export const mapfreSummary=rows=>({sessions:rows.length,booked:rows.filter(x=>x.rows.length).length,conflicts:rows.filter(x=>x.overbooked).length});
+
+export function validateMapfreBooking(data,appointments=[],excludeId=''){
+ if(data.projetoId!==MAPFRE_PROJECT)return {ok:true};
+ if(!MAPFRE_DAYS.includes(data.dataInicio)||data.dataFim!==data.dataInicio)throw new Error('Selecione um dos dias autorizados da programação MAPFRE.');
+ if(!MAPFRE_SLOTS.some(([start,end])=>start===data.horaInicio&&end===data.horaFim))throw new Error('Selecione um horário da grade MAPFRE.');
+ const current=appointments.filter(r=>r.id!==excludeId&&r.projetoId===MAPFRE_PROJECT&&r.status!=='Cancelado'&&r.dataInicio===data.dataInicio&&r.horaInicio<data.horaFim&&r.horaFim>data.horaInicio);
+ const total=current.reduce((sum,r)=>sum+(Number(r.previsto)||0),0)+(Number(data.previsto)||0);
+ if(total>40)throw new Error('Capacidade MAPFRE excedida: '+total+' previstos em horários sobrepostos (máximo 40).');
+ return {ok:true,reserved:total,remaining:40-total};
+}
