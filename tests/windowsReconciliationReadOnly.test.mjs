@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {reconcileWindowsReadOnly} from '../js/core/windowsReconciliationReadOnly.js';
+import {readFile} from 'node:fs/promises';
+const source=await readFile(new URL('../js/core/windowsReconciliationReadOnly.js',import.meta.url),'utf8');
+const {reconcileWindowsReadOnly}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 test('Não associa jogo a agenda sem idEvento nem inventa participantes realizados',()=>{
  const pack={formato:'mobiliza-windows-integral',tabelas:{tblAgendaEvento:[{idAgenda:1,idEvento:null,publicoEstimado:null,quantidadeTurmas:1,status:'CONCLUIDO'}],tblEvento:[{idEvento:9}],tblEventoTurma:[{idEvento:9,idTurma:3}],tblFilaEvento:[{idEvento:9,statusFila:'FINALIZADO'}]}};
  const online=[{id:'agenda-1',windowsSource:{archiveId:'abc',agendaId:1},idsTurmas:[],realizado:0},{id:'novo',realizado:3}];
