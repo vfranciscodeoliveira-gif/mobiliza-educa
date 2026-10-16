@@ -10,6 +10,5 @@ export function previewWindowsLink(report,appointments,agendaId,onlineId){
  const target=candidates[0];
  if(report.rows.some(r=>r.onlineIds.some(id=>s(id)===s(onlineId))))throw new Error('Agendamento online já vinculado a outra origem.');
  if(target.windowsSource?.agendaId!=null)throw new Error('Registro já tem origem Windows: não sobrescrever.');
- if(target.idEscola&&source.escola&&!s(target.idEscola))throw new Error('Escola inconsistente.');
  return Object.freeze({mode:'preview_only',requiresExplicitConfirmation:true,archiveId:null,agendaId:source.agendaId,onlineId:s(target.id),sourceSchool:source.escola,sourceDate:source.inicio,sourceStatus:source.statusOriginal,targetTitle:target.nome||'',targetDate:target.dataInicio||'',targetStatus:target.status||'',warnings:['Compare escola, data, hora, programa e turno manualmente.','Não alterar registros antes de confirmação administrativa e revalidação no servidor.']});
 }
