@@ -1,0 +1,29 @@
+name: Central Windows 360 - testes
+on:
+  pull_request:
+    paths:
+      - 'js/modules/windowsReconciliation.js'
+      - 'js/modules/appointments.js'
+      - 'tests/windowsReconciliationUI.test.mjs'
+      - '.github/workflows/windows-reconciliation-ui.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'js/modules/windowsReconciliation.js'
+      - 'js/modules/appointments.js'
+      - 'tests/windowsReconciliationUI.test.mjs'
+      - '.github/workflows/windows-reconciliation-ui.yml'
+permissions:
+  contents: read
+jobs:
+  validate-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar integração e segurança somente leitura
+        run: node --test tests/windowsReconciliationUI.test.mjs tests/windowsReconciliationReadOnly.test.mjs
+      - name: Verificar sintaxe do módulo de interface
+        run: node --check js/modules/windowsReconciliation.js
