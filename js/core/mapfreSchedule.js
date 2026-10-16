@@ -18,3 +18,14 @@ export function validateMapfreBooking(data,appointments=[],excludeId=''){
  if(total>40)throw new Error('Capacidade MAPFRE excedida: '+total+' previstos em horários sobrepostos (máximo 40).');
  return {ok:true,reserved:total,remaining:40-total};
 }
+
+const normalize=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+export function mapfreAssociation(row){
+ if(row.projetoId===MAPFRE_PROJECT)return 'confirmed';
+ if(row.projetoId)return 'other';
+ const text=normalize([row.nome,row.tipo,row.local,row.observacao].join(' '));
+ return /na pista certa|pista certa|mapfre/.test(text)?'review':'unknown';
+}
+export function mapfreExistingReview(appointments=[]){
+ return appointments.filter(row=>!row.deletedAt&&row.status!=='Cancelado'&&MAPFRE_DAYS.includes(row.dataInicio)&&mapfreAssociation(row)==='review');
+}
