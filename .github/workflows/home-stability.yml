@@ -1,0 +1,27 @@
+name: Página pública - estabilidade
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'assets/home-stability.css'
+      - 'tests/homeStability.test.mjs'
+      - '.github/workflows/home-stability.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'assets/home-stability.css'
+      - 'tests/homeStability.test.mjs'
+      - '.github/workflows/home-stability.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check js/app.js
+      - run: node --test tests/homeStability.test.mjs
