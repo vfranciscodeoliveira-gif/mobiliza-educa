@@ -1,0 +1,20 @@
+name: Identidade institucional por organização
+on:
+  pull_request:
+    paths:
+      - 'js/modules/sistemaContinuity.js'
+      - 'firestore.rules'
+      - 'tests/tenantInstitutionalIdentity.test.mjs'
+      - '.github/workflows/tenant-identity.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check js/modules/sistemaContinuity.js
+      - run: node --test tests/tenantInstitutionalIdentity.test.mjs

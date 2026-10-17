@@ -165,6 +165,22 @@ service cloud.firestore {
   match /platform/{id}{allow read: if owner();allow write: if false;}
   match /tenants/{t}{
    allow get: if owner() || staff(t) || member(t);allow list: if owner() || (signedIn() && exists(/databases/$(database)/documents/platformStaff/$(request.auth.uid)) && get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.active == true && get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.allClients == true);allow create: if owner() && request.resource.data.name is string && request.resource.data.name.size()>0 && request.resource.data.name.size()<=180 && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;allow update,delete: if false;
+   match /settings/institutionalIdentity {
+    allow get: if owner() || staff(t) || member(t);
+    allow list,delete: if false;
+    allow create,update: if manage(t)
+      && request.resource.data.keys().hasOnly(['org','secretaria','departamento','cidade','responsavel','email','telefone','rodape','updatedBy','updatedAt'])
+      && request.resource.data.updatedBy == request.auth.uid
+      && request.resource.data.updatedAt == request.time
+      && request.resource.data.org is string && request.resource.data.org.size()<=180
+      && request.resource.data.secretaria is string && request.resource.data.secretaria.size()<=180
+      && request.resource.data.departamento is string && request.resource.data.departamento.size()<=180
+      && request.resource.data.cidade is string && request.resource.data.cidade.size()<=180
+      && request.resource.data.responsavel is string && request.resource.data.responsavel.size()<=180
+      && request.resource.data.email is string && request.resource.data.email.size()<=180
+      && request.resource.data.telefone is string && request.resource.data.telefone.size()<=60
+      && request.resource.data.rodape is string && request.resource.data.rodape.size()<=250;
+   }
    match /members/{uid}{
     allow get: if signedIn() && (uid == request.auth.uid || manage(t));allow list: if manage(t);
     allow create,update: if manage(t) && validMember(t,uid,request.resource.data) && getAfter(/databases/$(database)/documents/memberships/$(uid+'_'+t)).data == request.resource.data;
