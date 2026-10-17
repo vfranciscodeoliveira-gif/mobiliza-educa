@@ -1,7 +1,7 @@
 import {renderQREducacao} from './modules/qrEducacao.js?v=2';
 import {mountProtocolCenter,unmountProtocolCenter,openUnreadNotifications} from './modules/protocolCenter.js?v=4';
 import {renderAgendaOverview} from './modules/agendaOverview.js?v=1';
-import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed,inspectMyTenantAccess} from './core/cloudAccess.js?v=1';
+import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed,inspectMyTenantAccess} from './core/cloudAccess.js?v=2';
 import {getCloudTenantId,setCloudTenantId} from './cloudGateway.js?v=6';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let onlineTenants=[];
