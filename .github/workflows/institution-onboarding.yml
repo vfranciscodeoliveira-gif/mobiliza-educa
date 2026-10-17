@@ -5,6 +5,7 @@ on:
       - 'js/core/institutionPolicy.js'
       - 'js/modules/cloudUsers.js'
       - 'tests/institutionPolicy.test.mjs'
+      - 'tests/semobOnboarding.test.mjs'
       - '.github/workflows/institution-onboarding.yml'
   push:
     branches: [main]
@@ -25,4 +26,4 @@ jobs:
           node-version: '22'
       - run: node --check js/modules/cloudUsers.js
       - run: node --check js/core/institutionPolicy.js
-      - run: node --test tests/institutionPolicy.test.mjs
+      - run: node --test tests/institutionPolicy.test.mjs tests/semobOnboarding.test.mjs
