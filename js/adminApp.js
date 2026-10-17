@@ -168,13 +168,13 @@ window.addEventListener('mobiliza-admin-auth',e=>{
 });
 window.addEventListener('mobiliza-tenant-change',()=>{if(isAdminUnlocked())renderAuthenticated();});
 
-if(isAdminUnlocked())listAccessTenants().then(rows=>{onlineTenants=rows;renderAuthenticated();}).catch(renderLoggedOut);
+if(isAdminUnlocked()){const context=qs('#adminContext');if(context)context.textContent='Verificando sessão e organizações no Firebase...';const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('A validação do Firebase excedeu 12 segundos. Confira sua conexão e tente novamente.')),12000));Promise.race([listAccessTenants(),timeout]).then(rows=>{onlineTenants=rows;renderAuthenticated();}).catch(error=>{renderLoggedOut();const context=qs('#adminContext');if(context)context.textContent=error?.message||'Não foi possível validar o acesso.';const button=qs('#adminLoginButton');if(button)button.textContent='Tentar acesso novamente';});}
 else{
   renderLoggedOut();
   setTimeout(requestLogin,80);
 }
 
-if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.66.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.67.7',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
 
 
 
