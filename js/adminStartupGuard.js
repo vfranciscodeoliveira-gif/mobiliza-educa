@@ -1,8 +1,8 @@
 (function(){
 let errorText='';
 const identify=value=>String(value?.message||value||'Erro desconhecido').slice(0,400);
-window.addEventListener('error',event=>{errorText=identify(event.error||event.message);},true);
-window.addEventListener('unhandledrejection',event=>{errorText=identify(event.reason);});
+window.addEventListener('error',event=>{errorText=identify(event.error||event.message)+' | Arquivo: '+String(event.filename||'não informado')+' | Linha: '+(event.lineno||'?')+' | Coluna: '+(event.colno||'?');},true);
+window.addEventListener('unhandledrejection',event=>{errorText=identify(event.reason)+' | '+String(event.reason?.stack||'').slice(0,400);});
 function recover(){
 const context=document.getElementById('adminContext'),session=document.getElementById('adminUserCard');
 const waiting=/Carregando organização|Verificando sessão/.test(context?.textContent||'')||/Validando acesso/.test(session?.textContent||'');
