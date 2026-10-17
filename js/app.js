@@ -122,7 +122,7 @@ function render(){
  qs('#educatorGrid').innerHTML=educatorModules.map(x=>moduleCard(x,'Abrir módulo')).join('');
  renderAdminGrid();
  const stat=qs('#statJogos'); if(stat) stat.textContent=games.length;
- bindModuleButtons();bindAudienceUI();bindGlobalSound();renderAudienceProfile(currentAudience);renderPublicService(qs('#publicServiceHost'));showTip(0);updateResults();updateAuthUI();
+ bindModuleButtons();bindAudienceUI();bindGlobalSound();renderAudienceProfile(currentAudience);renderPublicService(qs('#publicServiceHost'));showTip(0);updateResults();updateAuthUI();window.__mobilizaMainReady=true;document.body.dataset.publicBoot='complete';
 }
 function navigate(view){
  if(view==='gestao'){renderAdminGrid(false);bindModuleButtons();updateAuthUI();}
