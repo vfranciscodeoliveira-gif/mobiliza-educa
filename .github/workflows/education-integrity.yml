@@ -5,6 +5,7 @@ on:
       - 'js/core/educationRepository.js'
       - 'js/modules/admin.js'
       - 'tests/educationRecordMismatch.test.mjs'
+      - 'tests/educationNewCreate.test.mjs'
       - '.github/workflows/education-integrity.yml'
   push:
     branches: [main]
@@ -25,4 +26,4 @@ jobs:
           node-version: '22'
       - run: node --check js/core/educationRepository.js
       - run: node --check js/modules/admin.js
-      - run: node --test tests/educationRecordMismatch.test.mjs
+      - run: node --test tests/educationRecordMismatch.test.mjs tests/educationNewCreate.test.mjs
