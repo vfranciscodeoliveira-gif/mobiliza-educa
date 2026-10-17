@@ -30,9 +30,18 @@ export async function listAccessTenants(){
  let ids=[];if(o.exists()&&o.data().active===true||staff?.exists()&&staff.data().active===true&&staff.data().allClients===true){const tenants=await fs.getDocsFromServer(fs.collection(db,'tenants'));const rows=tenants.docs.map(d=>({id:d.id,...d.data()}));if(o.exists()&&o.data().active===true){const id=cloudConfig.directFirestore?.tenantId;if(id&&!rows.some(t=>t.id===id))rows.push({id,name:'Mobiliza Educa'});}return rows;}
  if(staff?.exists()&&staff.data().active===true)ids.push(...staff.data().tenantIds||[]);
  const memberships=await fs.getDocsFromServer(fs.query(fs.collection(db,'memberships'),fs.where('uid','==',user.uid)));ids.push(...memberships.docs.filter(d=>d.data().active===true).map(d=>d.data().tenantId));
- const rows=[];for(const id of [...new Set(ids)]){const a=await loadAccess(id);if(!a.active)continue;const t=await fs.getDocFromServer(fs.doc(db,'tenants',id));if(t.exists())rows.push({id:t.id,...t.data()});else rows.push({id,name:id});}return rows;
+ const rows=[];for(const id of [...new Set(ids.filter(Boolean))]){const a=await loadAccess(id);if(!a.active)continue;const t=await fs.getDocFromServer(fs.doc(db,'tenants',id));if(t.exists())rows.push({id:t.id,...t.data()});else rows.push({id,name:id});}return rows;
 }
 export async function refreshOnlineAccess(){const rows=await listAccessTenants();let id=accessTenantId();if(!rows.some(t=>t.id===id)){id=rows[0]?.id||'';if(id)localStorage.setItem(cloudStoragePrefix()+'.tenantId',id);else localStorage.removeItem(cloudStoragePrefix()+'.tenantId');}const a=await loadAccess(id);window.dispatchEvent(new CustomEvent('mobiliza-admin-auth',{detail:{unlocked:a.active}}));return{access:a,tenants:rows};}
 export function onlineUser(){const a=snapshot;return a?.active?{...a,id:a.uid,username:a.email,profileId:a.role||'PERSONALIZADO',_cloud:true}:null;}
 window.addEventListener('mobiliza-cloud-auth',()=>{snapshot=null;});window.addEventListener('mobiliza-cloud-tenant',()=>{snapshot=null;});
 
+
+export async function inspectMyTenantAccess(){
+ const user=await getCloudUser();if(!user)throw new Error('Não há conta Firebase conectada.');
+ const {db,fs}=await accessDb();
+ const owner=await fs.getDocFromServer(fs.doc(db,'platformOwners',user.uid));
+ const staff=await fs.getDocFromServer(fs.doc(db,'platformStaff',user.uid));
+ const membership=await fs.getDocsFromServer(fs.query(fs.collection(db,'memberships'),fs.where('uid','==',user.uid)));
+ return {uid:user.uid,email:user.email,owner:owner.exists()&&owner.data().active===true,staff:staff.exists()&&staff.data().active===true,staffAllClients:staff.exists()&&staff.data().active===true&&staff.data().allClients===true,staffTenantIds:staff.exists()?staff.data().tenantIds||[]:[],memberships:membership.docs.map(doc=>({tenantId:doc.data().tenantId,active:doc.data().active===true})),visibleTenants:(await listAccessTenants()).map(t=>({id:t.id,name:t.name}))};
+}
