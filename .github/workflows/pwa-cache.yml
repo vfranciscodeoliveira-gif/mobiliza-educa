@@ -4,8 +4,10 @@ on:
     paths:
       - 'service-worker.js'
       - 'js/app.js'
+      - 'js/publicBootstrap.js'
       - 'index.html'
       - 'tests/pwaCache.test.mjs'
+      - 'tests/publicBootstrap.test.mjs'
       - '.github/workflows/pwa-cache.yml'
 permissions:
   contents: read
@@ -19,4 +21,5 @@ jobs:
           node-version: '22'
       - run: node --check service-worker.js
       - run: node --check js/app.js
-      - run: node --test tests/pwaCache.test.mjs
+      - run: node --check js/publicBootstrap.js
+      - run: node --test tests/pwaCache.test.mjs tests/publicBootstrap.test.mjs
