@@ -4,6 +4,7 @@ import {
 import {listEvidenceFiles} from '../core/evidenceStore.js?v=3';
 import {recordAudit,currentUser} from '../core/accessControl.js?v=1';
 import {cloudConfigured,hasCloudSession} from '../cloudGateway.js?v=6';
+import {accessDb,loadAccess,permissionAllowed,accessTenantId} from '../core/cloudAccess.js?v=1';
 
 const SETTINGS='mobiliza.system.settings';
 const BACKUP_STATE='mobiliza.system.backupState';
@@ -11,6 +12,18 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&
 const fmtBytes=n=>{n=Number(n)||0;if(n<1024)return n+' B';if(n<1048576)return(n/1024).toFixed(1)+' KB';if(n<1073741824)return(n/1048576).toFixed(1)+' MB';return(n/1073741824).toFixed(2)+' GB';};
 const safe=(k,f={})=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(f))}catch{return f}};
 const settings=()=>({org:'Prefeitura de Presidente Prudente',secretaria:'SEMOB',departamento:'Educação para o Trânsito',cidade:'Presidente Prudente - SP',responsavel:'',email:'',telefone:'',rodape:'Mobiliza Educa • Educação para o Trânsito',...safe(SETTINGS,{})});
+const tenantSettingsKey=()=>SETTINGS+'.'+(accessTenantId()||'local');
+async function readIdentity(){
+ const local=safe(tenantSettingsKey(),{}),base={...settings(),...local},tenant=accessTenantId();
+ if(!tenant)return {value:base,remote:false,note:'Sem organização selecionada: somente armazenamento local.'};
+ try{const a=await loadAccess(tenant);if(!a.active)throw new Error('Acesso institucional não autorizado.');const {db,fs}=await accessDb();const snapshot=await fs.getDocFromServer(fs.doc(db,'tenants',tenant,'settings','institutionalIdentity'));return {value:{...base,...(snapshot.exists()?snapshot.data():{})},remote:true,note:'Identidade lida do Firestore da organização.'};}
+ catch(error){return {value:base,remote:false,note:'Firestore indisponível: '+String(error.message||error)+'. Alterações não serão gravadas como se estivessem na nuvem.'};}
+}
+async function saveIdentity(value){
+ const tenant=accessTenantId();if(!tenant)throw new Error('Selecione uma organização antes de salvar identidade na nuvem.');
+ const a=await loadAccess(tenant);if(!permissionAllowed(a,'users.manage'))throw new Error('É necessário ser gestor autorizado para alterar a identidade.');
+ const {db,fs}=await accessDb();await fs.setDoc(fs.doc(db,'tenants',tenant,'settings','institutionalIdentity'),{...value,updatedBy:a.uid,updatedAt:fs.serverTimestamp()},{merge:true});localStorage.setItem(tenantSettingsKey(),JSON.stringify(value));
+}
 const backupState=()=>safe(BACKUP_STATE,{lastOperationalAt:null,lastProtectedAt:null,lastRestoreAt:null});
 const setBackupState=p=>localStorage.setItem(BACKUP_STATE,JSON.stringify({...backupState(),...p}));
 const download=(name,text,type='application/json;charset=utf-8')=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);};
@@ -51,12 +64,13 @@ export function renderSistemaContinuity(host){
   <div class="sys-kpis"><div class="sys-kpi"><strong>${diag.totalCore}</strong><span>registros operacionais principais</span></div><div class="sys-kpi"><strong>${diag.files}</strong><span>arquivos de evidência locais</span></div><div class="sys-kpi"><strong>${fmtBytes(diag.storage.usage||diag.storage.localBytes)}</strong><span>armazenamento utilizado</span></div><div class="sys-kpi"><strong>${cloud?'Configurada':'Local'}</strong><span>camada de nuvem</span></div></div>
   <div class="sys-tabs"><button class="sys-tab ${tab==='identidade'?'active':''}" data-systab="identidade">🏛️ Identidade</button><button class="sys-tab ${tab==='backup'?'active':''}" data-systab="backup">💾 Backup</button><button class="sys-tab ${tab==='restaurar'?'active':''}" data-systab="restaurar">↩️ Restaurar</button><button class="sys-tab ${tab==='armazenamento'?'active':''}" data-systab="armazenamento">🗄️ Armazenamento</button><button class="sys-tab ${tab==='nuvem'?'active':''}" data-systab="nuvem">☁️ Nuvem</button></div><div id="sysBody"></div></section>`;
   host.querySelectorAll('[data-systab]').forEach(b=>b.onclick=()=>{tab=b.dataset.systab;restoreParsed=null;restoreInfo=null;shell();});
-  const body=host.querySelector('#sysBody');if(tab==='identidade')identityView(body);else if(tab==='backup')backupView(body,bs,diag);else if(tab==='restaurar')restoreView(body);else if(tab==='armazenamento')await storageView(body,diag);else cloudView(body,cloud,manager);
+  const body=host.querySelector('#sysBody');if(tab==='identidade')await identityView(body);else if(tab==='backup')backupView(body,bs,diag);else if(tab==='restaurar')restoreView(body);else if(tab==='armazenamento')await storageView(body,diag);else cloudView(body,cloud,manager);
  };
- function identityView(body){
-  const s=settings(),u=currentUser();
+ async function identityView(body){
+  const loaded=await readIdentity(),s=loaded.value,u=currentUser();
   body.innerHTML=`<div class="sys-panel"><div class="sys-note"><strong>Identidade institucional.</strong> Estes dados serão reutilizados em relatórios, certificados e documentos conforme os módulos forem consolidados.</div><form id="identityForm"><div class="sys-grid"><label>Órgão / Prefeitura<input name="org" value="${esc(s.org)}"></label><label>Secretaria<input name="secretaria" value="${esc(s.secretaria)}"></label><label>Departamento / Coordenação<input name="departamento" value="${esc(s.departamento)}"></label><label>Cidade / UF<input name="cidade" value="${esc(s.cidade)}"></label><label>Responsável institucional<input name="responsavel" value="${esc(s.responsavel||u?.name||'')}"></label><label>E-mail institucional<input name="email" type="email" value="${esc(s.email)}"></label><label>Telefone<input name="telefone" value="${esc(s.telefone)}"></label><label class="sys-span2">Rodapé institucional<input name="rodape" value="${esc(s.rodape)}"></label></div><div class="sys-actions"><button class="btn primary">Salvar identidade</button></div></form><div class="sys-note"><strong>Prévia:</strong> ${esc(identitySummary(s))}</div></div>`;
-  body.querySelector('#identityForm').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target).entries());localStorage.setItem(SETTINGS,JSON.stringify(v));recordAudit('CONFIG_IDENTIDADE','sistema','',identitySummary(v));alert('Identidade institucional salva.');shell();};
+  body.insertAdjacentHTML('afterbegin','<p class="sys-note">'+esc(loaded.note)+'</p>');
+  body.querySelector('#identityForm').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');button.disabled=true;const v=Object.fromEntries(new FormData(e.target).entries());try{await saveIdentity(v);recordAudit('CONFIG_IDENTIDADE','sistema',accessTenantId(),identitySummary(v));alert('Identidade institucional salva no Firestore da organização.');await shell();}catch(error){alert('Não foi possível salvar identidade na nuvem: '+error.message);}finally{button.disabled=false;}};
  }
  function backupView(body,bs,diag){
   const est=backupEstimateFromMeta();
