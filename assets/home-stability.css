@@ -1,0 +1,11 @@
+/* Página pública: conteúdo útil mesmo quando módulos dinâmicos falham. */
+#view-inicio .section-block{margin-top:clamp(16px,2.5vw,28px)}
+#view-inicio .section-heading{margin:12px 0}
+#view-inicio .section-heading h3{font-size:clamp(1.1rem,1.8vw,1.4rem)}
+#view-inicio .home-fallback-note{margin:0;padding:14px 18px;border:1px solid #dce8f1;border-radius:14px;background:#fff;color:#3c5368}
+#view-inicio .home-fallback-card{padding:18px;min-height:0}
+#view-inicio .home-fallback-card h4{margin:0 0 6px;color:#0f3c66}
+#view-inicio .home-fallback-card p{margin:0 0 10px;line-height:1.45;color:#607286}
+#view-inicio .home-fallback-warning{padding:12px 15px;border:1px solid #edb04f;border-radius:12px;background:#fff7e8;color:#624510}
+#view-inicio #tipText{padding:14px 18px;margin:0;font-size:1rem;line-height:1.5}
+@media(max-width:780px){#view-inicio .module-grid{grid-template-columns:1fr}#view-inicio .home-fallback-card{padding:16px}}
