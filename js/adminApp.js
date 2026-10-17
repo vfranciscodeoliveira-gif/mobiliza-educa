@@ -16,7 +16,8 @@ import {signInCloud,cloudSessionHint} from './core/cloudAuth.js?v=3';
 
 const qs=s=>document.querySelector(s);
 
-installTenantWorkspaceBridge();
+window.__mobilizaAdminModuleLoaded=true;
+try{installTenantWorkspaceBridge();}catch(error){console.error('Tenant workspace:',error);}
 
 function askFirestoreCredentials(){
  return new Promise(resolve=>{
