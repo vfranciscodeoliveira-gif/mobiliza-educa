@@ -14,7 +14,7 @@ const safe=(k,f={})=>{try{return JSON.parse(localStorage.getItem(k)||JSON.string
 const settings=()=>({org:'Prefeitura de Presidente Prudente',secretaria:'SEMOB',departamento:'Educação para o Trânsito',cidade:'Presidente Prudente - SP',responsavel:'',email:'',telefone:'',rodape:'Mobiliza Educa • Educação para o Trânsito',...safe(SETTINGS,{})});
 const tenantSettingsKey=()=>SETTINGS+'.'+(accessTenantId()||'local');
 async function readIdentity(){
- const local=safe(tenantSettingsKey(),{}),base={...settings(),...local},tenant=accessTenantId();
+ const local=safe(tenantSettingsKey(),{}),base={org:'',secretaria:'',departamento:'',cidade:'',responsavel:'',email:'',telefone:'',rodape:'',...local},tenant=accessTenantId();
  if(!tenant)return {value:base,remote:false,note:'Sem organização selecionada: somente armazenamento local.'};
  try{const a=await loadAccess(tenant);if(!a.active)throw new Error('Acesso institucional não autorizado.');const {db,fs}=await accessDb();const snapshot=await fs.getDocFromServer(fs.doc(db,'tenants',tenant,'settings','institutionalIdentity'));return {value:{...base,...(snapshot.exists()?snapshot.data():{})},remote:true,note:'Identidade lida do Firestore da organização.'};}
  catch(error){return {value:base,remote:false,note:'Firestore indisponível: '+String(error.message||error)+'. Alterações não serão gravadas como se estivessem na nuvem.'};}
