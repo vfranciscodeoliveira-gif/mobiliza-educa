@@ -12,7 +12,7 @@ const title=document.createElement('h2');title.textContent='Falha ao iniciar o C
 const description=document.createElement('p');description.textContent=window.__mobilizaAdminModuleLoaded?(errorText||'A verificação de acesso não terminou. Sua sessão permanece protegida.'):(errorText||'O módulo administrativo não iniciou. Pode haver um erro de importação ou arquivo JavaScript indisponível.');
 const btn=document.createElement('button');btn.type='button';btn.className='btn primary';btn.textContent='Recarregar gestão';btn.onclick=()=>location.reload();
 const link=document.createElement('a');link.href='./';link.textContent='Voltar ao site';link.style.cssText='margin-left:14px;display:inline-block';
-panel.append(title,description,btn,link);
+const diagnose=document.createElement('a');diagnose.href='./diagnostico-gestao.html';diagnose.textContent='Identificar arquivo com erro';diagnose.style.cssText='margin-left:14px;display:inline-block';panel.append(title,description,btn,diagnose,link);
 const main=document.querySelector('main')||context?.parentElement||document.body;main.prepend(panel);
 if(context)context.textContent='Inicialização interrompida; consulte o diagnóstico acima.';
 if(session)session.querySelector('strong')?.replaceChildren(document.createTextNode('Falha na validação'));
