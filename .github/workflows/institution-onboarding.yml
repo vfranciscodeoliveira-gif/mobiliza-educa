@@ -1,0 +1,28 @@
+name: Cadastro institucional
+on:
+  pull_request:
+    paths:
+      - 'js/core/institutionPolicy.js'
+      - 'js/modules/cloudUsers.js'
+      - 'tests/institutionPolicy.test.mjs'
+      - '.github/workflows/institution-onboarding.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'js/core/institutionPolicy.js'
+      - 'js/modules/cloudUsers.js'
+      - 'tests/institutionPolicy.test.mjs'
+      - '.github/workflows/institution-onboarding.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check js/modules/cloudUsers.js
+      - run: node --check js/core/institutionPolicy.js
+      - run: node --test tests/institutionPolicy.test.mjs
