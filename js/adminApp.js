@@ -1,7 +1,7 @@
 import {renderQREducacao} from './modules/qrEducacao.js?v=2';
 import {mountProtocolCenter,unmountProtocolCenter,openUnreadNotifications} from './modules/protocolCenter.js?v=4';
 import {renderAgendaOverview} from './modules/agendaOverview.js?v=1';
-import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed} from './core/cloudAccess.js?v=1';
+import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed,inspectMyTenantAccess} from './core/cloudAccess.js?v=1';
 import {getCloudTenantId,setCloudTenantId} from './cloudGateway.js?v=6';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let onlineTenants=[];
@@ -111,6 +111,7 @@ function renderAuthenticated(){
 
   qs('#adminUserCard').innerHTML=`<span>👤</span><div><small>Usuário conectado</small><strong>${esc(user?.name||user?.username||'Gestor')}</strong></div>`;
   qs('#adminContext').innerHTML=`Cliente: <select id="adminOnlineTenant">${onlineTenants.map(t=>`<option value="${esc(t.id)}" ${t.id===getCloudTenantId()?'selected':''}>${esc(t.name||t.id)}</option>`).join('')}</select> • usuário: <strong>${esc(user?.username||'—')}</strong>`;qs('#adminOnlineTenant').onchange=async e=>{qs('#adminDialog')?.close();setCloudTenantId(e.target.value);try{const result=await refreshOnlineAccess();onlineTenants=result.tenants;renderAuthenticated();}catch(error){alert(error.message);renderLoggedOut();}};
+  const verify=document.createElement('button');verify.type='button';verify.className='btn ghost';verify.textContent='Diagnosticar permissões';verify.onclick=async()=>{try{const a=await inspectMyTenantAccess();alert(JSON.stringify(a,null,2));}catch(e){alert(e.message);}};qs('#adminContext').append(verify);
   qs('#adminProfileKpi').textContent=user?.profileId||'GESTOR';
   qs('#adminModulesKpi').textContent=String(adminModules.length);
   qs('#adminSidebarNav').innerHTML=adminModules.map(sidebarButton).join('');
