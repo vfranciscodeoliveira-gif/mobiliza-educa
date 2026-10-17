@@ -1,13 +1,13 @@
 // Diagnóstico isolado: execute individualmente cada dependência da Gestão.
 const dependencies=[
- ['Módulos administrativos','./js/modules/admin.js?v=65'],
- ['QR Educação','./js/modules/qrEducacao.js?v=2'],
- ['Protocolos','./js/modules/protocolCenter.js?v=4'],
- ['Agenda resumida','./js/modules/agendaOverview.js?v=1'],
- ['Acessos Firestore','./js/core/cloudAccess.js?v=1'],
- ['Gateway Firebase','./js/cloudGateway.js?v=6'],
- ['Conteúdo','./js/content.js?v=68'],
- ['Autenticação','./js/modules/auth.js?v=3']
+ ['Módulos administrativos','./modules/admin.js?v=65'],
+ ['QR Educação','./modules/qrEducacao.js?v=2'],
+ ['Protocolos','./modules/protocolCenter.js?v=4'],
+ ['Agenda resumida','./modules/agendaOverview.js?v=1'],
+ ['Acessos Firestore','./core/cloudAccess.js?v=1'],
+ ['Gateway Firebase','./cloudGateway.js?v=6'],
+ ['Conteúdo','./content.js?v=68'],
+ ['Autenticação','./modules/auth.js?v=3']
 ];
 const box=document.querySelector('#diagnosticResults');
 const report=(name,status,detail='')=>{const row=document.createElement('p');row.textContent=name+': '+status+(detail?' — '+detail:'');box.append(row);};
