@@ -1,0 +1,19 @@
+name: SEMOB - ativação de gestor
+on:
+  pull_request:
+    paths:
+      - 'js/modules/cloudUsers.js'
+      - 'tests/semobActivation.test.mjs'
+      - '.github/workflows/semob-activation.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check js/modules/cloudUsers.js
+      - run: node --test tests/semobActivation.test.mjs
