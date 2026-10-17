@@ -27,7 +27,7 @@ export async function saveEducation(entity,row){
  const ctx=await context();ensureCurrent(ctx);if(!row.id||String(row.id).includes('/'))throw new Error('ID inválido.');if(!String(row.nome||'').trim())throw new Error('Informe o nome.');
  const existing=educationRows(entity).find(r=>r.id===row.id),action=existing?'education.update':'education.create';if(!permissionAllowed(ctx.access,action)||!ctx.access.allSchools&&!schoolAllowed(ctx.access,rowSchool(entity,row)))throw new Error('Sem permissão para cadastrar/editar nesta escola.');
  const ref=ctx.fs.doc(collection(ctx,entity),String(row.id)),data={...row,tenantId:ctx.tenantId,updatedBy:ctx.user.uid,updatedAt:ctx.fs.serverTimestamp()};delete data._cloud;
- if(existing)await ctx.fs.runTransaction(ctx.db,async tx=>{const old=await tx.get(ref);if(!old.exists())throw new Error('Registro não encontrado. Atualize o cadastro.');tx.set(ref,{...data,createdAt:old.data().createdAt,createdBy:old.data().createdBy});});
+ if(existing)await ctx.fs.runTransaction(ctx.db,async tx=>{const old=await tx.get(ref);if(!old.exists())throw new Error('Registro não localizado no Firestore desta organização ('+entity+' / '+row.id+'). Nenhuma alteração foi gravada. Atualize o cadastro e confira a organização selecionada. Caso seja um registro antigo, importe ou cadastre como novo após verificar duplicidades.');tx.set(ref,{...data,createdAt:old.data().createdAt,createdBy:old.data().createdBy});});
  else await ctx.fs.setDoc(ref,{...data,createdAt:ctx.fs.serverTimestamp(),createdBy:ctx.user.uid});
  ensureCurrent(ctx);const rows=educationRows(entity).filter(x=>x.id!==row.id);rows.unshift({...row,tenantId:ctx.tenantId});caches.set(ctx.user.uid+':'+ctx.tenantId+':'+entity,rows);return row;
 }
