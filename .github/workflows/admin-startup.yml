@@ -1,0 +1,22 @@
+name: Gestão - inicialização
+on:
+  pull_request:
+    paths:
+      - 'js/adminApp.js'
+      - 'js/adminStartupGuard.js'
+      - 'admin.html'
+      - 'tests/adminStartupGuard.test.mjs'
+      - '.github/workflows/admin-startup.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check js/adminApp.js
+      - run: node --check js/adminStartupGuard.js
+      - run: node --test tests/adminStartupGuard.test.mjs
