@@ -1,6 +1,5 @@
 // Diagnóstico isolado: execute individualmente cada dependência da Gestão.
 const dependencies=[
- ['Entrada administrativa','./js/adminApp.js?v=57'],
  ['Módulos administrativos','./js/modules/admin.js?v=65'],
  ['QR Educação','./js/modules/qrEducacao.js?v=2'],
  ['Protocolos','./js/modules/protocolCenter.js?v=4'],
