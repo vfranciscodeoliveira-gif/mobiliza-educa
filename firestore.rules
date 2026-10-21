@@ -199,8 +199,8 @@ service cloud.firestore {
    }
    match /appointments/{id}{
     function linkedClass(d,i){return d.idsTurmas.size() <= i || get(/databases/$(database)/documents/tenants/$(t)/classes/$(d.idsTurmas[i])).data.idEscola == d.idEscola;}
-    function validAppointment(d){return d.keys().hasOnly(['tenantId','nome','origem','tipo','status','idEscola','idsTurmas','solicitante','contato','telefone','email','publico','dataInicio','dataFim','horaInicio','horaFim','local','responsavel','previsto','realizado','vagas','materiais','equipe','observacao','createdBy','createdAt','updatedBy','updatedAt','serieId','windowsSource'])
-     && d.tenantId == t && d.nome is string && d.nome.size()>0 && d.nome.size()<=250
+    function validAppointment(d){return d.keys().hasOnly(['tenantId','nome','projetoId','origem','tipo','status','idEscola','idsTurmas','solicitante','contato','telefone','email','publico','dataInicio','dataFim','horaInicio','horaFim','local','responsavel','previsto','realizado','vagas','materiais','equipe','observacao','createdBy','createdAt','updatedBy','updatedAt','serieId','windowsSource'])
+     && d.tenantId == t && (!('projetoId' in d) || (d.projetoId is string && d.projetoId.size()<=100)) && d.nome is string && d.nome.size()>0 && d.nome.size()<=250
      && d.origem in ['Escola','Demanda espontânea'] && d.tipo in ['Agente de Trânsito Mirim','Palestra','Oficina','Ação educativa','Visita','Campanha','Outro'] && d.status in ['Solicitado','Planejado','Confirmado','Em preparação','Em andamento','Concluído','Cancelado','Reagendado']
      && d.idEscola is string && d.idsTurmas is list && d.idsTurmas.size()<=5 && d.idsTurmas.toSet().size()==d.idsTurmas.size()
      && (d.origem == 'Escola' ? get(/databases/$(database)/documents/tenants/$(t)/schools/$(d.idEscola)).data.nome is string && !('deletedAt' in get(/databases/$(database)/documents/tenants/$(t)/schools/$(d.idEscola)).data) && linkedClass(d,0) && linkedClass(d,1) && linkedClass(d,2) && linkedClass(d,3) && linkedClass(d,4) : d.idEscola == '' && d.idsTurmas.size()==0 && d.solicitante.size()>0)
