@@ -23,7 +23,8 @@ export function validateMapfreBooking(data,appointments=[],excludeId=''){
  if(!MAPFRE_DAYS.includes(data.dataInicio)||data.dataFim!==data.dataInicio)throw new Error('Selecione um dos dias autorizados da programação MAPFRE.');
  if(!MAPFRE_STARTS.includes(data.horaInicio))throw new Error('Escolha um horário da grade MAPFRE.');
  const school=officialMapfreSchool(data.dataInicio,data.horaInicio);
- if(school&&data.id!==excludeId)throw new Error('Horário confirmado para '+school+'. Confira a reserva existente antes de cadastrar outra.');
+ const editingSameSlot=!!excludeId&&appointments.some(r=>r.id===excludeId&&r.dataInicio===data.dataInicio&&r.horaInicio===data.horaInicio&&r.status!=='Cancelado');
+ if(school&&!editingSameSlot)throw new Error('Horário confirmado para '+school+'. Confira a reserva existente antes de cadastrar outra.');
  const current=appointments.filter(r=>r.id!==excludeId&&r.projetoId===MAPFRE_PROJECT&&r.status!=='Cancelado'&&r.dataInicio===data.dataInicio&&r.horaInicio===data.horaInicio);
  const total=current.reduce((sum,r)=>sum+(Number(r.previsto)||0),0)+(Number(data.previsto)||0);
  if(total>40)throw new Error('Capacidade da sessão excedida: '+total+' participantes previstos (máximo 40).');
