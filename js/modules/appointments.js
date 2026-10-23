@@ -1,5 +1,5 @@
 import {renderMapfreWeekGrid} from '../core/mapfreWeekGrid.js?v=2';
-import {mapfreRows,mapfreSummary,MAPFRE_DAYS,validateMapfreBooking,mapfreExistingReview} from '../core/mapfreSchedule.js?v=2';
+import {mapfreRows,mapfreSummary,MAPFRE_DAYS,validateMapfreBooking,mapfreExistingReview} from '../core/mapfreSchedule.js?v=3';
 import {PROJECTS,projectLabel,projectOptions,projectMatches} from '../core/appointmentProjects.js?v=1';
 import {renderWindowsHistory} from './windowsHistory.js?v=1';
 import {renderWindowsReconciliation} from './windowsReconciliation.js?v=5';
