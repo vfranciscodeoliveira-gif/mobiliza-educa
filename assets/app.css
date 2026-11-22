@@ -3517,3 +3517,45 @@ body.admin-workspace-open{overflow:hidden}
   #gameDialog:has(.milhao) .milhao-aids .btn{flex-basis:calc(50% - 8px)!important}
   #gameDialog:has(.milhao) .milhao-top{gap:8px!important}
 }
+
+/* v0.52 — Show do Milhão: legibilidade da partida em janela dividida.
+   Escopo exclusivo da partida; introdução e outros jogos permanecem intactos. */
+#gameDialog:has(.milhao-play)>.dialog-shell{overflow-y:auto!important;overflow-x:hidden!important}
+#gameDialog:has(.milhao-play) .milhao-play{padding:clamp(12px,2vw,24px)!important;min-height:0!important}
+#gameDialog:has(.milhao-play) .milhao-top{align-items:center!important;margin-bottom:12px!important}
+#gameDialog:has(.milhao-play) .milhao-top h2{font-size:clamp(1.2rem,2vw,1.65rem)!important}
+#gameDialog:has(.milhao-play) .milhao-score{font-size:clamp(.78rem,1.15vw,.95rem)!important}
+#gameDialog:has(.milhao-play) .milhao-timer{width:64px!important;height:64px!important;font-size:1.55rem!important;flex-shrink:0}
+#gameDialog:has(.milhao-play) .milhao-layout{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(132px,190px)!important;gap:clamp(10px,1.5vw,20px)!important;align-items:start!important}
+#gameDialog:has(.milhao-play) .milhao-stage{min-width:0!important}
+#gameDialog:has(.milhao-play) .milhao-brand-stage{min-height:105px!important;margin:0 0 12px!important;display:grid!important}
+#gameDialog:has(.milhao-play) .milhao-logo-disc{width:105px!important;height:105px!important;font-size:1.02rem!important}
+#gameDialog:has(.milhao-play) .milhao-logo-disc strong{font-size:1.15rem!important}
+#gameDialog:has(.milhao-play) .milhao-logo-disc small{font-size:.57rem!important}
+#gameDialog:has(.milhao-play) .milhao-question-wrap{padding:14px 18px!important;border-width:3px!important}
+#gameDialog:has(.milhao-play) .milhao-question-wrap span{font-size:.8rem!important}
+#gameDialog:has(.milhao-play) .milhao-question{font-size:clamp(1.15rem,2.1vw,1.7rem)!important;line-height:1.3!important;margin-top:6px!important}
+#gameDialog:has(.milhao-play) .milhao-options{margin-top:14px!important;gap:10px!important}
+#gameDialog:has(.milhao-play) .milhao-options .quiz-option{min-height:58px!important;padding:10px 14px 10px 54px!important;font-size:clamp(.92rem,1.25vw,1.08rem)!important;line-height:1.3!important;text-align:left!important}
+#gameDialog:has(.milhao-play) .milhao-options .quiz-option b{width:36px!important;height:36px!important;font-size:1rem!important}
+#gameDialog:has(.milhao-play) .milhao-aids{margin-top:14px!important;gap:8px!important;padding:9px!important}
+#gameDialog:has(.milhao-play) .milhao-aids .btn{min-height:43px!important;padding:9px 10px!important;font-size:.84rem!important;flex:1 1 125px!important}
+#gameDialog:has(.milhao-play) .milhao-ladder{display:grid!important;grid-template-columns:1fr!important;gap:4px!important;max-height:none!important;overflow:visible!important}
+#gameDialog:has(.milhao-play) .milhao-ladder span{min-height:25px!important;padding:4px 9px!important;font-size:.8rem!important}
+#gameDialog:has(.milhao-play) .milhao-ladder b{font-size:.84rem!important}
+@media(max-width:760px){
+ #gameDialog:has(.milhao-play) .milhao-layout{grid-template-columns:minmax(0,1fr)!important}
+ #gameDialog:has(.milhao-play) .milhao-brand-stage{min-height:78px!important;margin-bottom:8px!important}
+ #gameDialog:has(.milhao-play) .milhao-logo-disc{width:78px!important;height:78px!important;font-size:.77rem!important}
+ #gameDialog:has(.milhao-play) .milhao-logo-disc strong{font-size:.86rem!important}
+ #gameDialog:has(.milhao-play) .milhao-ladder{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important}
+ #gameDialog:has(.milhao-play) .milhao-ladder span{font-size:.7rem!important;padding:5px 7px!important}
+ #gameDialog:has(.milhao-play) .milhao-ladder b{font-size:.73rem!important}
+}
+@media(max-width:480px){
+ #gameDialog:has(.milhao-play) .milhao-play{padding:12px!important}
+ #gameDialog:has(.milhao-play) .milhao-question{font-size:1.16rem!important}
+ #gameDialog:has(.milhao-play) .milhao-options{grid-template-columns:1fr!important}
+ #gameDialog:has(.milhao-play) .milhao-options .quiz-option{min-height:52px!important;font-size:.94rem!important}
+ #gameDialog:has(.milhao-play) .milhao-ladder{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
