@@ -26,3 +26,41 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}img{max-width:100%}
 @media(max-width:900px){#gameDialog{max-width:100vw;max-height:100dvh;border-radius:0}#gameDialog .dialog-shell{width:100vw;max-height:100dvh;overflow-y:auto}#gameHost .ex60-layout{grid-template-columns:1fr}#gameHost .ex60-main{grid-template-columns:1fr}#gameHost .ex60-side{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:600px){#gameHost .ex60-side{grid-template-columns:repeat(2,minmax(0,1fr))}#gameHost .ex60-scene{min-height:160px;max-height:240px}#gameHost .ex60-scene img{max-height:240px}#gameHost .ex60-options button{min-height:54px;padding:12px}#gameHost .ex60-finalstats{grid-template-columns:1fr}#gameHost .ex60-finalbuttons{width:100%}#gameHost .ex60-finalbuttons button{flex:1}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}#gameHost *,#gameHost *::before,#gameHost *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* MOBILIZA EDUCA 2026 — REVISAO VISUAL GLOBAL V7 */
+:root{--me-deep:#082d48;--me-cyan:#00a7c9;--me-gold:#ffcb55}
+body{background:linear-gradient(160deg,#eaf6fb 0%,#f6fbff 43%,#eaf1f8 100%)}
+.topbar{background:linear-gradient(115deg,#092f4b,#075b7c)!important;color:#fff!important;border-bottom:3px solid #eebd47;box-shadow:0 8px 24px #092c4930}
+.topbar h1,.topbar .tagline,.topbar .eyebrow{color:#fff!important}
+.main-nav{box-shadow:0 8px 18px #0b355314}
+.main-nav .nav-item.active{background:linear-gradient(120deg,#067d9e,#0d3c64);box-shadow:0 5px 12px #0b446d2b}
+.hero{background:linear-gradient(120deg,#073453,#0b7291)!important;color:#fff!important;border:1px solid #0b6888!important;box-shadow:0 20px 45px #0a3d5b35}
+.hero h2,.hero p,.hero .eyebrow{color:#fff!important}
+.hero .badge{background:#ffdc77;color:#14354d}
+.hero .btn.primary{background:#ffcc56;color:#13344b}
+.module-grid{gap:20px}
+.module-card{position:relative;background:linear-gradient(180deg,#fff,#f4faff);border:1px solid #c5e0ed;border-radius:22px;box-shadow:0 12px 30px #0b456b13;transition:transform .2s,box-shadow .2s,border-color .2s;overflow:hidden}
+.module-card::before{content:'';position:absolute;inset:0 0 auto;height:5px;background:linear-gradient(90deg,#0a89ad,#f1bf48)}
+.module-card:hover{transform:translateY(-5px);box-shadow:0 22px 40px #0b456b2a;border-color:#59afc9}
+.module-card .module-icon{display:grid;place-items:center;width:65px;height:65px;background:linear-gradient(140deg,#e0f5fc,#fff0c8);border-radius:19px;font-size:2.2rem}
+.module-card h3{font-size:1.3rem;color:#073d5d}
+.module-card p{font-size:1rem;line-height:1.6}
+.module-card .btn,.module-card button{border-radius:13px;min-height:46px}
+#gameDialog{background:#f2f9fc;border:1px solid #8ab7c8}
+#gameHost .game{background:linear-gradient(160deg,#fff,#eef8fd);padding:clamp(16px,3vw,38px)}
+#gameHost .game h2{font-size:clamp(1.6rem,2.5vw,2.5rem);letter-spacing:-.025em}
+#gameHost :is(.quiz-option,.ex2-choice,.cw-clue,.ex60-options button){box-shadow:0 4px 12px #0a395112;transition:background .15s,border-color .15s,transform .15s}
+#gameHost :is(.quiz-option,.ex2-choice,.cw-clue,.ex60-options button):hover{transform:translateY(-2px);border-color:#078caa}
+#gameHost .ex60-top{background:linear-gradient(110deg,#072d49,#087fa0);border-bottom:4px solid #f5bf43}
+#gameHost .ex60-main{box-shadow:0 12px 26px #0b456b17;border:1px solid #a9d4e4}
+#gameHost .ex60-context{display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(155deg,#07324f,#086e8e 65%,#1296ab);color:#fff;min-height:265px;padding:0!important;max-height:none!important}
+#gameHost .ex60-context-top{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:15px 18px;background:#061f3690;font-size:.77rem;font-weight:900;letter-spacing:.07em}
+#gameHost .ex60-context-top span{font-size:.67rem;color:#c5f4ff}
+#gameHost .ex60-context-art{padding:18px 24px;text-align:center;display:grid;place-items:center;gap:12px}
+#gameHost .ex60-context-art strong{font-size:clamp(1.4rem,2.3vw,2.2rem);color:#ffda71;line-height:1.1}
+#gameHost .ex60-context-art p{font-size:clamp(1.05rem,1.55vw,1.3rem);line-height:1.4;margin:0;color:#fff;font-weight:650}
+#gameHost .ex60-road-mark{letter-spacing:12px;color:#ffce62;font-size:1.1rem}
+#gameHost .ex60-context-bottom{background:#06283f9c;padding:13px 18px;font-size:.8rem;font-weight:800;text-align:center;color:#dffaff}
+#gameHost .ex60-photo img{filter:saturate(1.08) contrast(1.03)}
+#gameHost .ex60-side>div{background:linear-gradient(145deg,#083e60,#096d8b);border:1px solid #147f9b;box-shadow:0 6px 12px #073e5b16}
+@media(max-width:700px){.topbar{padding:16px!important}.hero{padding:22px!important}.module-card{min-height:0}.module-card:hover{transform:none}#gameHost .ex60-context{min-height:180px}#gameHost .ex60-context-art{padding:12px 16px;gap:6px}#gameHost .ex60-context-top{padding:10px 12px}#gameHost .ex60-context-bottom{padding:9px 12px}}

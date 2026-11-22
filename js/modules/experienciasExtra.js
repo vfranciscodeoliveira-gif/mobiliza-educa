@@ -58,6 +58,7 @@ function optionsHtml(options,attr){
 function desafio60(dialog,host,onFinish){
   const questions=getQuestionSet({count:14,audiences:['criancas','adolescentes','adultos'],difficulties:['facil','medio'],avoidRecent:true,markRecent:true});
   let i=0,score=0,correct=0,answers=0,left=60,locked=false,done=false,timer=null,streak=0;
+  const usedSceneImages=new Set(); // Uma fotografia nunca se repete na mesma rodada.
   // Cada fotografia corresponde a uma situacao observavel, nao apenas a um tema.
   // Regras conservadoras: em caso de duvida, usar o painel neutro.
   const scenes={
@@ -85,11 +86,21 @@ function desafio60(dialog,host,onFinish){
     if(/(ciclista|bicicleta).{0,75}(ciclovia|ciclofaixa)|(ciclovia|ciclofaixa).{0,75}(ciclista|bicicleta)/.test(t))return {src:scenes.ciclista,label:'CICLOVIA'};
     return null;
   }
+  function escapeSceneText(value){return String(value||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function sceneMarkup(q){
     const scene=sceneFor(q);
-    if(scene)return '<div class="ex60-scene"><img src="'+scene.src+'" alt="Imagem ilustrativa: '+scene.label+'" loading="eager" onerror="this.hidden=true;this.parentElement.classList.add(\'ex60-scene-missing\')"><div class="ex60-scene-label">'+scene.label+' • CENA ILUSTRATIVA</div></div>';
-    return '<div class="ex60-scene ex60-scene-neutral" style="background:linear-gradient(135deg,#07354d,#087ea3);min-height:125px;display:grid;place-items:center;text-align:center;color:white" role="img" aria-label="Painel educativo sem fotografia específica"><div class="ex60-neutral-content" style="display:grid;gap:6px;padding:18px;font-size:clamp(15px,2vw,22px)"><strong style="font-size:34px">🚦</strong><span>DECISÃO SEGURA</span><small>Leia a situação com atenção e escolha a atitude mais segura.</small></div></div>';
+    // Nao repetir a mesma imagem em perguntas diferentes da mesma partida.
+    if(scene && !usedSceneImages.has(scene.src)){
+      usedSceneImages.add(scene.src);
+      return '<div class="ex60-scene ex60-photo"><img src="'+scene.src+'" alt="Imagem ilustrativa: '+scene.label+'" loading="eager" onerror="this.hidden=true;this.parentElement.classList.add(\'ex60-scene-missing\')"><div class="ex60-scene-label">'+scene.label+' • CENA ILUSTRATIVA</div></div>';
+    }
+    // Quando nao existe fotografia especifica, mostrar o proprio contexto da pergunta,
+    // sem reutilizar fotografias que poderiam induzir uma resposta errada.
+    const prompt=escapeSceneText(q.prompt);
+    const index=answers+1;
+    return '<div class="ex60-scene ex60-context" role="group" aria-label="Situacao '+index+' sem fotografia especifica"><div class="ex60-context-top">CENÁRIO '+String(index).padStart(2,'0')+' <span>🚦 EDUCAÇÃO PARA O TRÂNSITO</span></div><div class="ex60-context-art"><span class="ex60-road-mark">▰ ▰ ▰</span><strong>O QUE VOCÊ FARIA?</strong><p>'+prompt+'</p></div><div class="ex60-context-bottom">Analise a situação e escolha a atitude mais segura</div></div>';
   }
+
   function end(){
     if(done)return;done=true;if(timer)clearInterval(timer);save(score,correct,answers,'desafio-60','Desafio 60 segundos',{durationSec:60});if(onFinish)onFinish();
     const pct=answers?Math.round(correct/answers*100):0;
