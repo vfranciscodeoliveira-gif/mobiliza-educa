@@ -1,0 +1,22 @@
+name: Convite Lorena - verificacao
+on:
+  pull_request:
+    paths:
+      - 'convites/lorena-15/**'
+      - 'firestore.rules'
+      - 'storage.rules'
+      - 'tests/lorenaInvite.test.cjs'
+      - '.github/workflows/lorena-invite.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testar editor, convite e regras de seguranca
+        run: node --test tests/lorenaInvite.test.cjs

@@ -1,0 +1,151 @@
+import { getHistorySummary, exportHistoryCsv } from '../core/historyStore.js?v=1';
+const TRACKS={
+  pedestre:['🚶','Travessia'],
+  distracao:['📱','Distração'],
+  velocidade:['🛑','Velocidade'],
+  protecao:['🛡️','Proteção'],
+  bike:['🚲','Bicicleta'],
+  moto:['🏍️','Motociclista'],
+  familia:['👨‍👩‍👧','Família'],
+  empresa:['🏢','Deslocamento']
+};
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const json=(k,fallback)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(fallback))}catch{return fallback}};
+const avg=a=>a.length?a.reduce((s,x)=>s+Number(x||0),0)/a.length:0;
+const pct=(n,d)=>d?Math.round(n/d*100):0;
+const fmt=n=>Number(n||0).toLocaleString('pt-BR');
+const date=v=>v?new Date(v).toLocaleDateString('pt-BR'):'—';
+const dateTime=v=>v?new Date(v).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—';
+const dur=v=>v==null?'—':Number(v)<60?Math.round(Number(v))+'s':Math.floor(Number(v)/60)+'m '+Math.round(Number(v)%60)+'s';
+const GAME_ICONS={quiz:'⚡',milhao:'💰',trilha:'🎲',memoria:'🧠',cruzadas:'✏️',plateia:'📱'};
+
+function css(){
+ if(document.getElementById('results-v2-css'))return;
+ const s=document.createElement('style');s.id='results-v2-css';
+ s.textContent=[
+  '.res2{display:grid;gap:16px}',
+  '.res2-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:center;padding:26px;border-radius:24px;background:linear-gradient(135deg,#082f55,#0b75a4 62%,#10a7bd);color:#fff;box-shadow:0 16px 36px rgba(9,52,82,.18)}',
+  '.res2-hero:after{content:"";position:absolute;width:380px;height:380px;border-radius:50%;right:-120px;top:-150px;background:radial-gradient(circle,rgba(255,255,255,.2),transparent 68%)}',
+  '.res2-hero-copy{position:relative;z-index:2}.res2-hero .eyebrow{margin:0 0 5px;color:#a6edff;font-size:.7rem;font-weight:1000;letter-spacing:.12em}.res2-hero h3{font-size:2rem;line-height:1.05;margin:0 0 8px;color:#fff}.res2-hero p{margin:0;color:#dff6ff;line-height:1.5;max-width:720px}',
+  '.res2-hero-score{position:relative;z-index:2;display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.res2-hero-score div{padding:14px;border:1px solid rgba(255,255,255,.23);border-radius:16px;background:rgba(255,255,255,.12);backdrop-filter:blur(5px);text-align:center}.res2-hero-score strong{display:block;font-size:1.55rem}.res2-hero-score span{font-size:.7rem;color:#dff6ff}',
+  '.res2-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.res2-kpi{padding:14px;border:1px solid #d8e6ed;border-radius:16px;background:#fff;box-shadow:0 7px 18px rgba(15,60,102,.05)}.res2-kpi span{display:block;font-size:.68rem;color:#728796}.res2-kpi strong{display:block;margin-top:3px;font-size:1.35rem;color:#0d6f9c}.res2-kpi small{display:block;margin-top:3px;color:#8193a0;font-size:.64rem}',
+  '.res2-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}.res2-card{padding:18px;border:1px solid #d7e5ed;border-radius:18px;background:#fff;box-shadow:0 8px 22px rgba(15,60,102,.06)}.res2-card h3{margin:0;color:#103f61}.res2-card>p{margin:5px 0 0;color:#698090;line-height:1.45;font-size:.85rem}',
+  '.res2-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.res2-card-head .badge{white-space:nowrap}',
+  '.res2-bars{display:grid;gap:10px}.res2-bar{display:grid;grid-template-columns:150px minmax(0,1fr) 54px;gap:9px;align-items:center}.res2-bar-label{display:flex;gap:7px;align-items:center;font-size:.78rem;font-weight:900;color:#345a72}.res2-track{height:16px;border-radius:999px;background:#e5eef3;overflow:hidden}.res2-track i{display:block;height:100%;background:linear-gradient(90deg,#168fbb,#2fc078);border-radius:inherit;min-width:0}.res2-bar strong{text-align:right;font-size:.78rem;color:#0d6e99}',
+  '.res2-empty{padding:24px;border:1px dashed #c8dce6;border-radius:14px;background:#f9fcfd;text-align:center;color:#6f8492}.res2-empty strong{display:block;color:#34596f;margin-bottom:4px}',
+  '.res2-ped{display:grid;grid-template-columns:1fr 1fr;gap:10px}.res2-ped-box{padding:15px;border:1px solid #dce8ee;border-radius:15px;background:linear-gradient(145deg,#fff,#f5fafc);text-align:center}.res2-ped-box strong{display:block;font-size:1.6rem;color:#0d729f}.res2-ped-box span{font-size:.72rem;color:#708493}.res2-evolution{margin-top:12px;padding:13px;border-radius:14px;background:#eef8fb;border:1px solid #d4e8ef}.res2-evolution strong{display:block;color:#0f6f97}.res2-evolution .line{height:14px;border-radius:999px;background:#dce9ef;overflow:hidden;margin-top:7px}.res2-evolution .line i{display:block;height:100%;background:linear-gradient(90deg,#efb13a,#31bd72)}',
+  '.res2-impact{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.res2-impact div{padding:14px 10px;border-radius:14px;background:#f5fafc;border:1px solid #dce8ee;text-align:center}.res2-impact strong{display:block;font-size:1.4rem;color:#0d6e9a}.res2-impact span{font-size:.68rem;color:#6f8392}',
+  '.res2-recent{display:grid;gap:8px;margin-top:12px}.res2-recent-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px;border:1px solid #dce8ee;border-radius:13px;background:#fbfdfe}.res2-recent-icon{width:38px;height:38px;border-radius:12px;background:#e8f6fb;display:grid;place-items:center}.res2-recent-row strong{display:block;color:#173f60;font-size:.84rem}.res2-recent-row small{display:block;color:#758996;margin-top:2px}.res2-recent-row time{font-size:.68rem;color:#7c8d98}',
+  '.res2-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}.res2-note{padding:12px 14px;border-left:4px solid #18a4c5;background:#eaf8fc;border-radius:10px;color:#3d6379;font-size:.8rem;line-height:1.45}',
+  '.res2-game-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.res2-game{padding:14px;border:1px solid #d9e7ee;border-radius:16px;background:linear-gradient(145deg,#fff,#f6fbfd)}.res2-game-head{display:flex;gap:9px;align-items:center;margin-bottom:10px}.res2-game-icon{width:38px;height:38px;border-radius:12px;background:#e7f6fb;display:grid;place-items:center;font-size:1.2rem}.res2-game-head strong{display:block;color:#153f5d}.res2-game-head small{display:block;color:#78909f}.res2-game-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.res2-game-metrics div{padding:8px 6px;border-radius:10px;background:#fff;border:1px solid #e0ebf0;text-align:center}.res2-game-metrics strong{display:block;color:#0d729e;font-size:.95rem}.res2-game-metrics span{font-size:.59rem;color:#748895}',
+  '.res2-session-table{width:100%;border-collapse:collapse;font-size:.76rem}.res2-session-table th,.res2-session-table td{padding:9px 8px;border-bottom:1px solid #e2ebf0;text-align:left;vertical-align:middle}.res2-session-table th{color:#587388;font-size:.64rem;text-transform:uppercase;letter-spacing:.05em}.res2-session-table td strong{color:#173f60}.res2-session-table .num{text-align:right}.res2-session-wrap{overflow:auto}.res2-kind{display:inline-flex;padding:4px 7px;border-radius:999px;background:#edf7fb;color:#0d719b;font-size:.6rem;font-weight:900}.res2-kind.learning{background:#eef8ef;color:#247247}.res2-kind.experience{background:#fff5df;color:#8b6314}',
+  '@media(max-width:980px){.res2-kpis{grid-template-columns:repeat(3,1fr)}.res2-grid{grid-template-columns:1fr}.res2-hero{grid-template-columns:1fr}.res2-impact{grid-template-columns:1fr 1fr}.res2-game-grid{grid-template-columns:1fr 1fr}}',
+  '@media(max-width:620px){.res2-hero{padding:18px}.res2-hero h3{font-size:1.55rem}.res2-hero-score{grid-template-columns:1fr 1fr}.res2-kpis{grid-template-columns:1fr 1fr}.res2-bar{grid-template-columns:105px minmax(0,1fr) 45px}.res2-ped,.res2-impact{grid-template-columns:1fr 1fr}.res2-recent-row{grid-template-columns:38px 1fr}.res2-recent-row time{grid-column:2}.res2-actions{display:grid;grid-template-columns:1fr}.res2-actions .btn{width:100%}.res2-game-grid{grid-template-columns:1fr}.res2-session-table{min-width:720px}}'
+ ].join('');
+ document.head.appendChild(s);
+}
+function collect(){
+ const game=json('mobiliza.results',{games:0,correct:0,answers:0,best:0,streak:0});
+ const learning=json('mobiliza.learning.progress',{});
+ const evals=json('mobiliza.educador.avaliacoes',[]);
+ const evid=json('mobiliza.educador.evidencias',[]);
+ const agenda=json('mobiliza.educador.agenda',[]);
+ const certs=json('mobiliza.educador.certificados',[]);
+ const adminEvents=json('mobiliza.admin.eventos',[]);
+ const adminImpacts=json('mobiliza.admin.impactos',[]);
+ const adminEvidence=json('mobiliza.admin.evidencias',[]);
+ const adminCerts=json('mobiliza.admin.certificados',[]);
+ const adminAssess=json('mobiliza.admin.avaliacoes',[]);
+ const tracks=Object.entries(TRACKS).map(([id,[icon,label]])=>{
+   const p=learning[id]||{};
+   return {id,icon,label,best:Number(p.bestPct||0),last:Number(p.lastPct||0),completions:Number(p.completions||0),date:p.last||null,completed:!!p.completed};
+ });
+ const completed=tracks.filter(x=>x.completed).length;
+ const totalCompletions=tracks.reduce((s,x)=>s+x.completions,0);
+ const validEvals=evals.filter(x=>Number.isFinite(Number(x.pre))&&Number.isFinite(Number(x.pos)));
+ const pre=avg(validEvals.map(x=>x.pre)),post=avg(validEvals.map(x=>x.pos)),delta=post-pre;
+ const people=adminImpacts.length?adminImpacts.reduce((s,x)=>s+Number(x.publicoTotal||0),0):evid.reduce((s,x)=>s+Number(x.publico||0),0);
+ const materials=adminImpacts.length?adminImpacts.reduce((s,x)=>s+(x.materiaisDistribuidos||[]).reduce((q,m)=>q+Number(m.quantidade||0),0),0):evid.reduce((s,x)=>s+Number(x.materiais||0),0);
+ const photos=adminEvidence.length||evid.reduce((s,x)=>s+Number(x.fotos||0),0);
+ const actions=adminImpacts.length||evid.length;
+ const adminPresence=adminEvents.reduce((s,e)=>s+Object.values(e.presenca||{}).filter(Boolean).length,0);
+ const adminPre=adminAssess.filter(x=>x.phase==='PRE'),adminPost=adminAssess.filter(x=>x.phase==='POS'),adminPreAvg=adminPre.length?avg(adminPre.map(x=>x.pct)):null,adminPostAvg=adminPost.length?avg(adminPost.map(x=>x.pct)):null;
+ const effectivePre=adminPreAvg==null?pre:adminPreAvg,effectivePost=adminPostAvg==null?post:adminPostAvg,effectiveDelta=effectivePost-effectivePre,effectiveCerts=adminCerts.length?adminCerts:certs;
+ return {game,tracks,completed,totalCompletions,evals:validEvals,pre:effectivePre,post:effectivePost,delta:effectiveDelta,evid,people,materials,photos,actions,agenda,certs:effectiveCerts,adminEvents,adminPresence};
+}
+function activity(data){
+ const rows=[];
+ data.tracks.forEach(x=>{if(x.date)rows.push({type:'track',icon:x.icon,title:x.label,sub:'Trilha concluída • '+x.last+'% na última rodada',date:x.date})});
+ data.evid.forEach(x=>rows.push({type:'evidence',icon:'📷',title:x.acao||'Ação educativa',sub:(x.publico||0)+' pessoa(s) alcançada(s)',date:x.createdAt||x.data}));
+ data.evals.forEach(x=>rows.push({type:'eval',icon:'📈',title:x.atividade||'Avaliação',sub:'Pré '+x.pre+' • Pós '+x.pos,date:x.createdAt||x.data}));
+ data.certs.forEach(x=>rows.push({type:'cert',icon:'🎓',title:x.nome||'Certificado',sub:x.atividade||'Certificado emitido',date:x.createdAt||x.data}));
+ return rows.filter(x=>x.date).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
+}
+function summaryText(d){
+ const acc=pct(d.game.correct,d.game.answers);
+ return [
+  'MOBILIZA EDUCA - RESUMO LOCAL',
+  'Gerado em: '+new Date().toLocaleString('pt-BR'),
+  '',
+  'JOGOS',
+  'Partidas: '+fmt(d.game.games),
+  'Respostas: '+fmt(d.game.answers),
+  'Acertos: '+fmt(d.game.correct)+' ('+acc+'%)',
+  'Melhor pontuação: '+fmt(d.game.best),
+  'Melhor sequência: '+fmt(d.game.streak),
+  '',
+  'TRILHAS',
+  'Trilhas concluídas: '+d.completed+'/'+d.tracks.length,
+  'Conclusões totais: '+d.totalCompletions,
+  d.tracks.map(x=>'- '+x.label+': '+x.best+'% melhor resultado').join('\n'),
+  '',
+  'AVALIAÇÃO PEDAGÓGICA',
+  'Registros: '+d.evals.length,
+  'Média pré: '+d.pre.toFixed(1),
+  'Média pós: '+d.post.toFixed(1),
+  'Evolução média: '+(d.delta>=0?'+':'')+d.delta.toFixed(1),
+  '',
+  'IMPACTO DAS AÇÕES',
+  'Ações registradas: '+d.actions,
+  'Público alcançado: '+fmt(d.people),
+  'Materiais distribuídos: '+fmt(d.materials),
+  'Evidências registradas: '+fmt(d.photos),
+  'Certificados emitidos: '+fmt(d.certs.length),
+  '',
+  'Observação: dados deste dispositivo/navegador.'
+ ].join('\n');
+}
+function download(name,text,type='text/plain;charset=utf-8'){
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+export function renderResultsDashboard(host){
+ if(!host)return;
+ css();
+ const d=collect(),acc=pct(d.game.correct,d.game.answers),recent=activity(d);
+ const hist=getHistorySummary();
+ const gameGroups=hist.byModule.filter(x=>x.kind==='game');
+ const recentSessions=hist.recent.slice(0,12);
+ const deltaPct=Math.max(0,Math.min(100,Math.round(Number(d.post||0))));
+ host.innerHTML='<div class="res2">'+
+  '<section class="res2-hero"><div class="res2-hero-copy"><p class="eyebrow">PAINEL DE IMPACTO • DADOS LOCAIS</p><h3>Resultados que mostram aprendizagem e alcance</h3><p>O painel combina desempenho dos jogos, trilhas concluídas e registros da Central do Educador neste dispositivo.</p></div><div class="res2-hero-score"><div><strong>'+acc+'%</strong><span>acertos nos jogos</span></div><div><strong>'+d.completed+'/'+d.tracks.length+'</strong><span>trilhas concluídas</span></div><div><strong>'+fmt(d.people)+'</strong><span>público registrado</span></div><div><strong>'+(d.delta>=0?'+':'')+d.delta.toFixed(1)+'</strong><span>evolução pré/pós</span></div></div></section>'+
+  '<div class="res2-kpis"><div class="res2-kpi"><span>Partidas</span><strong>'+fmt(d.game.games)+'</strong><small>registro agregado</small></div><div class="res2-kpi"><span>Respostas</span><strong>'+fmt(d.game.answers)+'</strong><small>'+fmt(d.game.correct)+' corretas</small></div><div class="res2-kpi"><span>Melhor pontuação</span><strong>'+fmt(d.game.best)+'</strong><small>neste dispositivo</small></div><div class="res2-kpi"><span>Melhor sequência</span><strong>'+fmt(d.game.streak)+'</strong><small>acertos seguidos</small></div><div class="res2-kpi"><span>Conclusões de trilha</span><strong>'+fmt(d.totalCompletions)+'</strong><small>'+d.completed+' trilhas diferentes</small></div><div class="res2-kpi"><span>Certificados</span><strong>'+fmt(d.certs.length)+'</strong><small>emitidos localmente</small></div></div>'+
+  '<section class="res2-card"><div class="res2-card-head"><div><h3>🎮 Desempenho por jogo</h3><p>Histórico detalhado das partidas concluídas a partir da versão com rastreamento individual.</p></div><span class="badge">'+hist.count+' sessão(ões)</span></div>'+
+    (gameGroups.length?'<div class="res2-game-grid">'+gameGroups.map(g=>'<article class="res2-game"><div class="res2-game-head"><span class="res2-game-icon">'+(GAME_ICONS[g.moduleId]||'🎮')+'</span><div><strong>'+esc(g.title)+'</strong><small>'+g.plays+' partida'+(g.plays===1?'':'s')+'</small></div></div><div class="res2-game-metrics"><div><strong>'+(g.accuracy==null?'—':g.accuracy+'%')+'</strong><span>acertos</span></div><div><strong>'+fmt(g.bestScore)+'</strong><span>recorde</span></div><div><strong>'+dur(g.avgDurationSec)+'</strong><span>tempo médio</span></div></div></article>').join('')+'</div>':'<div class="res2-empty"><strong>O histórico detalhado começa agora.</strong>Conclua uma nova partida de Quiz, Milhão, Trilha, Memória, Cruzadas ou Plateia para aparecer aqui.</div>')+
+  '</section>'+
+  '<div class="res2-grid"><section class="res2-card"><div class="res2-card-head"><div><h3>📚 Aprendizagem por trilha</h3><p>Melhor aproveitamento registrado em cada microtrilha.</p></div><span class="badge">'+d.completed+' concluídas</span></div>'+
+    (d.tracks.some(x=>x.completions)?'<div class="res2-bars">'+d.tracks.map(x=>'<div class="res2-bar"><div class="res2-bar-label"><span>'+x.icon+'</span><span>'+esc(x.label)+'</span></div><div class="res2-track"><i style="width:'+x.best+'%"></i></div><strong>'+x.best+'%</strong></div>').join('')+'</div>':'<div class="res2-empty"><strong>Nenhuma trilha concluída ainda.</strong>Os resultados aparecem aqui assim que uma trilha for finalizada.</div>')+
+  '</section><section class="res2-card"><div class="res2-card-head"><div><h3>📈 Evolução pedagógica</h3><p>Comparação dos registros pré e pós.</p></div><span class="badge">'+d.evals.length+' registro(s)</span></div>'+
+    (d.evals.length?'<div class="res2-ped"><div class="res2-ped-box"><strong>'+d.pre.toFixed(1)+'</strong><span>média pré</span></div><div class="res2-ped-box"><strong>'+d.post.toFixed(1)+'</strong><span>média pós</span></div></div><div class="res2-evolution"><strong>'+(d.delta>=0?'↑ ':'↓ ')+(d.delta>=0?'+':'')+d.delta.toFixed(1)+' p.p.</strong><div class="line"><i style="width:'+deltaPct+'%"></i></div></div>':'<div class="res2-empty"><strong>Sem avaliação pré/pós.</strong>Registre uma avaliação na Central do Educador para acompanhar evolução.</div>')+
+  '</section></div>'+
+  '<section class="res2-card"><div class="res2-card-head"><div><h3>🌍 Impacto das ações educativas</h3><p>Indicadores registrados em Evidências e Impacto e nos eventos locais.</p></div><span class="badge">'+d.actions+' ação(ões)</span></div><div class="res2-impact"><div><strong>'+fmt(d.people)+'</strong><span>pessoas alcançadas</span></div><div><strong>'+fmt(d.materials)+'</strong><span>materiais distribuídos</span></div><div><strong>'+fmt(d.photos)+'</strong><span>evidências registradas</span></div><div><strong>'+fmt(d.adminPresence)+'</strong><span>presenças em eventos</span></div></div></section>'+
+  '<section class="res2-card"><div class="res2-card-head"><div><h3>🧾 Últimas sessões detalhadas</h3><p>Partidas, experiências e trilhas registradas individualmente.</p></div><span class="badge">'+recentSessions.length+' exibidas</span></div>'+
+    (recentSessions.length?'<div class="res2-session-wrap"><table class="res2-session-table"><thead><tr><th>Data/hora</th><th>Tipo</th><th>Atividade</th><th class="num">Pontos</th><th class="num">Acertos</th><th class="num">Tempo</th></tr></thead><tbody>'+recentSessions.map(x=>'<tr><td>'+dateTime(x.at)+'</td><td><span class="res2-kind '+esc(x.kind)+'">'+esc(x.kind)+'</span></td><td><strong>'+esc(x.title)+'</strong>'+(x.level?'<br><small>'+esc(x.level)+'</small>':'')+'</td><td class="num">'+fmt(x.score)+'</td><td class="num">'+(x.accuracy==null?'—':x.accuracy+'%')+'</td><td class="num">'+dur(x.durationSec)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="res2-empty"><strong>Nenhuma sessão detalhada ainda.</strong>Os novos registros aparecerão aqui automaticamente.</div>')+
+  '</section>'+
+  '<div class="res2-grid"><section class="res2-card"><div class="res2-card-head"><div><h3>🕘 Atividade recente</h3><p>Registros pedagógicos e de impacto neste navegador.</p></div></div>'+
+    (recent.length?'<div class="res2-recent">'+recent.map(x=>'<div class="res2-recent-row"><span class="res2-recent-icon">'+x.icon+'</span><div><strong>'+esc(x.title)+'</strong><small>'+esc(x.sub)+'</small></div><time>'+date(x.date)+'</time></div>').join('')+'</div>':'<div class="res2-empty"><strong>Ainda sem histórico pedagógico.</strong>Conclua trilhas ou registre ações para alimentar esta linha do tempo.</div>')+
+  '</section><section class="res2-card"><div class="res2-card-head"><div><h3>📤 Relatório e portabilidade</h3><p>Exporte o resumo e o histórico detalhado local.</p></div></div><div class="res2-actions"><button type="button" class="btn primary" id="res2Export">⬇ Resumo TXT</button><button type="button" class="btn secondary" id="res2ExportCsv">⬇ Histórico CSV</button><button type="button" class="btn ghost" id="res2Print">🖨 Imprimir / PDF</button></div><div class="res2-note" style="margin-top:14px"><strong>Escopo:</strong> dados deste navegador/dispositivo. Resultados anteriores à implantação do histórico detalhado permanecem nos totais agregados, mas não podem ser reconstruídos por jogo retroativamente.</div></section></div>'+
+ '</div>';
+ host.querySelector('#res2Export')?.addEventListener('click',()=>download('mobiliza-educa-resumo.txt',summaryText(d)));
+ host.querySelector('#res2ExportCsv')?.addEventListener('click',()=>download('mobiliza-educa-historico.csv',exportHistoryCsv(),'text/csv;charset=utf-8'));
+ host.querySelector('#res2Print')?.addEventListener('click',()=>window.print());
+}

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123b6b"><title>QR Educação • Mobiliza Educa</title>
+<link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+<style>:root{font-family:system-ui,'Segoe UI',sans-serif;color:#18314d;background:#f3f7fb}*{box-sizing:border-box}body{margin:0}header{padding:20px;text-align:center;color:white;background:#123b6b}header img{width:52px;height:52px}header h1{margin:4px;font-size:1.5rem}main{max-width:680px;margin:auto;padding:20px}h2{font-size:1.4rem}.material{display:flex;align-items:center;justify-content:space-between;gap:15px;background:white;color:#123b6b;text-decoration:none;padding:19px;border:1px solid #d8e2ec;border-radius:14px;margin:12px 0;box-shadow:0 4px 14px #102d4810;font-weight:650}.material:focus-visible{outline:3px solid #267abb}.pill{font-size:.7rem;background:#e7f3ff;border-radius:12px;padding:6px}#notice{padding:14px;background:white;border-left:4px solid #1a6393;border-radius:8px}footer{text-align:center;margin:30px;color:#50677b;font-size:.82rem}button{cursor:pointer}</style></head>
+<body><header><img src="./assets/icon.svg" alt=""><h1>Mobiliza Educa</h1><span>SEMOB • QR Educação 360</span></header>
+<main><p class="pill">MATERIAL EDUCATIVO DIGITAL</p><h2 id="actionTitle">Carregando ação...</h2><p id="actionDescription"></p><div id="notice" role="status">Buscando conteúdo publicado...</div><section id="materials" aria-label="Materiais publicados"></section><section id="quiz"></section></main>
+<footer>Educação para o trânsito • Material gratuito • Sem cadastro</footer>
+<script type="module">
+import {cloudConfig} from './js/cloudConfig.js?v=3';
+const qs=s=>document.querySelector(s);
+const id=new URLSearchParams(location.search).get('acao')||'';
+const validId=/^[a-f0-9]{20}$/.test(id);
+const safeUrl=value=>{try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}};
+async function load(){
+ if(!validId)throw Error('O código do QR Code não é válido.');
+ const [app,firestore]=await Promise.all([
+  import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
+  import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')
+ ]);
+ const client=app.getApps().length?app.getApp():app.initializeApp(cloudConfig.firebaseWebConfig);
+ const db=firestore.getFirestore(client);
+ const result=await firestore.getDoc(firestore.doc(db,'qrPublic',id));
+ if(!result.exists())throw Error('Este conteúdo não está publicado ou não está mais disponível.');
+ const data=result.data();
+ if(data.published!==true||!Array.isArray(data.materials))throw Error('Conteúdo indisponível.');
+ return data;
+}
+async function start(){
+ try{
+  const data=await load();
+  qs('#actionTitle').textContent=data.title||'Ação educativa';
+  qs('#actionDescription').textContent=data.description||'';
+  const allowed=data.materials.filter(x=>x && typeof x.title==='string' && safeUrl(x.url));
+  qs('#notice').textContent=allowed.length?'Selecione um material para visualizar ou salvar.':'Esta ação não possui materiais públicos disponíveis.';
+  for(const item of allowed){
+   const a=document.createElement('a');a.className='material';a.href=item.url;a.rel='noopener noreferrer';a.target='_blank';
+   a.textContent=item.title;qs('#materials').appendChild(a);
+  }
+ }catch(e){
+  qs('#actionTitle').textContent='Conteúdo indisponível';
+  qs('#notice').textContent=e.message||'Consulte a equipe da ação educativa.';
+ }
+}
+start();
+</script></body></html>

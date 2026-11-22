@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="t d">
+<title id="t">Plateia Conectada - Mobiliza Educa</title>
+<desc id="d">Capa do jogo coletivo com QR Code, celulares e telão sincronizado.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#071b35"/><stop offset=".52" stop-color="#0b4f82"/><stop offset="1" stop-color="#0ea0bd"/>
+  </linearGradient>
+  <radialGradient id="glow" cx=".5" cy=".42" r=".7">
+    <stop offset="0" stop-color="#38c9f0" stop-opacity=".45"/><stop offset="1" stop-color="#38c9f0" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#173d72"/><stop offset="1" stop-color="#081d3b"/>
+  </linearGradient>
+  <linearGradient id="phone" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#eefaff"/><stop offset="1" stop-color="#bfe8f6"/>
+  </linearGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#031326" flood-opacity=".42"/>
+  </filter>
+  <pattern id="dots" width="32" height="32" patternUnits="userSpaceOnUse">
+    <circle cx="3" cy="3" r="2" fill="#fff" opacity=".08"/>
+  </pattern>
+</defs>
+
+<rect width="1200" height="675" rx="34" fill="url(#bg)"/>
+<rect width="1200" height="675" rx="34" fill="url(#glow)"/>
+<rect width="1200" height="675" rx="34" fill="url(#dots)"/>
+
+<!-- road/ribbon -->
+<path d="M0 560 C220 500 390 610 610 552 S990 470 1200 535 V675 H0Z" fill="#06182d" opacity=".82"/>
+<path d="M20 590 C250 530 395 630 620 577 S1005 500 1180 560" fill="none" stroke="#fff" stroke-width="10" stroke-dasharray="34 24" opacity=".84"/>
+
+<!-- header -->
+<g transform="translate(52 46)">
+  <rect width="194" height="48" rx="24" fill="#ffffff" opacity=".11" stroke="#fff" stroke-opacity=".22"/>
+  <circle cx="26" cy="24" r="10" fill="#33c77a"/>
+  <text x="48" y="31" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="800" fill="#fff">MOBILIZA EDUCA</text>
+</g>
+<text x="52" y="145" font-family="Arial,Helvetica,sans-serif" font-size="58" font-weight="900" fill="#fff">PLATEIA</text>
+<text x="52" y="205" font-family="Arial,Helvetica,sans-serif" font-size="58" font-weight="900" fill="#60d8f3">CONECTADA</text>
+<text x="55" y="246" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="700" fill="#d8f3ff">QR Code • celulares • votação ao vivo • telão</text>
+
+<!-- QR panel -->
+<g transform="translate(70 305)" filter="url(#shadow)">
+  <rect width="220" height="220" rx="28" fill="#fff"/>
+  <rect x="24" y="24" width="172" height="172" rx="12" fill="#f8fcff"/>
+  <g fill="#09284b">
+    <rect x="36" y="36" width="46" height="46" rx="5"/><rect x="46" y="46" width="26" height="26" fill="#fff"/>
+    <rect x="138" y="36" width="46" height="46" rx="5"/><rect x="148" y="46" width="26" height="26" fill="#fff"/>
+    <rect x="36" y="138" width="46" height="46" rx="5"/><rect x="46" y="148" width="26" height="26" fill="#fff"/>
+    <rect x="96" y="38" width="18" height="18"/><rect x="94" y="68" width="22" height="20"/>
+    <rect x="92" y="104" width="22" height="22"/><rect x="122" y="96" width="20" height="20"/>
+    <rect x="150" y="104" width="28" height="18"/><rect x="116" y="132" width="22" height="22"/>
+    <rect x="92" y="160" width="18" height="22"/><rect x="148" y="144" width="36" height="36"/>
+  </g>
+  <text x="110" y="210" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="900" fill="#0a5483">ESCANEIE E ENTRE</text>
+</g>
+
+<!-- center screen -->
+<g transform="translate(355 286)" filter="url(#shadow)">
+  <rect width="500" height="275" rx="28" fill="url(#screen)" stroke="#6dddf6" stroke-width="3"/>
+  <rect x="22" y="20" width="456" height="42" rx="12" fill="#0f6d9f"/>
+  <circle cx="46" cy="41" r="9" fill="#31c777"/>
+  <text x="66" y="48" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="800" fill="#fff">PERGUNTA COMPARTILHADA</text>
+  <text x="28" y="101" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="800" fill="#fff">Qual atitude aumenta a segurança?</text>
+  <g font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="800">
+    <rect x="28" y="126" width="205" height="48" rx="14" fill="#f7fbfe"/><circle cx="51" cy="150" r="15" fill="#0f75ad"/><text x="51" y="156" text-anchor="middle" fill="#fff">A</text><text x="76" y="156" fill="#15334d">Observar e decidir</text>
+    <rect x="267" y="126" width="205" height="48" rx="14" fill="#f7fbfe"/><circle cx="290" cy="150" r="15" fill="#0f75ad"/><text x="290" y="156" text-anchor="middle" fill="#fff">B</text><text x="315" y="156" fill="#15334d">Agir com pressa</text>
+  </g>
+  <g transform="translate(40 205)">
+    <rect width="420" height="20" rx="10" fill="#183354"/>
+    <rect width="304" height="20" rx="10" fill="#35c47a"/>
+    <text x="210" y="-9" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="800" fill="#d8f3ff">72% dos votos recebidos</text>
+  </g>
+  <rect x="175" y="262" width="150" height="12" rx="6" fill="#06182e"/>
+</g>
+
+<!-- phones -->
+<g transform="translate(900 286)" filter="url(#shadow)">
+  <g transform="rotate(-7 82 135)">
+    <rect width="164" height="280" rx="30" fill="#0a1930" stroke="#77ddf4" stroke-width="4"/>
+    <rect x="11" y="18" width="142" height="238" rx="20" fill="url(#phone)"/>
+    <rect x="51" y="8" width="62" height="8" rx="4" fill="#34536d"/>
+    <text x="82" y="58" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="900" fill="#0d4c77">SALA 8G7K2P</text>
+    <text x="82" y="94" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="800" fill="#31536b">SEU VOTO</text>
+    <g font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="900">
+      <rect x="31" y="112" width="42" height="42" rx="12" fill="#0f74ad"/><text x="52" y="139" text-anchor="middle" fill="#fff">A</text>
+      <rect x="91" y="112" width="42" height="42" rx="12" fill="#e8f1f5"/><text x="112" y="139" text-anchor="middle" fill="#0f4f78">B</text>
+      <rect x="31" y="171" width="42" height="42" rx="12" fill="#e8f1f5"/><text x="52" y="198" text-anchor="middle" fill="#0f4f78">C</text>
+      <rect x="91" y="171" width="42" height="42" rx="12" fill="#e8f1f5"/><text x="112" y="198" text-anchor="middle" fill="#0f4f78">D</text>
+    </g>
+    <circle cx="82" cy="268" r="8" fill="#536d80"/>
+  </g>
+</g>
+
+<!-- audience silhouettes -->
+<g transform="translate(330 535)">
+  <g fill="#1c3652"><circle cx="28" cy="24" r="18"/><path d="M0 74c2-26 15-40 28-40s26 14 28 40z"/></g>
+  <g transform="translate(82 5)" fill="#284e6c"><circle cx="28" cy="24" r="18"/><path d="M0 74c2-26 15-40 28-40s26 14 28 40z"/></g>
+  <g transform="translate(166 -4)" fill="#183a58"><circle cx="28" cy="24" r="18"/><path d="M0 74c2-26 15-40 28-40s26 14 28 40z"/></g>
+  <g transform="translate(250 8)" fill="#2b5876"><circle cx="28" cy="24" r="18"/><path d="M0 74c2-26 15-40 28-40s26 14 28 40z"/></g>
+  <g transform="translate(334 0)" fill="#183a58"><circle cx="28" cy="24" r="18"/><path d="M0 74c2-26 15-40 28-40s26 14 28 40z"/></g>
+</g>
+
+<!-- status badge -->
+<g transform="translate(876 84)">
+  <rect width="260" height="58" rx="29" fill="#05233e" stroke="#60d8f3" stroke-width="2"/>
+  <circle cx="30" cy="29" r="11" fill="#32c779"/>
+  <text x="52" y="36" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="900" fill="#fff">MULTIJOGADOR AO VIVO</text>
+</g>
+</svg>

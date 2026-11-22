@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b5f91"/><stop offset="1" stop-color="#13a1c5"/></linearGradient>
+  <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6bcf84"/><stop offset="1" stop-color="#3ba760"/></linearGradient>
+  <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-opacity=".2"/></filter>
+</defs>
+<rect width="960" height="540" rx="34" fill="url(#sky)"/>
+<circle cx="820" cy="90" r="54" fill="#ffe16a" opacity=".9"/>
+<rect x="0" y="300" width="960" height="240" fill="url(#grass)"/>
+<rect x="0" y="350" width="960" height="125" fill="#384b58"/>
+<rect x="395" y="250" width="170" height="290" fill="#384b58"/>
+<g stroke="#f7f4c5" stroke-width="8" stroke-dasharray="34 24" opacity=".95">
+  <line x1="0" y1="412" x2="960" y2="412"/>
+  <line x1="480" y1="250" x2="480" y2="540"/>
+</g>
+<g fill="#fff" opacity=".96">
+  <rect x="410" y="338" width="28" height="76" rx="2"/><rect x="446" y="338" width="28" height="76" rx="2"/>
+  <rect x="482" y="338" width="28" height="76" rx="2"/><rect x="518" y="338" width="28" height="76" rx="2"/>
+</g>
+<g filter="url(#shadow)">
+  <g transform="translate(80 235)">
+    <rect width="220" height="120" rx="16" fill="#fff8e7"/>
+    <polygon points="0,0 110,-70 220,0" fill="#ef684d"/>
+    <rect x="28" y="42" width="54" height="78" rx="6" fill="#62b7dc"/>
+    <rect x="112" y="30" width="80" height="56" rx="6" fill="#a7dbef"/>
+    <text x="110" y="20" text-anchor="middle" font-family="Arial" font-weight="800" font-size="24" fill="#0b4d78">ESCOLA</text>
+  </g>
+  <g transform="translate(660 245)">
+    <rect width="210" height="112" rx="16" fill="#f7fbff"/>
+    <rect x="84" y="20" width="42" height="72" rx="5" fill="#ffcf4d"/>
+    <rect x="69" y="35" width="72" height="42" rx="5" fill="#ffcf4d"/>
+    <text x="105" y="105" text-anchor="middle" font-family="Arial" font-weight="800" font-size="19" fill="#0b4d78">CENTRO DE SAÚDE</text>
+  </g>
+</g>
+<g transform="translate(575 350)" filter="url(#shadow)">
+  <rect x="0" y="0" width="42" height="110" rx="18" fill="#142b3b"/>
+  <circle cx="21" cy="24" r="12" fill="#ef4a43"/>
+  <circle cx="21" cy="55" r="12" fill="#f7c43f"/>
+  <circle cx="21" cy="86" r="12" fill="#45ba69"/>
+  <rect x="17" y="108" width="8" height="52" fill="#263c48"/>
+</g>
+<g transform="translate(324 377)">
+  <circle cx="0" cy="0" r="16" fill="#ffd1a6"/>
+  <rect x="-12" y="18" width="24" height="44" rx="10" fill="#ffca3a"/>
+  <line x1="-8" y1="60" x2="-18" y2="92" stroke="#1e3d59" stroke-width="8" stroke-linecap="round"/>
+  <line x1="8" y1="60" x2="18" y2="92" stroke="#1e3d59" stroke-width="8" stroke-linecap="round"/>
+  <line x1="-8" y1="30" x2="-25" y2="52" stroke="#1e3d59" stroke-width="7" stroke-linecap="round"/>
+  <line x1="8" y1="30" x2="25" y2="48" stroke="#1e3d59" stroke-width="7" stroke-linecap="round"/>
+</g>
+<g transform="translate(720 405)" stroke="#143b5d" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="0" cy="28" r="28"/><circle cx="86" cy="28" r="28"/>
+  <path d="M0 28 L30 -8 L55 28 L20 28 L44 -18 L86 28"/>
+  <circle cx="44" cy="-18" r="8" fill="#143b5d" stroke="none"/>
+</g>
+<g fill="#2f8c52">
+  <circle cx="35" cy="296" r="38"/><circle cx="925" cy="292" r="38"/>
+  <rect x="30" y="295" width="10" height="48" fill="#6e4d36"/><rect x="920" y="291" width="10" height="48" fill="#6e4d36"/>
+</g>
+<g transform="translate(40 38)">
+  <rect width="440" height="112" rx="22" fill="rgba(3,34,61,.72)" stroke="rgba(255,255,255,.26)"/>
+  <text x="26" y="40" font-family="Arial" font-size="19" font-weight="800" fill="#bdefff">MOBILIZA EDUCA • AGENTES MIRINS</text>
+  <text x="26" y="82" font-family="Arial" font-size="38" font-weight="900" fill="#fff">CIDADE MIRIM</text>
+</g>
+<g transform="translate(674 52)">
+  <rect width="220" height="72" rx="18" fill="#fff" opacity=".95"/>
+  <text x="110" y="30" text-anchor="middle" font-family="Arial" font-size="16" font-weight="800" fill="#0b4d78">MISSÕES URBANAS</text>
+  <text x="110" y="53" text-anchor="middle" font-family="Arial" font-size="13" fill="#3e687f">pedestre • ciclista • passageiro</text>
+</g>
+</svg>

@@ -1,0 +1,21 @@
+# Firebase local / secrets
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebaserc
+
+# Node
+firebase/functions/node_modules/
+
+# Nunca versionar segredos locais
+*.secret
+*.key.local
+firebase/bootstrap-key.local.txt
+firebase/emulator-bootstrap-key.local.txt
+firebase/functions/.secret.local
+firebase/emulator-data/
+firebase/emulator-shell.pid
+
+# Configuracao Web auxiliar local
+firebase/web-config.local.json

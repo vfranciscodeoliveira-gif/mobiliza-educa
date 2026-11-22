@@ -1,0 +1,28 @@
+/* MOBILIZA EDUCA — camada consolidada de usabilidade e acessibilidade (2026-11-22) */
+:root{--me-ink:#10334d;--me-blue:#075c83;--me-ring:#f7b733}
+html{scroll-behavior:smooth}body{overflow-x:hidden}img{max-width:100%}
+:where(button,a,input,select,textarea,[tabindex]):focus-visible{outline:3px solid var(--me-ring)!important;outline-offset:3px}
+:where(button,.btn,.icon-btn){touch-action:manipulation}
+#gameDialog{max-width:min(98vw,1440px);max-height:96dvh;padding:0;border:0;border-radius:22px;box-shadow:0 25px 90px #09283d80}
+#gameDialog::backdrop{background:#061c30c9;backdrop-filter:blur(4px)}
+#gameDialog .dialog-shell{width:min(96vw,1360px);max-width:100%;box-sizing:border-box;overflow-x:hidden}
+#gameHost{min-width:0;overflow-wrap:break-word}
+#gameHost :is(h2,h3,p){overflow-wrap:break-word}
+#gameHost :is(button,.btn){min-height:44px}
+#gameHost button:disabled{cursor:not-allowed;opacity:.82}
+#gameHost :is(.ex60-options,.ex2-options){min-width:0}
+#gameHost .ex60-options button{font-size:clamp(1rem,1.3vw,1.16rem);line-height:1.45;min-height:58px}
+#gameHost .ex60-question h3{font-size:clamp(1.2rem,2.1vw,1.8rem);line-height:1.35}
+#gameHost .ex60-scene{background:linear-gradient(135deg,#0a3954,#087fa0)}
+#gameHost .ex60-scene img{object-position:center}
+#gameHost .ex60-scene-missing{display:grid;place-items:center}
+#gameHost .ex60-scene-missing:before{content:'🚦  LEIA A SITUAÇÃO';color:white;font-weight:800;font-size:clamp(1rem,2vw,1.4rem);padding:18px;text-align:center}
+#gameHost .ex60-scene-missing .ex60-scene-label{display:none}
+#gameHost .ex60-scene-neutral{min-height:180px!important}
+#gameHost .ex60-final{min-height:min(65dvh,620px);display:flex;flex-direction:column;justify-content:center;align-items:center}
+#gameHost .ex60-finalstats{width:min(100%,740px)}
+.game-showcase .module-card,.module-grid .module-card{min-width:0;overflow:hidden}
+.game-showcase img,.module-grid img{object-fit:cover}
+@media(max-width:900px){#gameDialog{max-width:100vw;max-height:100dvh;border-radius:0}#gameDialog .dialog-shell{width:100vw;max-height:100dvh;overflow-y:auto}#gameHost .ex60-layout{grid-template-columns:1fr}#gameHost .ex60-main{grid-template-columns:1fr}#gameHost .ex60-side{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:600px){#gameHost .ex60-side{grid-template-columns:repeat(2,minmax(0,1fr))}#gameHost .ex60-scene{min-height:160px;max-height:240px}#gameHost .ex60-scene img{max-height:240px}#gameHost .ex60-options button{min-height:54px;padding:12px}#gameHost .ex60-finalstats{grid-template-columns:1fr}#gameHost .ex60-finalbuttons{width:100%}#gameHost .ex60-finalbuttons button{flex:1}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}#gameHost *,#gameHost *::before,#gameHost *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}

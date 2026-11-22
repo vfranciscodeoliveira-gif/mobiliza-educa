@@ -1,0 +1,88 @@
+import {accessDb,loadAccess,permissionAllowed} from '../core/cloudAccess.js?v=1';
+import {getCloudTenantId} from '../cloudGateway.js?v=6';
+
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeDate=v=>{try{return v?.toDate?v.toDate():v?.seconds?new Date(v.seconds*1000):v?new Date(v):null;}catch{return null;}};
+const dateLabel=v=>{const d=safeDate(v);return d&&!isNaN(d.getTime())?d.toLocaleString('pt-BR'):'—';};
+const pending=s=>['Recebida','Em análise'].includes(String(s||'Recebida'));
+const fields=['protocolo','origemNome','solicitanteNome','nome','email','telefone','atividade','idEvento'];
+let state={records:[],tenant:'',selected:'',filter:'all',search:'',loading:false,lastError:'',lastRefresh:null,disposed:false};
+let timer=null,seq=0;
+const byId=id=>document.getElementById(id);
+// Notificações lidas são preferências locais por conta e cliente.
+// Pendências operacionais permanecem no Firestore e são contabilizadas separadamente.
+const noticeKey=()=>['mobiliza','notificacoes-lidas',state.tenant,state.access?.uid||''].join(':');
+const itemKey=r=>r.kind+':'+r.id;
+const readNotices=()=>{try{const v=JSON.parse(localStorage.getItem(noticeKey())||'[]');return new Set(Array.isArray(v)?v:[]);}catch{return new Set();}};
+const saveReadNotices=set=>{try{localStorage.setItem(noticeKey(),JSON.stringify([...set].slice(-1000)));}catch{}};
+const unreadRows=()=>{const seen=readNotices();return state.records.filter(r=>!seen.has(itemKey(r)));};
+function markRead(r){if(!r)return;const seen=readNotices();seen.add(itemKey(r));saveReadNotices(seen);}
+export function openUnreadNotifications(){
+ const host=byId('adminProtocolCenter');if(!host||host.hidden)return;
+ state.filter='unread';state.search='';draw();host.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function canRead(a){return a?.active&&a.allSchools&&permissionAllowed(a,'events.read');}
+function css(){if(byId('central-protocolos-style'))return;const el=document.createElement('style');el.id='central-protocolos-style';el.textContent=`
+.cp{margin:18px 0 24px;border:1px solid #d4e3ec;background:#fff;border-radius:18px;box-shadow:0 10px 25px #123c6410;overflow:hidden;color:#153a54}
+.cp *{box-sizing:border-box}.cp-head{padding:20px 22px;background:linear-gradient(112deg,#07375b,#116f94);color:white;display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:space-between}
+.cp-head h2{margin:4px 0;font-size:1.45rem}.cp-head p{margin:0;color:#deecf3;font-size:.87rem}.cp-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cp button{cursor:pointer}.cp button:disabled{opacity:.5;cursor:default}.cp-btn{border:1px solid #cadde9;border-radius:10px;background:#fff;color:#0c5278;padding:9px 13px;font-weight:750;font-size:.86rem}
+.cp-primary{background:#087ba9;color:white;border-color:#087ba9}.cp-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:16px 20px;background:#f4f9fc}
+.cp-stat{border:1px solid #e1eaf0;border-radius:12px;padding:12px 14px;background:white;min-height:72px}.cp-stat b{display:block;font-size:1.55rem;color:#0a587c}.cp-stat span{font-size:.79rem;color:#4d6674;font-weight:700}
+.cp-toolbar{display:flex;gap:10px;padding:14px 20px;align-items:center;flex-wrap:wrap}.cp-toolbar input,.cp-toolbar select{border:1px solid #bfd2de;border-radius:9px;padding:10px;background:#fff;color:#143d54;font:inherit}.cp-toolbar input{flex:1;min-width:205px}
+.cp-list{padding:0 20px 18px;max-height:440px;overflow:auto}.cp-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(95px,1fr) auto;gap:13px;align-items:center;text-align:left;width:100%;padding:13px 12px;background:white;border:0;border-bottom:1px solid #e2ebf1;color:#123d54}.cp-row:hover,.cp-row:focus-visible{background:#eff8fd}
+.cp-row strong,.cp-row small{display:block}.cp-row strong{font-size:.9rem}.cp-row small{color:#597381;margin-top:3px;font-size:.75rem;overflow-wrap:anywhere}.cp-chip{border-radius:999px;background:#d9eef7;color:#075878;font-weight:800;padding:6px 9px;font-size:.73rem;display:inline-block}.cp-chip.pending{background:#fff0ca;color:#795100}.cp-chip.done{background:#dff5e8;color:#17673a}
+.cp-note{font-size:.81rem;color:#577281;padding:3px 22px 16px}.cp-empty{padding:25px;text-align:center;color:#516a79}.cp-error{color:#8c2626;background:#fff1f1;padding:12px;border-radius:9px;margin:12px 20px}
+.cp-details{border-top:1px solid #d7e5ed;padding:19px 22px;background:#f9fcff}.cp-details h3{margin:0 0 12px;color:#123f5a}.cp-details-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.cp-detail{padding:9px 12px;border:1px solid #e1e9ef;border-radius:9px;background:#fff;min-width:0}.cp-detail b{display:block;font-size:.71rem;color:#547184;margin-bottom:3px}.cp-detail span{overflow-wrap:anywhere;font-size:.85rem}.cp-detail.wide{grid-column:1/-1}.cp-status-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:15px}
+.cp-status-bar select{border:1px solid #c7d9e5;border-radius:9px;padding:10px}.cp-bell{font-weight:800;white-space:nowrap}.cp-conversation{margin-top:20px;padding:20px;border:1px solid #cbdce7;background:#f3f9fc;border-radius:14px}
+.cp-conversation h3{margin:0 0 12px;color:#0c4469;font-size:1.12rem}
+.cp-conversation form{margin-top:15px;padding:16px;border:1px solid #cee2ec;border-radius:12px;background:white}
+.cp-conversation label{display:block;font-weight:800;color:#25475d;font-size:.92rem}
+.cp-conversation textarea{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:135px!important;margin:10px 0!important;padding:13px!important;resize:vertical!important;font:inherit!important;font-size:1rem!important;line-height:1.5!important;border:1px solid #aac8d7!important;border-radius:11px!important;background:#fff!important;color:#163f58!important;box-sizing:border-box!important}
+.cp-conversation form button{margin-top:8px;min-height:42px}
+.cp-message{padding:12px 14px;margin:10px 0;border:1px solid #d4e4ee;border-left:4px solid #197eaf;border-radius:11px;background:#fff}
+.cp-message p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;margin:8px 0 0}
+.cp-message small{font-size:.78rem;color:#637b88}
+.cp-bell strong{display:inline-grid;place-items:center;background:#fff0cc;color:#6a4400;border-radius:40px;min-width:23px;margin-left:6px}
+@media(max-width:760px){.cp-stats{grid-template-columns:repeat(2,1fr)}.cp-row{grid-template-columns:1fr auto}.cp-row>span:nth-child(2){display:none}.cp-details-grid{grid-template-columns:1fr}.cp-toolbar input{width:100%}}
+`;document.head.appendChild(el);}
+function rows(){const seen=readNotices();const q=state.search.toLocaleLowerCase('pt-BR').trim();return state.records.filter(r=>(state.filter==='all'||state.filter==='unread'&&!seen.has(itemKey(r))||state.filter==='pending'&&pending(r.status)||state.filter==='requests'&&r.kind==='Solicitação'||state.filter==='registrations'&&r.kind==='Inscrição'||state.filter==='completed'&&!pending(r.status))&&(!q||fields.some(f=>String(r[f]||'').toLocaleLowerCase('pt-BR').includes(q))));}
+function summary(){const all=state.records,awaiting=all.filter(r=>pending(r.status));return{all:all.length,requests:all.filter(r=>r.kind==='Solicitação').length,regs:all.filter(r=>r.kind==='Inscrição').length,pending:awaiting.length};}
+function selectRecord(id){state.selected=id;const r=state.records.find(x=>itemKey(x)===id);markRead(r);draw();}
+function detail(root,r,editAllowed){const labels=[['Protocolo',r.protocolo],['Tipo',r.kind],['Status',r.status||'Recebida'],['Recebido em',dateLabel(r.createdAt)],['Instituição',r.origemNome],['Responsável / solicitante',r.solicitanteNome||r.responsavel||r.nome],['Atividade',r.atividade||r.idEvento],['Data preferida',r.dataPreferida],['Hora preferida',r.horaPreferida],['Quantidade prevista',r.quantidade],['Telefone',r.telefone],['E-mail',r.email],['Local',r.local],['Objetivo e necessidades',r.necessidades||r.observacao]];root.innerHTML=`<h3>Detalhes da solicitação</h3><div class="cp-details-grid">${labels.filter(x=>x[1]!==undefined&&x[1]!==null&&String(x[1]).trim()).map(([k,v])=>`<div class="cp-detail ${k==='Objetivo e necessidades'?'wide':''}"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join('')}</div><div class="cp-status-bar"><button class="cp-btn" id="cpCopy" type="button">📋 Copiar protocolo</button>${editAllowed?`<label for="cpChangeStatus">Alterar status</label><select id="cpChangeStatus">${['Recebida','Em análise','Agendada','Confirmada','Recusada','Concluída','Cancelada'].map(x=>`<option ${x===r.status?'selected':''}>${x}</option>`).join('')}</select><button class="cp-btn cp-primary" id="cpSaveStatus" type="button">Salvar status</button>`:''}</div>`;
+root.querySelector('#cpCopy').onclick=()=>{if(navigator.clipboard?.writeText)navigator.clipboard.writeText(r.protocolo||'').catch(()=>{});};
+mountConversation(root,r,editAllowed);
+if(editAllowed){root.querySelector('#cpSaveStatus').onclick=async()=>{const status=root.querySelector('#cpChangeStatus').value;if(status===r.status)return;const btn=root.querySelector('#cpSaveStatus');btn.disabled=true;btn.textContent='Salvando...';try{await changeStatus(r,status);await refresh(true);}catch(e){alert('Status não alterado: '+e.message);}finally{btn.disabled=false;btn.textContent='Salvar status';}};}}
+async function mountConversation(root,r,editAllowed){
+ if(!r.protocolo)return;
+ const box=document.createElement('section');box.className='cp-conversation';box.innerHTML='<h3>💬 Histórico de mensagens</h3><p>Consultando comunicações do protocolo...</p>';root.appendChild(box);
+ const key=itemKey(r),tenant=state.tenant;
+ const show=async()=>{
+  const {db,fs}=await accessDb();
+  const ref=fs.collection(db,'tenants',tenant,'publicStatuses',r.protocolo,'messages');
+  const snap=await fs.getDocsFromServer(fs.query(ref,fs.limit(100)));
+  if(state.selected!==key||tenant!==state.tenant||!box.isConnected)return;
+  const items=snap.docs.map(d=>d.data()).sort((a,b)=>(safeDate(a.createdAt)?.getTime()||0)-(safeDate(b.createdAt)?.getTime()||0));
+  box.innerHTML=`<h3>💬 Histórico de mensagens</h3>${items.length?items.map(m=>`<article class="cp-message"><b>${m.authorRole==='gestor'?'Equipe de atendimento':'Solicitante'}</b><small> • ${esc(dateLabel(m.createdAt))}</small><p>${esc(m.text)}</p></article>`).join(''):'<p>Nenhuma mensagem enviada.</p>'}${editAllowed?'<form id="cpReply"><label>Responder ao solicitante<textarea name="message" maxlength="2000" rows="3" required placeholder="Escreva uma orientação ou solicite informações complementares"></textarea></label><button class="cp-btn cp-primary" type="submit">📨 Enviar resposta</button></form>':''}<small>Mensagens registradas no Firebase e acessíveis ao titular do protocolo.</small>`;
+  if(editAllowed)box.querySelector('#cpReply').onsubmit=async e=>{
+   e.preventDefault();const form=e.currentTarget,btn=form.querySelector('button'),text=form.elements.message.value.trim();
+   if(!text||text.length>2000)return;btn.disabled=true;
+   try{
+    const a=await loadAccess(tenant);
+    if(!canRead(a)||!permissionAllowed(a,'events.manage'))throw Error('Sem permissão de responder.');
+    const {db,fs}=await accessDb(),collection=fs.collection(db,'tenants',tenant,'publicStatuses',r.protocolo,'messages');
+    const saved=await fs.addDoc(collection,{tenantId:tenant,protocolo:r.protocolo,authorUid:a.uid,authorRole:'gestor',text,createdAt:fs.serverTimestamp()});
+    await fs.getDocFromServer(saved);
+    await show();
+   }catch(error){alert('Não foi possível enviar a resposta: '+error.message);btn.disabled=false;}
+  };
+ };
+ try{await show();}catch(e){box.innerHTML='<h3>💬 Histórico de mensagens</h3><p>Erro ao carregar: '+esc(e.message)+'</p>';}
+}
+async function changeStatus(r,status){const a=await loadAccess(state.tenant);if(!canRead(a)||!permissionAllowed(a,'events.manage'))throw Error('Sem permissão para alterar o status.');const {db,fs}=await accessDb(),root='tenants/'+state.tenant+'/',batch=fs.writeBatch(db);batch.update(fs.doc(db,root+(r.kind==='Inscrição'?'registrations':'requests')+'/'+r.id),{status,updatedAt:fs.serverTimestamp()});if(r.protocolo)batch.update(fs.doc(db,root+'publicStatuses/'+r.protocolo),{status,updatedAt:fs.serverTimestamp()});await batch.commit();}
+function draw(){const host=byId('adminProtocolCenter');if(!host||host.hidden)return;const a=state.access;if(!canRead(a)){host.innerHTML='<div class="cp"><p class="cp-empty">Central restrita a gestores com acesso a todas as escolas e permissão de leitura dos eventos.</p></div>';return;}const s=summary(),unread=unreadRows().length,shown=rows(),selected=state.records.find(x=>x.kind+':'+x.id===state.selected);const bell=byId('adminNotificationsCount');if(bell)bell.textContent=String(unread);host.innerHTML=`<div class="cp"><div class="cp-head"><div><p>GESTÃO OPERACIONAL • FIRESTORE</p><h2>📥 Central de Solicitações e Protocolos</h2><p>Recebimento online, busca por protocolo e acompanhamento de cada atendimento</p></div><div class="cp-actions"><button class="cp-btn cp-bell" data-cp-filter="unread">🔔 Novas <strong>${unread}</strong></button><button class="cp-btn" id="cpReload" type="button">↻ Atualizar</button></div></div><div class="cp-stats"><div class="cp-stat"><b>${s.all}</b><span>Protocolos recebidos</span></div><div class="cp-stat"><b>${s.pending}</b><span>Aguardando análise</span></div><div class="cp-stat"><b>${s.requests}</b><span>Solicitações</span></div><div class="cp-stat"><b>${s.regs}</b><span>Inscrições</span></div></div><div class="cp-toolbar"><input id="cpSearch" aria-label="Buscar protocolos" placeholder="Buscar protocolo, instituição, responsável..." value="${esc(state.search)}"><select id="cpFilter" aria-label="Filtrar solicitações">${[['all','Todas'],['unread','Não lidas'],['pending','Pendentes'],['requests','Solicitações'],['registrations','Inscrições'],['completed','Outros status']].map(([v,l])=>`<option value="${v}" ${v===state.filter?'selected':''}>${l}</option>`).join('')}</select></div>${state.lastError?`<div class="cp-error">${esc(state.lastError)}</div>`:''}<div class="cp-list">${shown.length?shown.map(r=>`<button type="button" class="cp-row" data-cp-row="${esc(r.kind+':'+r.id)}"><span><strong>${esc(r.origemNome||r.nome||r.solicitanteNome||'Solicitante')}</strong><small>${esc(r.protocolo||'Sem protocolo')} • ${esc(r.atividade||r.idEvento||r.kind)}</small>${!readNotices().has(itemKey(r))?'<small style="color:#a14b00;font-weight:800">● Nova notificação</small>':''}</span><span><small>${esc(dateLabel(r.createdAt))}</small><small>${esc(r.kind)}</small></span><span class="cp-chip ${pending(r.status)?'pending':'done'}">${esc(r.status||'Recebida')}</span></button>`).join(''):'<div class="cp-empty">Nenhum registro encontrado para os filtros selecionados.</div>'}</div><div id="cpDetails" class="cp-details" ${selected?'':'hidden'}></div><p class="cp-note">Última atualização: ${state.lastRefresh?esc(dateLabel(state.lastRefresh)):'aguardando'} • Atualização periódica enquanto a Gestão estiver aberta. A central mostra até 300 registros por categoria.</p></div>`;
+host.querySelector('#cpReload').onclick=()=>refresh(true);host.querySelectorAll('[data-cp-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.cpFilter;draw();});host.querySelector('#cpFilter').onchange=e=>{state.filter=e.target.value;draw();};host.querySelector('#cpSearch').oninput=e=>{const selection=e.target.selectionStart;state.search=e.target.value;draw();const field=byId('cpSearch');field.focus();field.setSelectionRange(selection,selection);};host.querySelectorAll('[data-cp-row]').forEach(b=>b.onclick=()=>selectRecord(b.dataset.cpRow));if(selected){detail(host.querySelector('#cpDetails'),selected,permissionAllowed(a,'events.manage'));}}
+async function refresh(force=false){const call=++seq,tenant=getCloudTenantId();const a=await loadAccess(tenant);if(call!==seq||state.disposed)return;state.access=a;state.tenant=tenant;if(!canRead(a)){state.records=[];state.lastError='';draw();return;}try{const {db,fs}=await accessDb(),base='tenants/'+tenant+'/',[req,reg]=await Promise.all(['requests','registrations'].map(k=>fs.getDocsFromServer(fs.query(fs.collection(db,base+k),fs.limit(300)))));if(call!==seq||state.disposed||tenant!==getCloudTenantId())return;const map=(snap,kind)=>snap.docs.map(d=>({...d.data(),id:d.id,kind}));state.records=[...map(req,'Solicitação'),...map(reg,'Inscrição')].sort((a,b)=>(safeDate(b.createdAt)?.getTime()||0)-(safeDate(a.createdAt)?.getTime()||0));state.lastRefresh=new Date();state.lastError='';draw();}catch(e){if(call!==seq||state.disposed)return;state.lastError='Falha ao consultar o Firestore: '+(e.message||e.code||e);draw();}}
+export function mountProtocolCenter(){const host=byId('adminProtocolCenter');if(!host)return;css();state.disposed=false;state.records=[];state.selected='';state.search='';state.filter='all';host.hidden=false;const bell=byId('adminNotificationsCount');if(bell)bell.textContent='—';refresh();clearInterval(timer);timer=setInterval(()=>{if(!document.hidden&&byId('adminDashboard')&&!byId('adminDashboard').hidden)refresh();},60000);}
+export function unmountProtocolCenter(){state.disposed=true;seq++;clearInterval(timer);timer=null;const h=byId('adminProtocolCenter');if(h){h.innerHTML='';h.hidden=true;}const bell=byId('adminNotificationsCount');if(bell)bell.textContent='—';}

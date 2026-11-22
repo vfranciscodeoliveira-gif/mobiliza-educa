@@ -1,0 +1,325 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function signedIn(){return request.auth != null;}
+  function owner(){return signedIn() && exists(/databases/$(database)/documents/platformOwners/$(request.auth.uid)) && get(/databases/$(database)/documents/platformOwners/$(request.auth.uid)).data.active == true;}
+  function staff(t){return signedIn() && exists(/databases/$(database)/documents/platformStaff/$(request.auth.uid)) && get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.active == true && (get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.allClients == true || t in get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.tenantIds);}
+  function member(t){return signedIn() && exists(/databases/$(database)/documents/tenants/$(t)/members/$(request.auth.uid)) && get(/databases/$(database)/documents/tenants/$(t)/members/$(request.auth.uid)).data.active == true;}
+  function membership(t){return get(/databases/$(database)/documents/tenants/$(t)/members/$(request.auth.uid)).data;}
+  function gestor(t){return member(t) && membership(t).role == 'GESTOR';}
+  function permitted(t,p){return owner() || (staff(t) && p in get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.permissions) || (member(t) && (membership(t).role == 'GESTOR' || p in membership(t).get('permissions',[])));}
+  function allSchools(t){return owner() || staff(t) || (member(t) && (membership(t).role == 'GESTOR' || membership(t).get('allSchools',false) == true));}
+  function school(t,id){return allSchools(t) || (member(t) && id in membership(t).get('schoolIds',[]));}
+  function manage(t){return permitted(t,'users.manage') && allSchools(t);}
+  function knownPermissions(){return ['education.read','education.create','education.update','education.delete','certificates.emit','users.manage','events.read','events.manage','reports.read'];}
+  function validMember(t,uid,d){return uid != request.auth.uid && d.uid == uid && d.tenantId == t && d.active is bool && d.role in ['GESTOR','PERSONALIZADO'] && d.permissions is list && d.permissions.hasOnly(knownPermissions()) && d.allSchools is bool && d.schoolIds is list && d.schoolIds.size() <= 100 && d.name is string && d.email is string && d.updatedBy == request.auth.uid && d.updatedAt == request.time && (owner() || gestor(t) || (staff(t) && d.role == 'PERSONALIZADO' && d.permissions.hasOnly(get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.permissions)));}
+  // Convite público da Lorena: leitura pública somente quando publicado;
+  // escrita exclusivamente por proprietário ativo da plataforma.
+  // Central RSVP 360: informações pessoais de famílias não são públicas.
+  // Somente proprietário ativo administra famílias, respostas e check-in.
+  // QR Educação 360: conteúdos de blitz separados de dados pessoais.
+  match /qrPublic/{code} {
+    function canRead(d) {
+      return signedIn() && permitted(d.tenantId,'events.read') && allSchools(d.tenantId);
+    }
+    function canManage(d) {
+      return signedIn() && permitted(d.tenantId,'events.manage') && allSchools(d.tenantId);
+    }
+    function validQr(d) {
+      return d.keys().hasOnly(['tenantId','actionId','title','description','materials','published','updatedBy','updatedAt'])
+        && d.keys().hasAll(['tenantId','actionId','title','description','materials','published','updatedBy','updatedAt'])
+        && d.tenantId is string && d.tenantId.size() > 0 && d.tenantId.size() <= 120
+        && d.actionId is string && d.actionId.size() > 0 && d.actionId.size() <= 180
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 120
+        && d.description is string && d.description.size() <= 600
+        && d.materials is list && d.materials.size() >= 1 && d.materials.size() <= 20
+        && d.published is bool
+        && d.updatedBy == request.auth.uid && d.updatedAt == request.time
+        && exists(/databases/$(database)/documents/tenants/$(d.tenantId)/appointments/$(d.actionId));
+    }
+    allow get: if (resource != null && resource.data.published == true)
+      || (resource != null && canRead(resource.data));
+    allow list: if canRead(resource.data);
+    allow create: if code.matches('[a-f0-9]{20}')
+      && canManage(request.resource.data) && validQr(request.resource.data);
+    allow update: if canManage(resource.data) && validQr(request.resource.data)
+      && request.resource.data.tenantId == resource.data.tenantId
+      && request.resource.data.actionId == resource.data.actionId;
+    allow delete: if false;
+  }
+  match /inviteGuestFamilies/{familyId} {
+    function validGuest(d) {
+      return familyId.matches('[a-f0-9-]{36}')
+        && d.keys().hasOnly(['nome','telefone','quantidade','resposta','acompanhantes','observacao','checkedIn','checkedAt','createdBy','createdAt','updatedBy','updatedAt'])
+        && d.keys().hasAll(['nome','telefone','quantidade','resposta','acompanhantes','observacao','checkedIn','checkedAt','createdBy','createdAt','updatedBy','updatedAt'])
+        && d.nome is string && d.nome.size() >= 2 && d.nome.size() <= 120
+        && d.telefone is string && d.telefone.size() <= 25
+        && d.quantidade is int && d.quantidade >= 1 && d.quantidade <= 30
+        && d.resposta in ['pendente','confirmado','recusado']
+        && d.acompanhantes is string && d.acompanhantes.size() <= 1000
+        && d.observacao is string && d.observacao.size() <= 1000
+        && d.checkedIn is bool
+        && (d.checkedAt == null || d.checkedAt is timestamp)
+        && d.createdBy is string && d.createdAt is timestamp
+        && d.updatedBy == request.auth.uid && d.updatedAt == request.time;
+    }
+    allow get,list: if owner();
+    allow create: if owner() && validGuest(request.resource.data)
+      && request.resource.data.createdBy == request.auth.uid
+      && request.resource.data.createdAt == request.time
+      && request.resource.data.checkedIn == false && request.resource.data.checkedAt == null;
+    allow update: if owner() && validGuest(request.resource.data)
+      && request.resource.data.createdBy == resource.data.createdBy
+      && request.resource.data.createdAt == resource.data.createdAt;
+    allow delete: if owner();
+  }
+  // Convites360: rascunhos e listagem disponíveis somente a proprietários.
+  // Publicação expõe exclusivamente os campos deste documento; não incluir dados pessoais.
+  match /invites360/{inviteId} {
+    function validInvite(d) {
+      return inviteId.matches('[a-f0-9-]{36}')
+        && d.keys().hasOnly(['tipo','titulo','mensagem','data','horario','local','endereco','estilo','foto','musica','whatsapp','instrucoes','publicado','createdBy','createdAt','updatedBy','updatedAt'])
+        && d.keys().hasAll(['tipo','titulo','mensagem','data','horario','local','endereco','estilo','foto','musica','whatsapp','instrucoes','publicado','createdBy','createdAt','updatedBy','updatedAt'])
+        && d.tipo in ['social','educacional','institucional','corporativo']
+        && d.titulo is string && d.titulo.size() >= 3 && d.titulo.size() <= 110
+        && d.mensagem is string && d.mensagem.size() <= 2500
+        && d.data is string && d.data.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && d.horario is string && d.horario.size() <= 5
+        && d.local is string && d.local.size() <= 160
+        && d.endereco is string && d.endereco.size() <= 260
+        && d.estilo in ['encantado','moderno','floral','institucional']
+        && d.foto is string && d.foto.size() <= 1200
+        && d.musica is string && d.musica.size() <= 1200
+        && d.whatsapp is string && d.whatsapp.size() <= 15
+        && d.instrucoes is string && d.instrucoes.size() <= 1000
+        && d.publicado is bool
+        && d.createdBy is string && d.createdAt is timestamp
+        && d.updatedBy == request.auth.uid && d.updatedAt == request.time;
+    }
+    allow get: if owner() || (resource != null && resource.data.publicado == true);
+    allow list: if owner();
+    allow create: if owner() && validInvite(request.resource.data)
+      && request.resource.data.createdBy == request.auth.uid
+      && request.resource.data.createdAt == request.time;
+    allow update: if owner() && validInvite(request.resource.data)
+      && request.resource.data.createdBy == resource.data.createdBy
+      && request.resource.data.createdAt == resource.data.createdAt;
+    allow delete: if owner();
+  }
+  match /publicInvites/{inviteId}{
+    allow get: if owner() || (resource != null && resource.data.publicado == true);
+    allow list: if false;
+    allow create,update: if owner() && inviteId == 'lorena-15'
+      && request.resource.data.keys().hasOnly(['titulo','mensagem','data','horario','local','endereco','dressCode','presentes','presentesUrl','encerramento','habilitarRsvp','publicado','cover','photos','estilo','paleta','corFundo','corDestaque','corTitulo','fundo','fonte','animacoes','musicaAtiva','musicaArquivo','musicaVolume','abrirEnvelope','mostrarContador','mostrarGaleria','mostrarPresentes','rsvpWhatsapp','rsvpPrazo','galeriaAutomatica','intervaloGaleria','updatedAt','updatedBy'])
+      && request.resource.data.updatedBy == request.auth.uid
+      && request.resource.data.updatedAt == request.time
+      && request.resource.data.titulo is string && request.resource.data.titulo.size() <= 90
+      && request.resource.data.mensagem is string && request.resource.data.mensagem.size() <= 4000
+      && request.resource.data.data is string && request.resource.data.data.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+      && request.resource.data.horario is string && request.resource.data.horario.size() <= 5
+      && request.resource.data.local is string && request.resource.data.local.size() <= 140
+      && request.resource.data.endereco is string && request.resource.data.endereco.size() <= 260
+      && request.resource.data.dressCode is string && request.resource.data.dressCode.size() <= 1500
+      && request.resource.data.presentes is string && request.resource.data.presentes.size() <= 1500
+      && request.resource.data.presentesUrl is string && request.resource.data.presentesUrl.size() <= 500
+      && request.resource.data.encerramento is string && request.resource.data.encerramento.size() <= 1500
+      && request.resource.data.habilitarRsvp is bool && request.resource.data.publicado is bool
+      && request.resource.data.cover is string && request.resource.data.cover.size() <= 2000
+      && request.resource.data.photos is list && request.resource.data.photos.size() <= 12
+      && request.resource.data.estilo in ['encantado','moderno','floral','noite']
+      && request.resource.data.paleta in ['lilas','rosa','azul','verde','vinho']
+      && request.resource.data.fundo in ['degrade','estrelas','luzes','solido']
+      && request.resource.data.fonte in ['caligrafia','classica','moderna']
+      && request.resource.data.corFundo is string && request.resource.data.corFundo.matches('^#[A-Fa-f0-9]{6}$')
+      && request.resource.data.corDestaque is string && request.resource.data.corDestaque.matches('^#[A-Fa-f0-9]{6}$')
+      && request.resource.data.corTitulo is string && request.resource.data.corTitulo.matches('^#[A-Fa-f0-9]{6}$')
+      && request.resource.data.animacoes is bool
+      && request.resource.data.musicaAtiva is bool
+      && request.resource.data.musicaArquivo is string && request.resource.data.musicaArquivo.size() <= 100
+      && (!request.resource.data.musicaAtiva || request.resource.data.musicaArquivo.matches('[A-Za-z0-9][A-Za-z0-9._-]{0,94}[.]mp3'))
+      && request.resource.data.musicaVolume is int && request.resource.data.musicaVolume >= 0 && request.resource.data.musicaVolume <= 100
+      && request.resource.data.abrirEnvelope is bool
+      && request.resource.data.mostrarContador is bool
+      && request.resource.data.mostrarGaleria is bool
+      && request.resource.data.mostrarPresentes is bool
+      && request.resource.data.galeriaAutomatica is bool
+      && request.resource.data.intervaloGaleria in [3,5,8,12]
+      && request.resource.data.rsvpWhatsapp is string
+      && request.resource.data.rsvpWhatsapp.size() <= 15
+      && (!request.resource.data.habilitarRsvp || request.resource.data.rsvpWhatsapp.matches('55[1-9][0-9]{9,10}'))
+      && request.resource.data.rsvpPrazo is string
+      && request.resource.data.rsvpPrazo.size() <= 10;
+    allow delete: if false;
+  }
+  match /platformOwners/{uid}{allow get: if signedIn() && (uid == request.auth.uid || owner());allow list: if owner();allow write: if false;}
+  match /platformStaff/{uid}{allow get: if signedIn() && (uid == request.auth.uid || owner());allow list: if owner();allow create,update: if owner() && uid != request.auth.uid && request.resource.data.uid == uid && request.resource.data.active is bool && request.resource.data.allClients is bool && request.resource.data.tenantIds is list && request.resource.data.permissions is list && request.resource.data.permissions.hasOnly(knownPermissions()) && request.resource.data.role == 'PERSONALIZADO' && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time;allow delete: if false;}
+  match /memberships/{id}{
+   allow read: if signedIn() && (resource.data.uid == request.auth.uid || owner());
+   allow create,update: if manage(request.resource.data.tenantId) && validMember(request.resource.data.tenantId,request.resource.data.uid,request.resource.data) && id == request.resource.data.uid+'_'+request.resource.data.tenantId && getAfter(/databases/$(database)/documents/tenants/$(request.resource.data.tenantId)/members/$(request.resource.data.uid)).data == request.resource.data;
+   allow delete: if false;
+  }
+  match /users/{uid}{allow read: if signedIn() && (uid == request.auth.uid || owner());allow write: if false;}
+  match /plans/{id}{allow read: if true;allow write: if false;}
+  match /publicTenants/{id}{allow read: if true;allow write: if false;}
+  match /subscriptions/{t}{allow read: if owner() || staff(t) || gestor(t);allow write: if false;}
+  match /platform/{id}{allow read: if owner();allow write: if false;}
+  match /tenants/{t}{
+   allow get: if owner() || staff(t) || member(t);allow list: if owner() || (signedIn() && exists(/databases/$(database)/documents/platformStaff/$(request.auth.uid)) && get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.active == true && get(/databases/$(database)/documents/platformStaff/$(request.auth.uid)).data.allClients == true);allow create: if owner() && request.resource.data.name is string && request.resource.data.name.size()>0 && request.resource.data.name.size()<=180 && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;allow update,delete: if false;
+   match /members/{uid}{
+    allow get: if signedIn() && (uid == request.auth.uid || manage(t));allow list: if manage(t);
+    allow create,update: if manage(t) && validMember(t,uid,request.resource.data) && getAfter(/databases/$(database)/documents/memberships/$(uid+'_'+t)).data == request.resource.data;
+    allow delete: if false;
+   }
+   match /{collection}/{id}{
+    function education(){return collection in ['schools','classes','students','institutions','contacts','teachers'];}
+    function recordSchool(d){return collection == 'schools'?id:collection == 'students'?get(/databases/$(database)/documents/tenants/$(t)/classes/$(d.idTurma)).data.idEscola:d.get('idEscola','');}
+    function scoped(d){return allSchools(t) || (collection in ['schools','classes','students','teachers'] && school(t,recordSchool(d)));}
+    function readPerm(){return (collection in ['schools','classes'] && permitted(t,'events.read')) || (collection == 'schools' && manage(t)) || permitted(t,'education.read') || permitted(t,'reports.read') || (collection in ['schools','classes','students'] && permitted(t,'certificates.emit'));}
+    function valid(d){return d.tenantId == t && d.nome is string && d.nome.size()>0 && d.nome.size()<=250 && d.updatedBy == request.auth.uid && d.updatedAt == request.time;}
+    allow get,list: if education() && readPerm() && scoped(resource.data);
+    allow create: if education() && permitted(t,'education.create') && scoped(request.resource.data) && valid(request.resource.data) && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time && !('deletedAt' in request.resource.data);
+    allow update: if education() && scoped(resource.data) && scoped(request.resource.data) && valid(request.resource.data) && request.resource.data.createdBy == resource.data.createdBy && request.resource.data.createdAt == resource.data.createdAt && (request.resource.data.diff(resource.data).affectedKeys().hasAny(['deletedAt']) ? permitted(t,'education.delete') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deletedAt','updatedAt','updatedBy']) && request.resource.data.deletedAt == request.time : permitted(t,'education.update'));
+    allow delete: if false;
+   }
+   match /appointments/{id}{
+    function linkedClass(d,i){return d.idsTurmas.size() <= i || get(/databases/$(database)/documents/tenants/$(t)/classes/$(d.idsTurmas[i])).data.idEscola == d.idEscola;}
+    function validAppointment(d){return d.keys().hasOnly(['tenantId','nome','origem','tipo','status','idEscola','idsTurmas','solicitante','contato','telefone','email','publico','dataInicio','dataFim','horaInicio','horaFim','local','responsavel','previsto','realizado','vagas','materiais','equipe','observacao','createdBy','createdAt','updatedBy','updatedAt','serieId','windowsSource'])
+     && d.tenantId == t && d.nome is string && d.nome.size()>0 && d.nome.size()<=250
+     && d.origem in ['Escola','Demanda espontânea'] && d.tipo in ['Agente de Trânsito Mirim','Palestra','Oficina','Ação educativa','Visita','Campanha','Outro'] && d.status in ['Solicitado','Planejado','Confirmado','Em preparação','Em andamento','Concluído','Cancelado','Reagendado']
+     && d.idEscola is string && d.idsTurmas is list && d.idsTurmas.size()<=5 && d.idsTurmas.toSet().size()==d.idsTurmas.size()
+     && (d.origem == 'Escola' ? get(/databases/$(database)/documents/tenants/$(t)/schools/$(d.idEscola)).data.nome is string && !('deletedAt' in get(/databases/$(database)/documents/tenants/$(t)/schools/$(d.idEscola)).data) && linkedClass(d,0) && linkedClass(d,1) && linkedClass(d,2) && linkedClass(d,3) && linkedClass(d,4) : d.idEscola == '' && d.idsTurmas.size()==0 && d.solicitante.size()>0)
+     && d.solicitante is string && d.solicitante.size()<=250 && d.contato is string && d.contato.size()<=250 && d.telefone is string && d.telefone.size()<=250 && d.email is string && d.email.size()<=250 && d.publico is string && d.publico.size()<=250
+     && d.local is string && d.local.size()<=250 && d.responsavel is string && d.responsavel.size()<=250
+     && d.dataInicio is string && d.dataInicio.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') && d.dataFim is string && d.dataFim.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') && d.dataFim >= d.dataInicio
+     && d.horaInicio is string && d.horaInicio.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$') && d.horaFim is string && d.horaFim.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$') && (d.dataFim > d.dataInicio || d.horaFim > d.horaInicio)
+     && d.previsto is int && d.previsto>=0 && d.previsto<=100000 && d.realizado is int && d.realizado>=0 && d.realizado<=100000 && d.vagas is int && d.vagas>=0 && d.vagas<=100000 && (d.vagas==0 || d.previsto<=d.vagas)
+     && d.materiais is string && d.materiais.size()<=4000 && d.equipe is string && d.equipe.size()<=4000 && d.observacao is string && d.observacao.size()<=4000 && d.serieId is string
+     && (!('windowsSource' in d) || (d.windowsSource is map && d.windowsSource.keys().hasOnly(['archiveId','agendaId']) && d.windowsSource.archiveId is string && d.windowsSource.archiveId.matches('^[a-f0-9]{64}$') && d.windowsSource.agendaId is int && d.windowsSource.agendaId>0 && exists(/databases/$(database)/documents/tenants/$(t)/windowsArchives/$(d.windowsSource.archiveId))))
+     && d.updatedBy == request.auth.uid && d.updatedAt == request.time;}
+    allow read: if permitted(t,'events.read') && (allSchools(t) || school(t,resource.data.idEscola));
+    allow create: if permitted(t,'events.manage') && allSchools(t) && validAppointment(request.resource.data) && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
+    allow update: if permitted(t,'events.manage') && allSchools(t) && validAppointment(request.resource.data) && request.resource.data.createdBy == resource.data.createdBy && request.resource.data.createdAt == resource.data.createdAt && request.resource.data.serieId == resource.data.serieId && (!('windowsSource' in resource.data) || request.resource.data.windowsSource == resource.data.windowsSource);
+    allow delete: if permitted(t,'events.manage') && allSchools(t) && resource.data.tenantId == t;
+   }
+   match /windowsArchives/{id}{
+    allow read: if permitted(t,'events.read') && allSchools(t);
+    allow create: if permitted(t,'events.manage') && allSchools(t) && id.matches('^[a-f0-9]{64}$') && request.resource.data.keys().hasOnly(['tenantId','banco','versao','chunks','agendamentos','createdBy','createdAt']) && request.resource.data.tenantId == t && request.resource.data.banco is string && request.resource.data.banco.size()<=80 && request.resource.data.versao in [2,3] && request.resource.data.chunks is int && request.resource.data.chunks>0 && request.resource.data.chunks<=110 && request.resource.data.agendamentos is int && request.resource.data.agendamentos>0 && request.resource.data.agendamentos<=2000 && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
+    allow update,delete: if false;
+   }
+   match /windowsArchiveChunks/{id}{
+    allow read: if permitted(t,'events.read') && allSchools(t);
+    allow create: if permitted(t,'events.manage') && allSchools(t) && id.matches('^[a-f0-9]{64}-[0-9]{1,3}$') && request.resource.data.keys().hasOnly(['tenantId','archiveId','index','data','createdBy','createdAt']) && request.resource.data.tenantId == t && request.resource.data.archiveId is string && request.resource.data.archiveId.matches('^[a-f0-9]{64}$') && request.resource.data.index is int && request.resource.data.index>=0 && request.resource.data.index<110 && request.resource.data.data is string && request.resource.data.data.size()>0 && request.resource.data.data.size()<=150000 && request.resource.data.createdBy == request.auth.uid && request.resource.data.createdAt == request.time;
+    allow update,delete: if false;
+   }
+   match /certificateIssues/{id}{allow read: if permitted(t,'certificates.emit') && school(t,resource.data.schoolId);allow create: if permitted(t,'certificates.emit') && school(t,request.resource.data.schoolId) && request.resource.data.tenantId == t && request.resource.data.issuedBy == request.auth.uid && request.resource.data.issuedAt == request.time && request.resource.data.code == id && get(/databases/$(database)/documents/tenants/$(t)/students/$(request.resource.data.studentId)).data.idTurma == request.resource.data.classId && get(/databases/$(database)/documents/tenants/$(t)/classes/$(request.resource.data.classId)).data.idEscola == request.resource.data.schoolId;allow update,delete: if false;}
+   // Recepção Spark. Uma solicitação e uma inscrição por conta Firebase.
+   // Para nova solicitação, o visitante deve manter sua identidade autenticada.
+   function publicBase(d) {
+    return signedIn() && d.tenantId == t && d.ownerUid == request.auth.uid
+      && d.status == 'Recebida' && d.protocolo is string
+      && d.createdAt == request.time && d.updatedAt == request.time
+      && d.email is string && d.email.size() >= 5 && d.email.size() <= 180
+      && d.telefone is string && d.telefone.size() >= 8 && d.telefone.size() <= 40
+      && d.quantidade is int && d.quantidade >= 1;
+   }
+   match /requests/{id} {
+    allow read: if permitted(t,'events.read') && allSchools(t);
+    allow create: if id == request.auth.uid && publicBase(request.resource.data)
+      && getAfter(/databases/$(database)/documents/tenants/$(t)/publicStatuses/$(request.resource.data.protocolo)).data.ownerUid == request.auth.uid
+      && getAfter(/databases/$(database)/documents/tenants/$(t)/publicStatuses/$(request.resource.data.protocolo)).data.protocolo == request.resource.data.protocolo
+      && request.resource.data.protocolo.matches('^SOL-[0-9]{8}-[A-F0-9]{24}$')
+      && request.resource.data.keys().hasOnly(['tenantId','ownerUid','protocolo','status','origemTipo','origemNome','solicitanteNome','telefone','email','atividade','dataPreferida','horaPreferida','flexibilidade','quantidade','publico','local','necessidades','createdAt','updatedAt'])
+      && request.resource.data.origemTipo is string && request.resource.data.origemTipo.size() <= 80
+      && request.resource.data.origemNome is string && request.resource.data.origemNome.size() > 0 && request.resource.data.origemNome.size() <= 180
+      && request.resource.data.solicitanteNome is string && request.resource.data.solicitanteNome.size() > 0 && request.resource.data.solicitanteNome.size() <= 180
+      && request.resource.data.atividade is string && request.resource.data.atividade.size() > 0 && request.resource.data.atividade.size() <= 100
+      && request.resource.data.dataPreferida is string && request.resource.data.dataPreferida.size() <= 10
+      && request.resource.data.horaPreferida is string && request.resource.data.horaPreferida.size() <= 5
+      && request.resource.data.flexibilidade is string && request.resource.data.flexibilidade.size() <= 100
+      && request.resource.data.quantidade <= 9999
+      && request.resource.data.publico is string && request.resource.data.publico.size() <= 180
+      && request.resource.data.local is string && request.resource.data.local.size() <= 250
+      && request.resource.data.necessidades is string && request.resource.data.necessidades.size() <= 1500;
+    allow update: if permitted(t,'events.manage') && allSchools(t)
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+      && request.resource.data.status is string && request.resource.data.status.size() <= 80
+      && request.resource.data.updatedAt == request.time;
+    allow delete: if false;
+   }
+   match /registrations/{id} {
+    allow read: if permitted(t,'events.read') && allSchools(t);
+    allow create: if id == request.auth.uid && publicBase(request.resource.data)
+      && getAfter(/databases/$(database)/documents/tenants/$(t)/publicStatuses/$(request.resource.data.protocolo)).data.ownerUid == request.auth.uid
+      && getAfter(/databases/$(database)/documents/tenants/$(t)/publicStatuses/$(request.resource.data.protocolo)).data.protocolo == request.resource.data.protocolo
+      && request.resource.data.protocolo.matches('^INS-[0-9]{8}-[A-F0-9]{24}$')
+      && request.resource.data.keys().hasOnly(['tenantId','ownerUid','protocolo','status','idEvento','tipoInscricao','nome','responsavel','telefone','email','quantidade','observacao','createdAt','updatedAt'])
+      && request.resource.data.idEvento is string && request.resource.data.idEvento.size() > 0 && request.resource.data.idEvento.size() <= 120
+      && exists(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(request.resource.data.idEvento))
+      && get(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(request.resource.data.idEvento)).data.publicadoOnline == true
+      && get(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(request.resource.data.idEvento)).data.status == 'Confirmado'
+      && get(/databases/$(database)/documents/tenants/$(t)/publicEvents/$(request.resource.data.idEvento)).data.inscricoesAbertas == true
+      && request.resource.data.tipoInscricao is string && request.resource.data.tipoInscricao.size() <= 60
+      && request.resource.data.nome is string && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 180
+      && request.resource.data.responsavel is string && request.resource.data.responsavel.size() <= 180
+      && request.resource.data.quantidade <= 500 && request.resource.data.observacao is string && request.resource.data.observacao.size() <= 1000;
+    allow update: if permitted(t,'events.manage') && allSchools(t)
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+      && request.resource.data.status is string && request.resource.data.status.size() <= 80
+      && request.resource.data.updatedAt == request.time;
+    allow delete: if false;
+   }
+   match /publicStatuses/{id} {
+    allow get: if signedIn() && resource.data.ownerUid == request.auth.uid
+      || (permitted(t,'events.read') && allSchools(t));
+    allow list: if permitted(t,'events.read') && allSchools(t);
+    allow create: if signedIn()
+      && request.resource.data.keys().hasOnly(['tenantId','ownerUid','protocolo','status','tipo','createdAt','updatedAt'])
+      && id == request.resource.data.protocolo && request.resource.data.tenantId == t
+      && request.resource.data.ownerUid == request.auth.uid
+      && request.resource.data.protocolo.matches('^(SOL|INS)-[0-9]{8}-[A-F0-9]{24}$')
+      && request.resource.data.status == 'Recebida' && request.resource.data.tipo in ['Solicitação','Inscrição']
+      && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time
+      && (request.resource.data.tipo == 'Solicitação'
+        ? getAfter(/databases/$(database)/documents/tenants/$(t)/requests/$(request.auth.uid)).data.protocolo == id
+        : getAfter(/databases/$(database)/documents/tenants/$(t)/registrations/$(request.auth.uid)).data.protocolo == id);
+    allow update: if permitted(t,'events.manage') && allSchools(t)
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+      && request.resource.data.status is string && request.resource.data.status.size() <= 80
+      && request.resource.data.updatedAt == request.time;
+    allow delete: if false;
+   }
+   // Conversas vinculadas a protocolos; mensagens imutáveis e acesso só das partes.
+   match /publicStatuses/{protocolo}/messages/{messageId} {
+    function participant() {
+     return signedIn() && get(/databases/$(database)/documents/tenants/$(t)/publicStatuses/$(protocolo)).data.ownerUid == request.auth.uid;
+    }
+    function protocolManager() {
+     return permitted(t,'events.read') && allSchools(t);
+    }
+    allow get,list: if participant() || protocolManager();
+    allow create: if (participant() || (protocolManager() && permitted(t,'events.manage')))
+      && request.resource.data.keys().hasOnly(['tenantId','protocolo','authorUid','authorRole','text','createdAt'])
+      && request.resource.data.tenantId == t
+      && request.resource.data.protocolo == protocolo
+      && request.resource.data.authorUid == request.auth.uid
+      && request.resource.data.authorRole == (participant() ? 'solicitante' : 'gestor')
+      && request.resource.data.text is string
+      && request.resource.data.text.size() >= 1
+      && request.resource.data.text.size() <= 2000
+      && request.resource.data.createdAt == request.time;
+    allow update,delete: if false;
+   }
+   match /publicEvents/{id}{
+    allow get,list: if (permitted(t,'events.read') && allSchools(t)) || (signedIn() && resource.data.publicadoOnline == true);
+    allow create: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.nome is string && request.resource.data.createdBy == request.auth.uid && request.resource.data.updatedBy == request.auth.uid && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time && request.resource.data.publicadoOnline == false;
+    allow update: if permitted(t,'events.manage') && allSchools(t) && request.resource.data.tenantId == t && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','dataInicio','local','status','updatedBy','updatedAt']);
+    allow delete: if false;
+   }
+   match /certificates/{id}{allow read: if permitted(t,'certificates.emit') && allSchools(t);allow write: if false;}
+   match /auditLogs/{id}{allow read: if manage(t);allow write: if false;}
+   match /pushDevices/{id}{allow read,write: if false;}
+   match /{document=**}{allow read,write: if false;}
+  }
+  match /{document=**}{allow read,write: if false;}
+ }
+}

@@ -1,0 +1,30 @@
+name: Gestão - Central de Protocolos
+on:
+  pull_request:
+    paths:
+      - 'js/modules/protocolCenter.js'
+      - 'js/adminApp.js'
+      - 'admin.html'
+      - '.github/workflows/protocol-center.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar sintaxe de módulos
+        run: |
+          node --check js/modules/protocolCenter.js
+          node --check js/adminApp.js
+      - name: Verificar pontos de integração
+        run: |
+          grep -Fq 'id="adminProtocolCenter"' admin.html
+          grep -Fq 'id="adminNotifications"' admin.html
+          grep -Fq 'mountProtocolCenter();' js/adminApp.js
+          grep -Fq 'getDocsFromServer' js/modules/protocolCenter.js
+          grep -Fq 'loadAccess(tenant)' js/modules/protocolCenter.js
+          grep -Fq 'fs.writeBatch(db)' js/modules/protocolCenter.js
