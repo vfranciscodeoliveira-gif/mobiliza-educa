@@ -3588,31 +3588,61 @@ body.admin-workspace-open{overflow:hidden}
 }
 
 
-/* Mobiliza Educa - acessibilidade de leitura e janelas divididas - 2026-11-22 */
-#gameDialog:has(.trail-v31),#gameDialog:has(.ea){max-height:calc(100dvh - 12px)!important;max-width:calc(100vw - 12px)!important}
-#gameDialog:has(.trail-v31){overflow-y:auto!important;overscroll-behavior:contain}
-#gameDialog:has(.trail-v31) .trail-game{min-height:0!important}
-#gameDialog:has(.trail-v31) .trail-board-wrap{overflow:auto!important;max-height:min(64dvh,660px)!important;overscroll-behavior:contain}
-#gameDialog:has(.trail-v31) .trail-cell{min-height:clamp(78px,13dvh,130px)!important}
-#gameDialog:has(.trail-v31) .trail-cell-no{font-size:clamp(.75rem,1.3vw,1rem)!important}
-#gameDialog:has(.trail-v31) .trail-cell .trail-special{font-size:clamp(.68rem,1.1vw,.9rem)!important}
-#gameDialog:has(.trail-v31) .trail-question-button,#gameDialog:has(.trail-v31) .trail-actions-top button{min-height:40px!important;font-size:clamp(.83rem,1.2vw,1rem)!important}
-#gameDialog:has(.trail-v31) .trail-answer-option{min-height:58px!important;font-size:clamp(.95rem,1.3vw,1.1rem)!important;line-height:1.4!important}
-#gameDialog:has(.ea){overflow:hidden!important}
-#gameDialog:has(.ea) #gameHost{min-height:0!important}
-#gameDialog:has(.ea) .ea .decision{width:min(96%,1100px)!important;max-height:calc(100dvh - 130px)!important;overflow-y:auto!important;overscroll-behavior:contain;padding:clamp(12px,2vw,22px)!important}
-#gameDialog:has(.ea) .ea .decision .question{font-size:clamp(1.08rem,2.2vw,1.55rem)!important;line-height:1.35!important}
+/* REFORMA 2026-11-22: legibilidade e adaptacao por janela, sem reduzir texto a escala minuscula */
+#gameDialog{width:min(1460px,98vw)!important;max-width:98vw!important;max-height:calc(100dvh - 12px)!important;overflow:auto!important;overscroll-behavior:contain}
+#gameDialog>.dialog-shell{max-height:calc(100dvh - 12px)!important;overflow-y:auto!important;overflow-x:hidden!important;scrollbar-gutter:stable}
+#gameDialog .dialog-close{position:sticky!important;top:8px!important;right:8px!important;z-index:550!important;min-width:42px!important;min-height:42px!important}
+#gameDialog :is(button,[role="button"]):focus-visible{outline:3px solid #ffbe2e!important;outline-offset:3px!important}
+#gameDialog :is(.quiz-option,.lightning-option,.trail-answer-option,.choice){touch-action:manipulation}
+/* Show do Milhao: pergunta como elemento principal; escada acessivel por rolagem */
+#gameDialog:has(.milhao-play) .milhao-play{padding:clamp(14px,2vw,26px)!important}
+#gameDialog:has(.milhao-play) .milhao-layout{align-items:start!important;grid-template-columns:minmax(0,1fr) clamp(130px,16vw,220px)!important;gap:clamp(10px,1.4vw,22px)!important}
+#gameDialog:has(.milhao-play) .milhao-brand-stage{min-height:76px!important;margin:0 0 8px!important}
+#gameDialog:has(.milhao-play) .milhao-logo-disc{width:76px!important;height:76px!important;font-size:.76rem!important}
+#gameDialog:has(.milhao-play) .milhao-logo-disc strong{font-size:.85rem!important}
+#gameDialog:has(.milhao-play) .milhao-question{font-size:clamp(1.15rem,2.2vw,1.7rem)!important;line-height:1.35!important}
+#gameDialog:has(.milhao-play) .milhao-options{gap:10px!important;margin-top:12px!important}
+#gameDialog:has(.milhao-play) .milhao-options .quiz-option{min-height:62px!important;font-size:clamp(.98rem,1.35vw,1.14rem)!important;line-height:1.35!important}
+#gameDialog:has(.milhao-play) .milhao-aids{display:flex!important;flex-wrap:wrap!important;gap:9px!important}
+#gameDialog:has(.milhao-play) .milhao-aids .btn{min-height:46px!important;font-size:.93rem!important;flex:1 1 130px!important}
+#gameDialog:has(.milhao-play) .milhao-ladder{max-height:min(66dvh,650px)!important;overflow-y:auto!important;gap:5px!important}
+#gameDialog:has(.milhao-play) .milhao-ladder span{min-height:29px!important;font-size:.82rem!important}
+/* Quiz Relampago: controles de continuidade acessiveis mesmo com feedback longo */
+#gameDialog:has(.lightning-v2) .lightning-question-layout{grid-template-columns:minmax(115px,22%) minmax(0,1fr)!important;align-items:stretch!important}
+#gameDialog:has(.lightning-v2) .lightning-question-image{min-height:105px!important;max-height:180px!important}
+#gameDialog:has(.lightning-v2) .lightning-question-copy h2{font-size:clamp(1.15rem,1.8vw,1.55rem)!important;line-height:1.3!important}
+#gameDialog:has(.lightning-v2) .lightning-option{min-height:58px!important;font-size:clamp(.98rem,1.25vw,1.12rem)!important;line-height:1.3!important}
+#gameDialog:has(.lightning-v2) #nextQuestion{position:sticky!important;bottom:8px!important;z-index:30!important;min-height:52px!important;font-size:1rem!important;box-shadow:0 5px 22px #102d4d45!important}
+/* Trilha: parar de comprimir casas e comandos; tabuleiro com area propria de rolagem */
+#gameDialog:has(.trail-v31) .trail-actions-top .btn{min-height:42px!important;height:auto!important;font-size:clamp(.82rem,1.15vw,1rem)!important;padding:8px 12px!important;white-space:normal!important}
+#gameDialog:has(.trail-v31) .trail-question-button{min-height:46px!important;height:auto!important;font-size:clamp(.86rem,1.1vw,1rem)!important;padding:8px 12px!important}
+#gameDialog:has(.trail-v31) .trail-player-name{font-size:clamp(.82rem,1vw,1rem)!important;line-height:1.2!important}
+#gameDialog:has(.trail-v31) .trail-player-card small{font-size:.72rem!important;line-height:1.2!important}
+#gameDialog:has(.trail-v31) .trail-board-wrap{overflow:auto!important;max-height:58dvh!important;min-height:190px!important;overscroll-behavior:contain!important}
+#gameDialog:has(.trail-v31) .trail-cell{min-height:90px!important;height:auto!important}
+#gameDialog:has(.trail-v31) .trail-cell-no{font-size:.8rem!important}
+#gameDialog:has(.trail-v31) .trail-special small{font-size:.68rem!important}
+#gameDialog:has(.trail-v31) .trail-inline-status{font-size:.86rem!important;min-height:40px!important;height:auto!important}
+#gameDialog:has(.trail-v31) .trail-message{height:auto!important;max-height:none!important;min-height:36px!important}
+#gameDialog:has(.trail-v31) .trail-answer-option{min-height:52px!important;font-size:1rem!important;line-height:1.3!important}
+/* Decisoes no Transito: alternativas e leitura acima da imagem decorativa */
+#gameDialog:has(.ea) .ea .decision{max-width:min(100%,1120px)!important;overflow-y:auto!important;max-height:75dvh!important}
+#gameDialog:has(.ea) .ea .question{font-size:clamp(1.12rem,2vw,1.6rem)!important;line-height:1.4!important}
 #gameDialog:has(.ea) .ea .choices{gap:10px!important}
-#gameDialog:has(.ea) .ea .choice{font-size:clamp(.95rem,1.4vw,1.1rem)!important;line-height:1.35!important;min-height:66px!important;padding:12px!important}
-#gameDialog:has(.ea) .ea .decisionTimer{flex-shrink:0!important}
+#gameDialog:has(.ea) .ea .choice{min-height:64px!important;padding:12px 14px!important;font-size:clamp(.98rem,1.25vw,1.15rem)!important;line-height:1.4!important}
+#gameDialog:has(.ea) .ea .decisionTimer{min-width:44px!important;min-height:44px!important;font-size:1.1rem!important}
 @media(max-width:760px){
- #gameDialog:has(.trail-v31) .trail-board-wrap{max-height:55dvh!important}
- #gameDialog:has(.trail-v31) .trail-cell{min-height:86px!important}
- #gameDialog:has(.ea) .ea .decision{width:calc(100% - 20px)!important;max-height:calc(100dvh - 95px)!important;bottom:10px!important}
- #gameDialog:has(.ea) .ea .choices{display:grid!important;grid-template-columns:1fr!important}
- #gameDialog:has(.ea) .ea .choice{min-height:52px!important}
+ #gameDialog:has(.milhao-play) .milhao-layout{grid-template-columns:minmax(0,1fr)!important}
+ #gameDialog:has(.milhao-play) .milhao-ladder{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-height:170px!important}
+ #gameDialog:has(.milhao-play) .milhao-options{grid-template-columns:1fr!important}
+ #gameDialog:has(.lightning-v2) .lightning-question-layout{grid-template-columns:1fr!important}
+ #gameDialog:has(.lightning-v2) .lightning-question-image{max-height:125px!important}
+ #gameDialog:has(.lightning-v2) .lightning-options{grid-template-columns:1fr!important}
+ #gameDialog:has(.trail-v31) .trail-board{grid-template-columns:repeat(3,minmax(110px,1fr))!important;min-width:350px!important}
+ #gameDialog:has(.trail-v31) .trail-board-wrap{max-height:53dvh!important}
+ #gameDialog:has(.ea) .ea .choices{grid-template-columns:1fr!important}
 }
-@media(max-height:640px){
- #gameDialog:has(.trail-v31) .trail-board-wrap{max-height:55dvh!important}
- #gameDialog:has(.ea) .ea .decision{max-height:calc(100dvh - 95px)!important}
+@media(max-height:650px){
+ #gameDialog:has(.milhao-play) .milhao-brand-stage{display:none!important}
+ #gameDialog:has(.trail-v31) .trail-board-wrap{max-height:48dvh!important}
 }
