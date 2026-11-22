@@ -3670,3 +3670,19 @@ body.admin-workspace-open{overflow:hidden}
  #gameDialog:has(.trail-v31) .trail-cell{min-height:76px!important}
  #gameDialog:has(.trail-v31) .trail-board-wrap{overflow-y:auto!important;overflow-x:hidden!important}
 }
+
+/* Trilha 2.1 — peoes de alto contraste, identificacao e sobreposicao segura */
+#gameDialog:has(.trail-v31) .trail-cell{position:relative!important;isolation:isolate!important}
+#gameDialog:has(.trail-v31) .trail-pawns{position:absolute!important;right:7px!important;bottom:7px!important;display:flex!important;flex-direction:row!important;align-items:flex-end!important;justify-content:flex-end!important;gap:5px!important;z-index:6!important;max-width:calc(100% - 12px)!important}
+#gameDialog:has(.trail-v31) .trail-pawn{position:relative!important;box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:none!important;width:30px!important;height:34px!important;border:3px solid #fff!important;border-radius:48% 48% 43% 43%!important;transform:none!important;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))!important;box-shadow:0 0 0 2px rgba(15,37,57,.75),inset 0 2px 3px rgba(255,255,255,.3)!important}
+#gameDialog:has(.trail-v31) .trail-pawn::before{content:none!important}
+#gameDialog:has(.trail-v31) .trail-pawn::after{content:''!important;position:absolute!important;left:50%!important;bottom:-7px!important;transform:translateX(-50%)!important;width:17px!important;height:5px!important;background:#15344e!important;border:1px solid #fff!important;border-radius:100%!important}
+#gameDialog:has(.trail-v31) .trail-pawn.blue,#gameDialog:has(.trail-v31) .trail-pawn.azul{background:linear-gradient(145deg,#49c4ff,#0060c9)!important;color:#fff!important}
+#gameDialog:has(.trail-v31) .trail-pawn.yellow,#gameDialog:has(.trail-v31) .trail-pawn.amarelo{background:linear-gradient(145deg,#fff27a,#ed9b00)!important;color:#172a37!important}
+#gameDialog:has(.trail-v31) .trail-pawn-initial{font-size:17px!important;font-weight:1000!important;line-height:1!important;text-shadow:0 1px 1px rgba(0,0,0,.25)!important}
+#gameDialog:has(.trail-v31) .trail-player-name .trail-pawn{width:25px!important;height:28px!important;margin-right:7px!important}
+#gameDialog:has(.trail-v31) .trail-player-name .trail-pawn-initial{display:none!important}
+#gameDialog:has(.trail-v31) .trail-cell.occupied-current{outline:3px solid #ffbb26!important;outline-offset:-3px!important;box-shadow:inset 0 0 0 2px #fff3b1,0 0 12px rgba(255,171,20,.45)!important}
+#gameDialog:has(.trail-v31) .trail-cell.occupied-current::after{content:none!important}
+@media(max-width:760px){#gameDialog:has(.trail-v31) .trail-pawn{width:27px!important;height:30px!important}#gameDialog:has(.trail-v31) .trail-pawn-initial{font-size:15px!important}}
+@media(prefers-reduced-motion:no-preference){#gameDialog:has(.trail-v31) .trail-cell.occupied-current .trail-pawn{animation:trailPawnPulse 1.8s ease-in-out infinite alternate!important}@keyframes trailPawnPulse{from{filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}to{filter:drop-shadow(0 0 6px rgba(255,190,45,.9))}}}

@@ -99,7 +99,7 @@ export function openTrilha(dialog,host,onFinish){
     win:()=>{tone(523,.10,0,'triangle',.05);tone(659,.10,.10,'triangle',.05);tone(784,.10,.20,'triangle',.05);tone(1046,.28,.30,'triangle',.06);}
   };
 
-  const pawnHtml=p=>`<span class="trail-pawn ${p.color}" title="${p.name}" aria-label="${p.name}"></span>`;
+  const pawnHtml=p=>`<span class="trail-pawn ${p.color}" title="Jogador ${p.name} — casa ${p.pos+1}" aria-label="Jogador ${p.name}, casa ${p.pos+1}" role="img"><span class="trail-pawn-initial" aria-hidden="true">${p.name.slice(0,1).toUpperCase()}</span></span>`;
 
   const cellLabel=i=>{
     if(i===0)return 'INÍCIO';
@@ -114,7 +114,8 @@ export function openTrilha(dialog,host,onFinish){
     const sp=SPECIALS[i];
     const bonus=BONUS_HOUSES.has(i);
     const direction=directionFor(i,cols);
-    return `<div class="trail-cell ${i===0?'start':''} ${i===BOARD_SIZE-1?'finish':''} ${sp?'special':''} ${bonus?'quiz-house':''}" data-cell="${i}" style="order:${visualOrder(i,cols)}" data-step="${i+1}" aria-label="Casa ${i+1}${sp?`, ${sp.label}`:bonus?`, bônus`:``}${here.length?`, jogadores: ${here.map(p=>p.name).join(', ')}`:``}">
+    const activeHere=here.some(p=>p===current());
+    return `<div class="trail-cell ${activeHere?'occupied-current':''} ${here.length?'occupied':''} ${i===0?'start':''} ${i===BOARD_SIZE-1?'finish':''} ${sp?'special':''} ${bonus?'quiz-house':''}" data-cell="${i}" style="order:${visualOrder(i,cols)}" data-step="${i+1}" aria-label="Casa ${i+1}${sp?`, ${sp.label}`:bonus?`, bônus`:``}${here.length?`, jogadores: ${here.map(p=>p.name).join(', ')}`:``}">
       <div class="trail-cell-top">
         <span class="trail-cell-no">${cellLabel(i)}</span>
         ${i!==BOARD_SIZE-1&&i!==0?`<span class="trail-direction" aria-hidden="true">${direction}</span>`:''}
@@ -246,9 +247,10 @@ export function openTrilha(dialog,host,onFinish){
 
   const repaint=()=>{
     host.querySelectorAll('.trail-pawns').forEach(el=>el.innerHTML='');
+    host.querySelectorAll('.trail-cell').forEach(el=>el.classList.remove('occupied','occupied-current'));
     players.forEach(p=>{
       const box=host.querySelector(`[data-cell="${p.pos}"] .trail-pawns`);
-      if(box)box.insertAdjacentHTML('beforeend',pawnHtml(p));
+      if(box){box.insertAdjacentHTML('beforeend',pawnHtml(p));box.closest('.trail-cell')?.classList.add('occupied');if(p===current())box.closest('.trail-cell')?.classList.add('occupied-current');}
     });
     applyBoardLayout();
     focusCurrentCell(true);
