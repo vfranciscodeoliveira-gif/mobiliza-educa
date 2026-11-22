@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "actionId": "blitz-072d6c89ac3f",
+  "revision": 1,
+  "title": "Blitz Teste",
+  "description": "Ação com motociclistas",
+  "date": "2026-10-15",
+  "time": "09:00",
+  "location": "Base Centro",
+  "responsible": "semob",
+  "audience": "motociclistas",
+  "status": "planejada",
+  "materials": [
+    {
+      "id": "orientacoes",
+      "title": "Orientações educativas — exemplo",
+      "path": "assets/orientacoes.html",
+      "type": "html"
+    },
+    {
+      "id": "quiz-motociclista",
+      "title": "🏍️ Desafio Motociclista Seguro — 8 perguntas",
+      "path": "assets/quiz-motociclista.html",
+      "type": "html"
+    },
+    {
+      "id": "material-c38476b335",
+      "title": "Teste",
+      "path": "assets/material-c38476b335.jpeg",
+      "type": "jpeg"
+    },
+    {
+      "id": "material-067b22a29a",
+      "title": "xxxxxxxxxxxxxx",
+      "path": "assets/material-067b22a29a.png",
+      "type": "png"
+    },
+    {
+      "id": "material-ebb31612fe",
+      "title": "Titulo",
+      "path": "assets/material-ebb31612fe.png",
+      "type": "png"
+    },
+    {
+      "id": "material-65ee4dc0b6",
+      "title": "Teste imagem",
+      "path": "assets/material-65ee4dc0b6.png",
+      "type": "png"
+    },
+    {
+      "id": "material-f880b754dd",
+      "title": "xxxxx",
+      "path": "assets/material-f880b754dd.jpg",
+      "type": "jpg"
+    },
+    {
+      "id": "material-83e7cdbbd0",
+      "title": "Img_Blitz",
+      "path": "assets/material-83e7cdbbd0.jpg",
+      "type": "jpg"
+    }
+  ]
+}

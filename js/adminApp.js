@@ -1,7 +1,7 @@
 import {renderQREducacao} from './modules/qrEducacao.js?v=2';
 import {mountProtocolCenter,unmountProtocolCenter,openUnreadNotifications} from './modules/protocolCenter.js?v=4';
 import {renderAgendaOverview} from './modules/agendaOverview.js?v=1';
-import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed,inspectMyTenantAccess} from './core/cloudAccess.js?v=2';
+import {refreshOnlineAccess,listAccessTenants,accessSnapshot,permissionAllowed} from './core/cloudAccess.js?v=1';
 import {getCloudTenantId,setCloudTenantId} from './cloudGateway.js?v=6';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let onlineTenants=[];
@@ -10,14 +10,13 @@ import {ensureAdminAccess,isAdminUnlocked,lockAdmin,getCurrentAdminUser} from '.
 import {canAccessModule} from './core/accessControl.js?v=2';
 import {activeTenant,installTenantWorkspaceBridge} from './core/tenantRegistry.js?v=2';
 import {adminModuleEntitlement} from './core/saasContext.js?v=2';
-import {openAdminModule} from './modules/admin.js?v=69';
+import {openAdminModule} from './modules/admin.js?v=42';
 import {cloudMe,syncCloudInbox} from './cloudGateway.js?v=6';
 import {signInCloud,cloudSessionHint} from './core/cloudAuth.js?v=3';
 
 const qs=s=>document.querySelector(s);
 
-window.__mobilizaAdminModuleLoaded=true;
-try{installTenantWorkspaceBridge();}catch(error){console.error('Tenant workspace:',error);}
+installTenantWorkspaceBridge();
 
 function askFirestoreCredentials(){
  return new Promise(resolve=>{
@@ -111,7 +110,6 @@ function renderAuthenticated(){
 
   qs('#adminUserCard').innerHTML=`<span>👤</span><div><small>Usuário conectado</small><strong>${esc(user?.name||user?.username||'Gestor')}</strong></div>`;
   qs('#adminContext').innerHTML=`Cliente: <select id="adminOnlineTenant">${onlineTenants.map(t=>`<option value="${esc(t.id)}" ${t.id===getCloudTenantId()?'selected':''}>${esc(t.name||t.id)}</option>`).join('')}</select> • usuário: <strong>${esc(user?.username||'—')}</strong>`;qs('#adminOnlineTenant').onchange=async e=>{qs('#adminDialog')?.close();setCloudTenantId(e.target.value);try{const result=await refreshOnlineAccess();onlineTenants=result.tenants;renderAuthenticated();}catch(error){alert(error.message);renderLoggedOut();}};
-  const verify=document.createElement('button');verify.type='button';verify.className='btn ghost';verify.textContent='Diagnosticar permissões';verify.onclick=async()=>{try{const a=await inspectMyTenantAccess();alert(JSON.stringify(a,null,2));}catch(e){alert(e.message);}};qs('#adminContext').append(verify);
   qs('#adminProfileKpi').textContent=user?.profileId||'GESTOR';
   qs('#adminModulesKpi').textContent=String(adminModules.length);
   qs('#adminSidebarNav').innerHTML=adminModules.map(sidebarButton).join('');
@@ -170,13 +168,13 @@ window.addEventListener('mobiliza-admin-auth',e=>{
 });
 window.addEventListener('mobiliza-tenant-change',()=>{if(isAdminUnlocked())renderAuthenticated();});
 
-if(isAdminUnlocked()){const context=qs('#adminContext');if(context)context.textContent='Verificando sessão e organizações no Firebase...';const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('A validação do Firebase excedeu 12 segundos. Confira sua conexão e tente novamente.')),12000));Promise.race([listAccessTenants(),timeout]).then(rows=>{onlineTenants=rows;renderAuthenticated();}).catch(error=>{renderLoggedOut();const context=qs('#adminContext');if(context)context.textContent=error?.message||'Não foi possível validar o acesso.';const button=qs('#adminLoginButton');if(button)button.textContent='Tentar acesso novamente';});}
+if(isAdminUnlocked())listAccessTenants().then(rows=>{onlineTenants=rows;renderAuthenticated();}).catch(renderLoggedOut);
 else{
   renderLoggedOut();
   setTimeout(requestLogin,80);
 }
 
-if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.67.7',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js?v=0.66.1',{updateViaCache:'none'});await reg.update();}catch(e){console.warn(e);}});
 
 
 
