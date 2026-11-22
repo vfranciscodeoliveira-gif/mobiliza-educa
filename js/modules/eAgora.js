@@ -1,9 +1,9 @@
 const ASSETS={
-  school:'assets/ai/hero_area_escolar.webp?v=39',
-  ball:'assets/scenes/bola-na-rua.svg?v=41',
-  crossing:'visual-2026/travessia-e-prioridade.webp?v=41',
-  motorcycle:'visual-2026/motociclista-seguro.webp?v=41',
-  signal:'visual-2026/velocidade-e-risco.webp?v=41',
+  school:'assets/scenes/onibus-escolar.webp?v=52',
+  ball:'assets/scenes/bola-na-rua.webp?v=60',
+  crossing:'assets/scenes/faixa-pedestres.webp?v=60',
+  motorcycle:'assets/scenes/ponto-cego-moto.webp?v=60',
+  signal:'assets/scenes/semaforo-amarelo.webp?v=60',
   road:'assets/hero-ai.webp?v=39',
   life:'assets/mobiliza_educa_caminhos_para_a_vida.webp?v=39'
 };
@@ -183,43 +183,6 @@ function ensureCss(){
  #gameDialog.eagora-dialog .ea .resultActions button{font-size:clamp(12px,1vw,15px)!important;min-height:44px}
  @media(max-width:900px){#gameDialog.eagora-dialog .ea .choices{grid-template-columns:1fr!important}#gameDialog.eagora-dialog .ea .choice{min-height:54px!important}#gameDialog.eagora-dialog .ea .decision{max-height:75dvh!important}#gameDialog.eagora-dialog .ea .decisionHead{grid-template-columns:1fr auto!important}#gameDialog.eagora-dialog .ea .freezeTag{grid-column:1/-1;justify-self:start}#gameDialog.eagora-dialog .ea .question{font-size:18px!important}}
  @media(max-height:650px){#gameDialog.eagora-dialog .ea .decision{max-height:77dvh!important;bottom:6px!important}#gameDialog.eagora-dialog .ea .choice{min-height:52px!important;padding:8px!important}#gameDialog.eagora-dialog .ea .question{margin:6px 0 9px!important}#gameDialog.eagora-dialog .ea .caption{bottom:5px!important}}
-
- /* Reforma 3: abertura contextual e resultado sem foto reutilizada */
- #gameDialog.eagora-dialog .ea .episodeIntro{background:linear-gradient(100deg,rgba(2,14,29,.96),rgba(3,31,53,.84)),radial-gradient(circle at 85% 20%,#087cbd,transparent 60%);overflow:auto;align-items:center}
- #gameDialog.eagora-dialog .ea .introCard{width:min(800px,94%);max-height:88%;overflow:auto;border:1px solid #37c8fa;border-left:7px solid #ffcc42;border-radius:22px;padding:clamp(20px,3vw,38px);background:linear-gradient(145deg,#08233b,#07476c);box-shadow:0 20px 65px #0008}
- #gameDialog.eagora-dialog .ea .introEyebrow{font-size:clamp(12px,1vw,15px);color:#a7eaff;font-weight:900;letter-spacing:.09em}
- #gameDialog.eagora-dialog .ea .introStep{margin-top:18px;font-size:clamp(12px,1.2vw,17px);font-weight:900;color:#ffdc6a}
- #gameDialog.eagora-dialog .ea .introCard h2{font-size:clamp(26px,3vw,46px);line-height:1.12;margin:10px 0 18px}
- #gameDialog.eagora-dialog .ea .introCard p{font-size:clamp(16px,1.5vw,21px);line-height:1.55;color:#effaff}
- #gameDialog.eagora-dialog .ea .introHint{margin-top:18px;padding:14px 16px;border-radius:12px;background:#ffffff17;font-size:clamp(14px,1.2vw,17px);line-height:1.4}
- #gameDialog.eagora-dialog .ea .introCard .start{font-size:clamp(15px,1.3vw,19px);min-height:50px;padding:12px 24px;margin-top:22px}
- #gameDialog.eagora-dialog .eaSummaryV3{height:100%;overflow:auto;padding:clamp(16px,2vw,30px);background:linear-gradient(155deg,#061725,#0a2e46);color:#fff}
- #gameDialog.eagora-dialog .eaSummaryV3 .summaryHero{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:clamp(18px,2.5vw,34px);border-radius:20px;background:linear-gradient(120deg,#08618f,#083251);border:1px solid #3bb5e7}
- #gameDialog.eagora-dialog .eaSummaryV3 .summaryIdentity{max-width:780px}
- #gameDialog.eagora-dialog .eaSummaryV3 .summaryKicker{font-size:clamp(12px,1vw,15px);font-weight:900;color:#b7eaff;letter-spacing:.06em}
- #gameDialog.eagora-dialog .eaSummaryV3 h2{font-size:clamp(26px,3vw,44px);line-height:1.12;margin:10px 0}
- #gameDialog.eagora-dialog .eaSummaryV3 .summaryIdentity p{font-size:clamp(15px,1.2vw,19px);line-height:1.5;color:#e1f4ff;margin:0 0 15px}
- #gameDialog.eagora-dialog .eaSummaryV3 .summaryClass{display:inline-block;padding:9px 14px;border-radius:100px;background:#ffe08a;color:#17344a;font-size:clamp(13px,1.1vw,16px);font-weight:900}
- #gameDialog.eagora-dialog .eaSummaryV3 .summaryGrade{flex-shrink:0;width:130px;height:130px;border:7px solid #fff4b0;border-radius:50%;background:#ffcb38;color:#082b44;display:flex;flex-direction:column;align-items:center;justify-content:center}
- #gameDialog.eagora-dialog .eaSummaryV3 .summaryGrade strong{font-size:48px;line-height:1}
- #gameDialog.eagora-dialog .eaSummaryV3 .summaryGrade span{font-size:10px;font-weight:900;margin-top:6px}
- #gameDialog.eagora-dialog .eaSummaryV3 .metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
- #gameDialog.eagora-dialog .eaSummaryV3 .metric{padding:17px;background:#12364e;border:1px solid #35617c}
- #gameDialog.eagora-dialog .eaSummaryV3 .metric span{font-size:clamp(11px,.95vw,14px);line-height:1.3}
- #gameDialog.eagora-dialog .eaSummaryV3 .metric b{display:block;margin-top:8px;font-size:clamp(22px,2.3vw,32px)}
- #gameDialog.eagora-dialog .eaSummaryV3 .summarySectionTitle{font-size:clamp(19px,1.8vw,26px);margin:22px 0 12px}
- #gameDialog.eagora-dialog .eaSummaryV3 .episodes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0}
- #gameDialog.eagora-dialog .eaSummaryV3 .ep{display:flex;gap:12px;padding:16px;border:1px solid #345f77;background:#102f45;border-radius:14px}
- #gameDialog.eagora-dialog .eaSummaryV3 .ep.isSafe{border-left:5px solid #3bde91}
- #gameDialog.eagora-dialog .eaSummaryV3 .ep.isRisk{border-left:5px solid #ff8a73}
- #gameDialog.eagora-dialog .eaSummaryV3 .epNumber{font-size:23px;font-weight:900;color:#82d9ff}
- #gameDialog.eagora-dialog .eaSummaryV3 .epCopy strong{font-size:clamp(15px,1.2vw,19px);line-height:1.3}
- #gameDialog.eagora-dialog .eaSummaryV3 .epCopy p{font-size:clamp(13px,1.05vw,16px);line-height:1.5;color:#d4e7f2;margin:8px 0 0}
- #gameDialog.eagora-dialog .eaSummaryV3 .summaryAdvice{font-size:clamp(14px,1.2vw,18px);line-height:1.5;background:#174158;padding:16px;margin-top:16px;border-radius:12px}
- #gameDialog.eagora-dialog .eaSummaryV3 .footer{position:sticky;bottom:-1px;padding:14px 0;background:#0a293e;display:flex;justify-content:center;gap:12px}
- #gameDialog.eagora-dialog .eaSummaryV3 .footer button{font-size:clamp(15px,1.2vw,18px);min-height:48px;padding:10px 22px}
- @media(max-width:850px){#gameDialog.eagora-dialog .eaSummaryV3 .summaryHero{gap:12px}#gameDialog.eagora-dialog .eaSummaryV3 .summaryGrade{width:90px;height:90px;border-width:5px}#gameDialog.eagora-dialog .eaSummaryV3 .summaryGrade strong{font-size:34px}#gameDialog.eagora-dialog .eaSummaryV3 .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}#gameDialog.eagora-dialog .eaSummaryV3 .episodes{grid-template-columns:1fr}}
- @media(max-width:520px){#gameDialog.eagora-dialog .eaSummaryV3 .summaryHero{align-items:flex-start;flex-direction:column}#gameDialog.eagora-dialog .eaSummaryV3 .summaryGrade{align-self:center}#gameDialog.eagora-dialog .eaSummaryV3 .footer{flex-direction:column}#gameDialog.eagora-dialog .ea .introCard{padding:18px}}
  `;document.head.appendChild(s);
 }
 
@@ -246,7 +209,7 @@ export function openEAgora(dialog,host,onFinish){
    <div class="topHud"><div class="titlebox"><div class="badge">${String(x.number).padStart(2,'0')}</div><div><p>${x.kicker}</p><h2>${x.title}</h2></div></div><div class="hudstats"><div class="pill"><span>EPISÓDIO</span><b id="eaEpisode">${ep+1}/${EPISODES.length}</b></div><div class="pill"><span>SEGURANÇA</span><b id="eaSafety">${safety}%</b></div><div class="pill"><span>PONTOS</span><b id="eaScore">${score}</b></div></div></div><div class="timeline"><i id="eaLine"></i></div>${inner}</section>`;
  }
  function intro(){
-  stop();toolUsed=false;const x=e();host.innerHTML=frame(`<div class="episodeIntro"><div class="introCard"><div class="introEyebrow">🚦 MOBILIZA EDUCA · DECISÕES NO TRÂNSITO</div><div class="introStep">SITUAÇÃO ${x.number} DE ${EPISODES.length} · ${x.kicker}</div><h2>${x.title}</h2><p>${x.observe}</p><div class="introHint">👁 Observe a cena, identifique o risco e escolha a atitude mais segura.</div><button class="btn primary start" id="eaStart">▶ OBSERVAR CENA</button></div></div>`,'observing');hud();host.querySelector('#eaStart').onclick=observe;
+  stop();toolUsed=false;const x=e();host.innerHTML=frame(`<div class="episodeIntro"><div class="introCard"><div class="k">EPISÓDIO ${x.number} • ${x.kicker}</div><h2>${x.title}</h2><p>${x.observe}</p><button class="btn primary start" id="eaStart">▶ INICIAR CENA</button></div></div>`,'observing');hud();host.querySelector('#eaStart').onclick=observe;
  }
  function observe(){
   snd.start();const x=e();host.innerHTML=frame(`<div class="caption"><strong>OBSERVE.</strong> ${x.observe}</div>`,'observing');hud();let t=0;const line=host.querySelector('#eaLine');phaseTimer=setInterval(()=>{t+=.1;if(line)line.style.width=Math.min(100,t/4.2*100)+'%';if(t>=4.2){clearInterval(phaseTimer);phaseTimer=null;decision()}},100);
@@ -289,7 +252,7 @@ export function openEAgora(dialog,host,onFinish){
  }
  function next(){if(ep>=EPISODES.length-1){summary();return}ep++;intro()}
  function summary(){
-  stop();snd.finish();globalResult(score,correct,EPISODES.length,bestStreak);onFinish?.();const grade=Math.max(0,Math.round((correct/EPISODES.length)*70+safety*.3));host.innerHTML=`<section class="eaSummary eaSummaryV3"><div class="summaryHero"><div class="summaryIdentity"><span class="summaryKicker">🚦 MOBILIZA EDUCA · MISSÃO CONCLUÍDA</span><h2>Seu perfil de segurança</h2><p>Você enfrentou cinco situações reais de decisão no trânsito. Confira seus resultados e aprenda com cada escolha.</p><span class="summaryClass">${grade>=85?'🏆 Condutor preventivo':grade>=60?'🛡️ Condutor atento':'📘 Segurança em desenvolvimento'}</span></div><div class="summaryGrade"><strong>${grade}</strong><span>DE 100 PONTOS</span></div></div><div class="metrics"><div class="metric"><span>DECISÕES SEGURAS</span><b>${correct} de ${EPISODES.length}</b></div><div class="metric"><span>MARGEM DE SEGURANÇA</span><b>${safety}%</b></div><div class="metric"><span>PONTUAÇÃO</span><b>${score.toLocaleString('pt-BR')}</b></div><div class="metric"><span>MELHOR SEQUÊNCIA</span><b>${bestStreak}</b></div></div><h3 class="summarySectionTitle">Revise suas cinco decisões</h3><div class="episodes">${EPISODES.map((x,i)=>{const a=answers[i];return `<article class="ep ${a?.safe?'isSafe':'isRisk'}"><div class="epNumber">${String(i+1).padStart(2,'0')}</div><div class="epCopy"><strong>${a?.safe?'✓ Decisão segura':'! Atenção ao risco'} · ${x.title}</strong><p>${a?.safe?x.safeText:x.dangerText}</p></div></article>`}).join('')}</div><div class="summaryAdvice">💡 <strong>Lembre-se:</strong> antecipar riscos, respeitar a sinalização e preservar tempo de reação são atitudes que salvam vidas.</div><div class="footer"><button class="btn primary" id="eaAgain">↻ Jogar novamente</button><button class="btn ghost" id="eaClose">Encerrar</button></div></section>`;host.querySelector('#eaAgain').onclick=()=>{ep=0;score=0;safety=100;correct=0;streak=0;bestStreak=0;answers=[];intro()};host.querySelector('#eaClose').onclick=()=>dialog.close();
+  stop();snd.finish();globalResult(score,correct,EPISODES.length,bestStreak);onFinish?.();const grade=Math.max(0,Math.round((correct/EPISODES.length)*70+safety*.3));host.innerHTML=`<section class="eaSummary"><div class="head"><div class="cover"></div><div><p>E AGORA? VOCÊ DECIDE! • 5 SITUAÇÕES</p><h2>Seu perfil de segurança</h2><small>Percepção, antecipação e tomada de decisão em cinco situações de trânsito.</small></div><div class="grade">${grade}</div></div><div class="metrics"><div class="metric"><span>DECISÕES SEGURAS</span><b>${correct}/${EPISODES.length}</b></div><div class="metric"><span>MARGEM FINAL</span><b>${safety}%</b></div><div class="metric"><span>PONTOS</span><b>${score}</b></div><div class="metric"><span>MELHOR SEQUÊNCIA</span><b>${bestStreak}</b></div></div><div class="episodes">${EPISODES.map((x,i)=>{const a=answers[i];return `<div class="ep"><strong>${a?.safe?'✅':'⚠️'} ${x.title}</strong><small>${a?.safe?x.safeText:x.dangerText}</small></div>`}).join('')}</div><div class="footer"><button class="btn primary" id="eaAgain">↻ Jogar novamente</button><button class="btn ghost" id="eaClose">Encerrar</button></div></section>`;host.querySelector('#eaAgain').onclick=()=>{ep=0;score=0;safety=100;correct=0;streak=0;bestStreak=0;answers=[];intro()};host.querySelector('#eaClose').onclick=()=>dialog.close();
  }
  const onClose=()=>{stop();dialog.classList.remove('eagora-dialog');dialog.removeEventListener('close',onClose)};dialog.addEventListener('close',onClose);intro();if(!dialog.open)dialog.showModal();
 }
