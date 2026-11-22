@@ -1,7 +1,7 @@
 import { getGameQuestions } from '../core/questionEngine.js?v=3';
 import { recordGameResult } from '../core/historyStore.js?v=1';
 const BOARD_SIZE=24;
-const COLS=6;
+const COLS=6; // quatro linhas em desktop; oito linhas em celular
 
 const SPECIALS={
   4:{icon:'🚦',image:'assets/memory/semaforo.svg?v=31',label:'Semáforo',title:'Atenção no amarelo',message:'Boa conduta no semáforo. Avance 1 casa.',delta:1,tone:'good'},
@@ -114,7 +114,7 @@ export function openTrilha(dialog,host,onFinish){
     const sp=SPECIALS[i];
     const bonus=BONUS_HOUSES.has(i);
     const direction=directionFor(i,cols);
-    return `<div class="trail-cell ${i===0?'start':''} ${i===BOARD_SIZE-1?'finish':''} ${sp?'special':''} ${bonus?'quiz-house':''}" data-cell="${i}" style="order:${visualOrder(i,cols)}" data-step="${i+1}">
+    return `<div class="trail-cell ${i===0?'start':''} ${i===BOARD_SIZE-1?'finish':''} ${sp?'special':''} ${bonus?'quiz-house':''}" data-cell="${i}" style="order:${visualOrder(i,cols)}" data-step="${i+1}" aria-label="Casa ${i+1}${sp?`, ${sp.label}`:bonus?`, bônus`:``}${here.length?`, jogadores: ${here.map(p=>p.name).join(', ')}`:``}">
       <div class="trail-cell-top">
         <span class="trail-cell-no">${cellLabel(i)}</span>
         ${i!==BOARD_SIZE-1&&i!==0?`<span class="trail-direction" aria-hidden="true">${direction}</span>`:''}

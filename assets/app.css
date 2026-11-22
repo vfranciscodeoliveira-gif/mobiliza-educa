@@ -3646,3 +3646,27 @@ body.admin-workspace-open{overflow:hidden}
  #gameDialog:has(.milhao-play) .milhao-brand-stage{display:none!important}
  #gameDialog:has(.trail-v31) .trail-board-wrap{max-height:48dvh!important}
 }
+
+/* Trilha 2.0 — tabuleiro inteiro visivel em janelas desktop divididas.
+   Substitui os limites conflitantes das versoes anteriores. */
+@media (min-width:761px){
+ #gameDialog:has(.trail-v31) .trail-v31{display:flex!important;flex-direction:column!important;min-height:0!important;height:100%!important;gap:6px!important;overflow:hidden!important}
+ #gameDialog:has(.trail-v31) .trail-hero{flex:0 0 auto!important;min-height:0!important;padding:5px 10px!important}
+ #gameDialog:has(.trail-v31) .trail-hero img{max-height:46px!important;width:auto!important}
+ #gameDialog:has(.trail-v31) .trail-dashboard{flex:0 0 auto!important;min-height:0!important}
+ #gameDialog:has(.trail-v31) .trail-turn-action{flex:0 0 auto!important;min-height:48px!important;height:auto!important}
+ #gameDialog:has(.trail-v31) .trail-board-wrap{flex:1 1 auto!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:auto!important;padding:5px!important}
+ #gameDialog:has(.trail-v31) .trail-board{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-template-rows:repeat(4,minmax(56px,1fr))!important;height:100%!important;min-height:244px!important;min-width:0!important;gap:5px!important;padding:3px!important}
+ #gameDialog:has(.trail-v31) .trail-cell{height:100%!important;min-height:0!important;min-width:0!important;padding:4px 7px!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important}
+ #gameDialog:has(.trail-v31) .trail-cell-no{font-size:clamp(.7rem,1vw,.9rem)!important}
+ #gameDialog:has(.trail-v31) .trail-special em{font-size:clamp(1rem,1.7vw,1.5rem)!important}
+ #gameDialog:has(.trail-v31) .trail-special small{font-size:clamp(.55rem,.75vw,.72rem)!important}
+ #gameDialog:has(.trail-v31) .trail-message{flex:0 0 auto!important;min-height:0!important;max-height:42px!important;overflow:auto!important}
+ #gameDialog:has(.trail-v31) .trail-actions-top .btn{min-height:34px!important;padding:5px 8px!important;font-size:clamp(.72rem,.9vw,.9rem)!important}
+ #gameDialog:has(.trail-v31) .trail-question-button{min-height:38px!important;padding:6px 10px!important}
+}
+@media (max-width:760px){
+ #gameDialog:has(.trail-v31) .trail-board{grid-template-columns:repeat(3,minmax(0,1fr))!important;min-width:0!important}
+ #gameDialog:has(.trail-v31) .trail-cell{min-height:76px!important}
+ #gameDialog:has(.trail-v31) .trail-board-wrap{overflow-y:auto!important;overflow-x:hidden!important}
+}
