@@ -3559,3 +3559,30 @@ body.admin-workspace-open{overflow:hidden}
  #gameDialog:has(.milhao-play) .milhao-options .quiz-option{min-height:52px!important;font-size:.94rem!important}
  #gameDialog:has(.milhao-play) .milhao-ladder{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
+
+/* Quiz Relampago - layout compacto sem perder legibilidade, 2026-11-22 */
+#gameDialog:has(.lightning-v2){max-height:calc(100dvh - 20px);overflow-y:auto;overscroll-behavior:contain}
+#gameDialog:has(.lightning-v2) .dialog-shell{min-height:0}
+#gameDialog .lightning-v2.playing{padding:clamp(12px,2vw,24px)!important}
+#gameDialog .lightning-v2.playing .lightning-question-layout{grid-template-columns:minmax(130px,24%) minmax(0,1fr);gap:12px;margin-bottom:12px}
+#gameDialog .lightning-v2.playing .lightning-question-image{min-height:105px;max-height:155px}
+#gameDialog .lightning-v2.playing .lightning-question-copy{padding:14px 18px}
+#gameDialog .lightning-v2.playing .lightning-question-copy h2{font-size:clamp(1.12rem,1.9vw,1.5rem);line-height:1.22}
+#gameDialog .lightning-v2.playing .lightning-progress{margin-bottom:12px}
+#gameDialog .lightning-v2.playing .lightning-option{min-height:54px!important;padding:8px 12px!important;font-size:clamp(.9rem,1.1vw,1.04rem)!important}
+#gameDialog .lightning-v2.playing .lightning-feedback{margin-top:10px;padding:12px 14px}
+#gameDialog .lightning-v2.playing .lightning-feedback p{margin:6px 0}
+#gameDialog .lightning-v2.playing #nextQuestion{display:block;width:100%;min-height:46px;font-size:1rem;position:sticky;bottom:0;z-index:3;box-shadow:0 5px 16px rgba(0,50,80,.16)}
+@media(max-height:680px) and (min-width:650px){
+ #gameDialog .lightning-v2.playing .lightning-question-image{min-height:86px;max-height:112px}
+ #gameDialog .lightning-v2.playing .lightning-topbar{padding-bottom:6px}
+ #gameDialog .lightning-v2.playing .lightning-question-copy{padding:10px 14px}
+ #gameDialog .lightning-v2.playing .lightning-option{min-height:49px!important}
+ #gameDialog .lightning-v2.playing .lightning-feedback-meta{margin:5px 0 7px}
+}
+@media(max-width:650px){
+ #gameDialog .lightning-v2.playing .lightning-question-layout{grid-template-columns:1fr}
+ #gameDialog .lightning-v2.playing .lightning-question-image{min-height:100px;max-height:135px}
+ #gameDialog .lightning-v2.playing .lightning-options{grid-template-columns:1fr!important}
+ #gameDialog .lightning-v2.playing .lightning-topbar{flex-wrap:wrap;padding-right:25px}
+}

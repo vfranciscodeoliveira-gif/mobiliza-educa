@@ -133,6 +133,8 @@ export function openQuiz(dialog,host,onFinish){
       <button type="button" class="btn primary" id="nextQuestion">${i===qs.length-1?'VER RESULTADO':'PRÓXIMA PERGUNTA →'}</button>
     </div>`;
     host.querySelector('#nextQuestion').onclick=()=>{SoundManager.play('next');i++;locked=false;i>=qs.length?finish():render()};
+    // Mostrar a explicacao e a navegacao mesmo em janelas de pouca altura.
+    fb.scrollIntoView({block:'nearest',behavior:'smooth'});
   }
 
   function finish(){
