@@ -3452,3 +3452,68 @@ body.admin-workspace-open{overflow:hidden}
 .home-admin-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto}
 .home-admin-actions .btn{white-space:nowrap}
 @media(max-width:700px){.home-admin-actions{width:100%;margin-left:0}.home-admin-actions .btn{flex:1;min-width:140px}}
+
+/* v0.32.1 — Correção de viewport do Show do Milhão (telas divididas e notebooks).
+   O modal nunca deve recortar a região de ações: a rolagem é interna. */
+#gameDialog:has(.milhao){
+  box-sizing:border-box!important;
+  width:min(1320px,calc(100vw - 20px))!important;
+  max-width:calc(100vw - 20px)!important;
+  height:auto!important;
+  max-height:calc(100dvh - 20px)!important;
+  padding:0!important;
+  overflow:hidden!important;
+  margin:auto!important;
+}
+#gameDialog:has(.milhao)>.dialog-shell{
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-height:calc(100dvh - 20px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+}
+#gameDialog:has(.milhao) #gameHost{min-width:0!important;height:auto!important;overflow:visible!important}
+#gameDialog:has(.milhao) .milhao{box-sizing:border-box!important;min-height:0!important;max-width:100%!important}
+#gameDialog:has(.milhao) .milhao-start-stage,
+#gameDialog:has(.milhao) .milhao-layout{min-width:0!important}
+#gameDialog:has(.milhao) .milhao-start-copy,
+#gameDialog:has(.milhao) .milhao-stage{min-width:0!important}
+#gameDialog:has(.milhao) .milhao-start-button{position:relative;z-index:2;max-width:100%;white-space:normal}
+#gameDialog:has(.milhao) .milhao-connected-room{min-width:0}
+#gameDialog:has(.milhao) .milhao-aids{display:flex!important;flex-wrap:wrap!important}
+#gameDialog:has(.milhao) .milhao-aids .btn{flex:1 1 110px;min-width:0!important}
+#gameDialog:has(.milhao) .milhao-options .quiz-option{white-space:normal!important;height:auto!important}
+#gameDialog:has(.milhao) #feedback{scroll-margin-bottom:18px}
+#gameDialog:has(.milhao) .milhao-help-overlay.show{position:fixed;inset:0;z-index:200;overflow-y:auto;display:grid;place-items:center;padding:20px}
+@media (max-height:760px){
+  #gameDialog:has(.milhao) .milhao-start{padding:12px 18px 18px!important}
+  #gameDialog:has(.milhao) .milhao-start-stage{gap:14px!important}
+  #gameDialog:has(.milhao) .milhao-start-copy .milhao-title-3d{font-size:clamp(1.35rem,3vw,2.3rem)!important;line-height:1.08!important;margin:5px 0!important}
+  #gameDialog:has(.milhao) .milhao-start-copy>p:not(.eyebrow){font-size:.8rem!important;line-height:1.35!important;margin:5px 0!important}
+  #gameDialog:has(.milhao) .milhao-connected-start{margin:7px 0!important;padding:8px 10px!important}
+  #gameDialog:has(.milhao) .milhao-connected-room{margin-bottom:8px!important;padding:8px!important}
+  #gameDialog:has(.milhao) .milhao-connected-qr{width:78px!important;height:78px!important}
+  #gameDialog:has(.milhao) .milhao-connected-room{grid-template-columns:82px minmax(0,1fr) auto!important}
+  #gameDialog:has(.milhao) .milhao-rules{margin:6px 0!important;gap:5px!important}
+  #gameDialog:has(.milhao) .milhao-play{padding:12px!important}
+  #gameDialog:has(.milhao) .milhao-brand-stage{min-height:60px!important}
+  #gameDialog:has(.milhao) .milhao-logo-disc{width:60px!important;height:60px!important}
+}
+@media (max-width:900px){
+  #gameDialog:has(.milhao) .milhao-start-stage{grid-template-columns:1fr!important}
+  #gameDialog:has(.milhao) .milhao-start-emblem{display:none!important}
+  #gameDialog:has(.milhao) .milhao-start-copy{width:100%!important}
+  #gameDialog:has(.milhao) .milhao-layout{grid-template-columns:1fr!important}
+  #gameDialog:has(.milhao) .milhao-ladder{max-height:160px!important;overflow-y:auto!important}
+}
+@media (max-width:520px){
+  #gameDialog:has(.milhao){width:calc(100vw - 10px)!important;max-width:calc(100vw - 10px)!important;max-height:calc(100dvh - 10px)!important}
+  #gameDialog:has(.milhao)>.dialog-shell{max-height:calc(100dvh - 10px)!important}
+  #gameDialog:has(.milhao) .milhao-connected-room{grid-template-columns:76px minmax(0,1fr)!important}
+  #gameDialog:has(.milhao) .milhao-connected-room>.btn{grid-column:1/-1!important}
+  #gameDialog:has(.milhao) .milhao-connected-qr{width:72px!important;height:72px!important}
+  #gameDialog:has(.milhao) .milhao-aids .btn{flex-basis:calc(50% - 8px)!important}
+  #gameDialog:has(.milhao) .milhao-top{gap:8px!important}
+}
