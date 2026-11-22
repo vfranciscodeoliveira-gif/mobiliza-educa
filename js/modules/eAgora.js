@@ -1,5 +1,9 @@
 const ASSETS={
   school:'assets/ai/hero_area_escolar.webp?v=39',
+  ball:'assets/scenes/bola-na-rua.svg?v=41',
+  crossing:'visual-2026/travessia-e-prioridade.webp?v=41',
+  motorcycle:'visual-2026/motociclista-seguro.webp?v=41',
+  signal:'visual-2026/velocidade-e-risco.webp?v=41',
   road:'assets/hero-ai.webp?v=39',
   life:'assets/mobiliza_educa_caminhos_para_a_vida.webp?v=39'
 };
@@ -26,7 +30,7 @@ const EPISODES=[
   },
   {
     id:'bola',number:2,title:'A bola entrou na rua',kicker:'RUA RESIDENCIAL',
-    image:ASSETS.school,pos:'37% 56%',zoom:'128%',
+    image:ASSETS.ball,pos:'50% 50%',zoom:'cover',
     observe:'Você circula devagar por uma rua residencial. Uma bola aparece de repente na pista, vindo da calçada.',
     freeze:'A bola já está na rua. Ainda não há nenhuma criança visível.',
     question:'Qual é a melhor leitura dessa situação?',
@@ -45,7 +49,7 @@ const EPISODES=[
   },
   {
     id:'faixa',number:3,title:'Faixa à frente',kicker:'ÁREA ESCOLAR',
-    image:ASSETS.school,pos:'62% 50%',zoom:'121%',
+    image:ASSETS.crossing,pos:'50% 50%',zoom:'cover',
     observe:'Você se aproxima de uma faixa de pedestres próxima a uma escola. Há pessoas junto à calçada.',
     freeze:'Um pedestre se aproxima da faixa enquanto você ainda está em movimento.',
     question:'Como você deve conduzir a aproximação?',
@@ -64,7 +68,7 @@ const EPISODES=[
   },
   {
     id:'ponto-cego',number:4,title:'Tem alguém no seu ponto cego',kicker:'MUDANÇA DE FAIXA',
-    image:ASSETS.road,pos:'58% 52%',zoom:'126%',
+    image:ASSETS.motorcycle,pos:'50% 50%',zoom:'cover',
     observe:'Você está em uma avenida e pretende mudar de faixa. O retrovisor parece livre por um instante.',
     freeze:'Você já sinalizou a manobra. Uma motocicleta se aproxima pela lateral.',
     question:'Antes de iniciar a mudança de faixa, o que você faz?',
@@ -83,7 +87,7 @@ const EPISODES=[
   },
   {
     id:'amarelo',number:5,title:'O amarelo apareceu',kicker:'CRUZAMENTO SEMAFORIZADO',
-    image:ASSETS.life,pos:'51% 48%',zoom:'118%',
+    image:ASSETS.signal,pos:'50% 50%',zoom:'cover',
     observe:'Você se aproxima de um cruzamento semaforizado. O fluxo está normal e há usuários nas proximidades.',
     freeze:'O semáforo muda para amarelo enquanto você se aproxima da linha de retenção.',
     question:'Qual atitude preserva a maior margem de segurança?',
@@ -160,6 +164,25 @@ function ensureCss(){
    .ea .toolrow{margin-top:6px}.ea .power{font-size:.36rem}.ea .resultPanel{bottom:8px;width:96%;padding:10px}.ea .resultTop{grid-template-columns:40px 1fr auto}.ea .resultIcon{width:38px;height:38px}.ea .resultTop h3{font-size:.66rem}.ea .resultTop p{font-size:.39rem}.ea .resultText{font-size:.42rem;padding:6px}.ea .resultActions{display:grid;grid-template-columns:repeat(3,1fr)}.ea .resultActions button{padding:4px;font-size:.33rem;min-height:34px}
    .ea .introCard{width:94%;padding:14px}.ea .introCard h2{font-size:1rem}.ea .introCard p{font-size:.48rem}.ea .toolReveal{width:90%}.eaSummary{padding:9px}.eaSummary .head{grid-template-columns:90px 1fr 52px;padding:9px}.eaSummary .cover{height:60px}.eaSummary .head h2{font-size:.95rem}.eaSummary .grade{width:48px;height:48px;font-size:.9rem}.eaSummary .metrics{grid-template-columns:repeat(2,1fr)}.eaSummary .episodes{grid-template-columns:1fr}.eaSummary .footer{display:grid;grid-template-columns:1fr 1fr}
  }
+
+ /* E Agora 2.1: tipografia legivel e painel adaptavel sem encolher fontes */
+ #gameDialog.eagora-dialog .ea .decision{width:min(1180px,96%)!important;max-height:min(72dvh,480px);overflow-y:auto;overscroll-behavior:contain;padding:clamp(12px,1.5vw,22px)!important;bottom:12px!important}
+ #gameDialog.eagora-dialog .ea .decisionHead h3{font-size:clamp(14px,1.35vw,19px)!important;line-height:1.35}
+ #gameDialog.eagora-dialog .ea .freezeTag{font-size:clamp(10px,.85vw,13px)!important;white-space:nowrap}
+ #gameDialog.eagora-dialog .ea .question{font-size:clamp(17px,2vw,28px)!important;line-height:1.3!important;font-weight:800;color:#fff!important;margin:10px 0 15px!important}
+ #gameDialog.eagora-dialog .ea .choices{gap:10px!important}
+ #gameDialog.eagora-dialog .ea .choice{min-height:76px!important;padding:12px!important;grid-template-columns:40px 1fr!important}
+ #gameDialog.eagora-dialog .ea .choice b{width:38px!important;height:38px!important;font-size:18px!important}
+ #gameDialog.eagora-dialog .ea .choice span{font-size:clamp(13px,1.15vw,17px)!important;line-height:1.4!important;font-weight:750!important}
+ #gameDialog.eagora-dialog .ea .power{font-size:clamp(12px,1vw,15px)!important;min-height:42px!important}
+ #gameDialog.eagora-dialog .ea .decisionTimer{font-size:20px!important;min-width:48px!important;width:48px!important;height:48px!important}
+ #gameDialog.eagora-dialog .ea .caption{font-size:clamp(12px,1vw,16px)!important}
+ #gameDialog.eagora-dialog .ea .resultPanel{max-height:70dvh;overflow:auto}
+ #gameDialog.eagora-dialog .ea .resultText{font-size:clamp(14px,1.1vw,17px)!important}
+ #gameDialog.eagora-dialog .ea .resultTop p{font-size:clamp(12px,1vw,15px)!important}
+ #gameDialog.eagora-dialog .ea .resultActions button{font-size:clamp(12px,1vw,15px)!important;min-height:44px}
+ @media(max-width:900px){#gameDialog.eagora-dialog .ea .choices{grid-template-columns:1fr!important}#gameDialog.eagora-dialog .ea .choice{min-height:54px!important}#gameDialog.eagora-dialog .ea .decision{max-height:75dvh!important}#gameDialog.eagora-dialog .ea .decisionHead{grid-template-columns:1fr auto!important}#gameDialog.eagora-dialog .ea .freezeTag{grid-column:1/-1;justify-self:start}#gameDialog.eagora-dialog .ea .question{font-size:18px!important}}
+ @media(max-height:650px){#gameDialog.eagora-dialog .ea .decision{max-height:77dvh!important;bottom:6px!important}#gameDialog.eagora-dialog .ea .choice{min-height:52px!important;padding:8px!important}#gameDialog.eagora-dialog .ea .question{margin:6px 0 9px!important}#gameDialog.eagora-dialog .ea .caption{bottom:5px!important}}
  `;document.head.appendChild(s);
 }
 
